@@ -1,0 +1,21 @@
+name:                manicure
+version:             0.1.0.0
+synopsis:            
+-- description:         
+license:             GPL-3
+license-file:        LICENSE
+author:              inkyu lee
+maintainer:          gofiri@gmail.com
+-- copyright:           
+category:            Web
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+executable manicure
+  main-is:           manicure/main.hs
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.7 && <4.8
+  -- hs-source-dirs:      
+  default-language:    Haskell2010
