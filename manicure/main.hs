@@ -6,18 +6,21 @@ import Network.Socket.ByteString (sendAll, recv)
 import Control.Concurrent
  
 main = withSocketsDo $ do
-    sock <- listenOn $ PortNumber 5000
-    loop sock
+    socket_fd <- listenOn $ PortNumber 5000
+    accept_socket socket_fd
  
-loop sock = do
-    (conn, _) <- accept sock
-    forkIO $ body conn
-    loop sock
-  where
-    body c = do
-        request <- recv c 4096
-        BS.putStr $ Prelude.head $ BS.split '\n' $ request
-        sendAll c msg
-        sClose c
+accept_socket socket_fd = do
+    (fd, _) <- accept socket_fd
+    forkIO $ accept_body fd
+    accept_socket socket_fd
+  
+accept_body c = do
+    request <- recv c 4096
+    BS.putStr $ Prelude.head $ parse_request request
+    sendAll c msg
+    sClose c
  
+parse_request request =
+    BS.split '\n' $ request
+
 msg = BS.pack "HTTP/1.0 200 OK\r\nContent-Length: 5\r\n\r\nPong!\r\n"
