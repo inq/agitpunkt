@@ -6,7 +6,7 @@ import Network.Socket.ByteString (sendAll, recv)
 import Control.Concurrent
  
 main = withSocketsDo $ do
-    sock <- listenOn $ PortNumber 5002
+    sock <- listenOn $ PortNumber 5000
     loop sock
  
 loop sock = do
@@ -15,8 +15,8 @@ loop sock = do
     loop sock
   where
     body c = do
-        hello <- recv c 4096
-        BS.putStr hello
+        request <- recv c 4096
+        BS.putStr $ Prelude.head $ BS.split '\n' $ request
         sendAll c msg
         sClose c
  
