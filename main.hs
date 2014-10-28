@@ -1,9 +1,10 @@
-import Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8 as BS
  
 import Network (PortID(PortNumber), withSocketsDo, listenOn)
 import Network.Socket (accept, bind, listen, sClose, socket, SocketType(Stream), Family(AF_UNIX), SockAddr(SockAddrUnix), Socket)
 import Network.Socket.ByteString (sendAll, recv)
 import Control.Concurrent
+import Manicure.Request
  
 main = withSocketsDo $ do
     socket_fd <- socket AF_UNIX Stream 0
@@ -20,13 +21,13 @@ accept_socket socket_fd = do
 accept_body :: Socket -> IO () 
 accept_body fd = do
     request <- recv fd 4096
-    BS.putStr $ Prelude.head $ parse_request request
-    sendAll fd msg
+    sendAll fd $ response $ show $ parse request
     sClose fd
 
-parse_request :: ByteString -> [ByteString] 
+parse_request :: BS.ByteString -> [BS.ByteString] 
 parse_request request =
     BS.split '\n' $ request
 
-msg :: ByteString
-msg = BS.pack "HTTP/1.0 200 OK\r\nContent-Length: 5\r\n\r\nPong!\r\n"
+response :: String -> BS.ByteString
+response str =
+    BS.pack $ "HTTP/1.0 200 OK\r\nContent-Length: " ++ (show $ length str) ++ "\r\n\r\n" ++ str ++ "\r\n"

@@ -13,8 +13,8 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable manicure
-  main-is:           manicure/main.hs
-  -- other-modules:       
+  main-is:           main.hs
+  other-modules:     Manicure.Request
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
                        network,
