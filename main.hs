@@ -26,7 +26,7 @@ accept_body fd = do
 
 parse_request :: BS.ByteString -> [BS.ByteString] 
 parse_request request =
-    BS.split '\n' $ request
+    BS.split '\n' request
 
 response :: String -> BS.ByteString
 response str =
