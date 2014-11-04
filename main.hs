@@ -26,7 +26,6 @@ accept_socket socket_fd = do
 accept_body :: Socket -> IO () 
 accept_body fd = do
     request <- recv fd 4096
-    Route.route $ Request.parse request fd
     sendAll fd $ response $ show $ sample
     sClose fd
 
@@ -38,7 +37,11 @@ response :: String -> BS.ByteString
 response str =
     BS.pack $ "HTTP/1.0 200 OK\r\nContent-Length: " ++ (show $ length str) ++ "\r\n\r\n" ++ str ++ "\r\n"
 
-sample :: Route.RouteSetting
-sample = [Route.parseRoutes|
-/ index GET
+sample :: Route.Routes
+sample = [Route.parse|
+/ GET index
+
+
+/ POST post_test
+
 |]
