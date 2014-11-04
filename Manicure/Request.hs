@@ -4,24 +4,19 @@ module Manicure.Request (
 ) where
 
 import qualified Data.ByteString.Char8 as BS
+import Network.Socket (Socket)
 import Data.Char
 
 data Request = Request {
   method  :: Method,
   version :: Version,
   uri     :: BS.ByteString,
-  headers :: RequestHeaders
+  headers :: RequestHeaders,
+  request_socket :: Socket
 } deriving (Show)
 
-data Method = GET
-  | POST
-  | PUT
-  | DELETE
-  | PATCH
-  | TRACE
-  | OPTIONS
-  | HEAD
-  | CONNECT
+data Method = GET | POST | PUT | DELETE | PATCH
+  | TRACE | OPTIONS | HEAD | CONNECT
   deriving (Show)
 
 data Version = Version {
@@ -32,24 +27,13 @@ data Version = Version {
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
 
-offset :: Method -> Int
-offset GET     = 4
-offset POST    = 5
-offset PUT     = 4
-offset DELETE  = 6
-offset PATCH   = 6
-offset TRACE   = 6
-offset OPTIONS = 7
-offset HEAD    = 5
-offset CONNECT = 7
-
-parse :: BS.ByteString -> Request
-parse ipt = 
-    parseHead head $ parseTail tail
+parse :: BS.ByteString -> Socket -> Request
+parse ipt socket = 
+    parseHead head (parseTail tail) socket
   where 
     head : tail = splitLines ipt
         
-parseHead :: BS.ByteString -> RequestHeaders -> Request
+parseHead :: BS.ByteString -> RequestHeaders -> Socket -> Request
 parseHead str =
     Request method version uri
   where
@@ -66,6 +50,15 @@ parseHead str =
             _   -> TRACE
     length = BS.length str
     uri = BS.drop (offset method) $ BS.take (length - 9) str
+      where
+        offset :: Method -> Int
+        offset GET     = 4
+        offset POST    = 5
+        offset PUT     = 4
+        offset HEAD    = 5
+        offset OPTIONS = 7
+        offset CONNECT = 7
+        offset _       = 6
     version = Version (digitToInt $ BS.index str (length - 3)) (digitToInt $ BS.index str (length - 1))
 
 parseTail :: [BS.ByteString] -> RequestHeaders
