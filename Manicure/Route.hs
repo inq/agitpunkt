@@ -15,11 +15,11 @@ import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
     deriving Show
-data Route = Route String
+data Route = Route String Request.Method String
     deriving Show
 
 instance TS.Lift Route where
-    lift (Route a) = [| Route a |]
+    lift (Route uri method action) = [| Route uri method action |]
 instance TS.Lift Routes where
     lift (Routes a) = [| Routes a |]
 
@@ -39,8 +39,14 @@ parse = TQ.QuasiQuoter {
 
 routeNode :: PS.Parser Route
 routeNode = do
-    line <- (P.many $ P.char '\n') *> (PC.many1 $ P.satisfy (/='\n')) <* (P.many $ P.char '\n')
-    return $ Route line
+    P.many $ P.char '\n'
+    uri <- PC.many1 $ P.satisfy (/=' ')
+    P.many1 $ P.char ' '
+    method <- PC.many1 $ P.satisfy (/=' ')
+    P.many1 $ P.char ' '
+    action <- PC.many1 $ P.satisfy (/='\n')
+    P.many $ P.char '\n'
+    return $ Route uri (Request.strToMethod method) action
 
 routesNode :: PS.Parser Routes
 routesNode = do

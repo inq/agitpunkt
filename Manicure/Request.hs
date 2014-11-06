@@ -1,9 +1,13 @@
+{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
 module Manicure.Request (
   Request,
+  Method,
+  strToMethod,
   parse
 ) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Language.Haskell.TH.Syntax as TS
+import qualified Data.ByteString.Char8      as BS
 import Network.Socket (Socket)
 import Data.Char
 
@@ -19,10 +23,24 @@ data Method = GET | POST | PUT | DELETE | PATCH
   | TRACE | OPTIONS | HEAD | CONNECT
   deriving (Show)
 
+instance TS.Lift Method where
+    lift GET     = [| GET |]
+    lift POST    = [| POST |]
+    lift PUT     = [| PUT |]
+    lift DELETE  = [| DELETE |]
+    lift PATCH   = [| PATCH |]
+    lift TRACE   = [| TRACE |]
+    lift OPTIONS = [| OPTIONS |]
+    lift CONNECT = [| CONNECT |]
+
 data Version = Version {
   major :: !Int,
   minor :: !Int
 } deriving (Show)
+
+strToMethod :: String -> Method
+strToMethod "GET" = GET
+strToMethod "POST" = POST
 
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
