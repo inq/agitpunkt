@@ -1,7 +1,9 @@
-{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE QuasiQuotes       #-}
 module Manicure.Route (
   Routes,
-  parse
+  parse,
+  extract
 ) where
 
 import qualified Data.ByteString.Char8      as BS
@@ -11,6 +13,7 @@ import qualified Text.Parsec                as P
 import qualified Text.Parsec.String         as PS
 import qualified Text.Parsec.Combinator     as PC
 import qualified Manicure.Request           as Request
+import qualified Data.String                as S
 import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
@@ -22,6 +25,10 @@ instance TS.Lift Route where
     lift (Route uri method action) = [| Route uri method action |]
 instance TS.Lift Routes where
     lift (Routes a) = [| Routes a |]
+
+extract :: Routes -> Route
+extract (Routes routes) =
+    head routes
 
 parse :: TQ.QuasiQuoter
 parse = TQ.QuasiQuoter {
@@ -52,3 +59,6 @@ routesNode :: PS.Parser Routes
 routesNode = do
     lines <- P.many routeNode
     return $ Routes lines
+
+installRoutes action =
+    TS.VarE $ TS.mkName action

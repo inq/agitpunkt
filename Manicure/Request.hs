@@ -1,4 +1,5 @@
-{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes     #-}
 module Manicure.Request (
   Request,
   Method,
@@ -80,7 +81,7 @@ parseHead str =
     version = Version (digitToInt $ BS.index str (length - 3)) (digitToInt $ BS.index str (length - 1))
 
 parseTail :: [BS.ByteString] -> RequestHeaders
-parseTail list = 
+parseTail list =
     map split list 
   where
     split line = 
