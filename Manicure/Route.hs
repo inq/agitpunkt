@@ -3,6 +3,7 @@
 module Manicure.Route (
   Routes,
   parse,
+  parseFile,
   extract
 ) where
 
@@ -29,6 +30,12 @@ instance TS.Lift Routes where
 extract :: Routes -> Route
 extract (Routes routes) =
     head routes
+
+parseFile :: FilePath -> TS.Q TS.Exp
+parseFile file_path = do
+     TS.qAddDependentFile file_path
+     s <- TS.qRunIO $ readFile file_path
+     TQ.quoteExp parse s
 
 parse :: TQ.QuasiQuoter
 parse = TQ.QuasiQuoter {
