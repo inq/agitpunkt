@@ -27,9 +27,11 @@ instance TS.Lift Route where
 instance TS.Lift Routes where
     lift (Routes a) = [| Routes a |]
 
-extract :: Routes -> Route
+extract :: Routes -> String
 extract (Routes routes) =
-    head routes
+    location
+  where
+    Route _ _ location = head routes
 
 parseFile :: FilePath -> TS.Q TS.Exp
 parseFile file_path = do

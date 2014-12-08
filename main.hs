@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE QuasiQuotes       #-}
 import qualified Data.ByteString.Char8 as BS
 import qualified Language.Haskell.TH.Quote  as TQ
 import qualified Language.Haskell.TH.Syntax as TS
@@ -13,7 +12,7 @@ import qualified Manicure.Route as Route
 import qualified Manicure.Request as Request
  
 main = N.withSocketsDo $ do
-    putStrLn $ show routes
+    putStrLn $ $(return $ TS.VarE $ TS.mkName "index")
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix ("manicure.sock")
     NS.listen socket_fd 10
