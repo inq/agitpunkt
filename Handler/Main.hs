@@ -2,9 +2,10 @@
 module Handler.Main where
 
 import qualified Data.ByteString.Char8      as BS
+import qualified Manicure.Request           as R
 
-index :: String -> String
-index val = "Hello, world!"
+index :: R.Request -> String
+index val = show val
 
-post_test :: String -> String
+post_test :: R.Request -> String
 post_test val = "post test"

@@ -27,8 +27,8 @@ accept_socket socket_fd = do
 accept_body :: NS.Socket -> IO () 
 accept_body fd = do
     request <- NSB.recv fd 4096
-    putStrLn $ show $ Request.parse request fd    
-    NSB.sendAll fd $ response $ Route.extract routes "HELLO"
+    let req = Request.parse request fd
+    NSB.sendAll fd $ response $ Route.extract routes req
     NS.sClose fd
 
 parse_request :: BS.ByteString -> [BS.ByteString] 

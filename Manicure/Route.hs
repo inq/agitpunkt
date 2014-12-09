@@ -13,13 +13,13 @@ import qualified Language.Haskell.TH.Syntax as TS
 import qualified Text.Parsec                as P
 import qualified Text.Parsec.String         as PS
 import qualified Text.Parsec.Combinator     as PC
-import qualified Manicure.Request           as Request
+import qualified Manicure.Request           as R
 import qualified Data.String                as S
 import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
-data Route = Route String Request.Method (String -> String)
-           | RouteR String Request.Method String
+data Route = Route String R.Method (R.Request -> String)
+           | RouteR String R.Method String
 
 instance TS.Lift Route where
     lift (RouteR uri method action) = [| Route uri method $(return $ TS.VarE $ TS.mkName action) |]
@@ -27,7 +27,7 @@ instance TS.Lift Routes where
     lift (Routes a) = [| Routes a |]
 
 
-extract :: Routes -> String -> String
+extract :: Routes -> R.Request -> String
 extract (Routes routes) =
     location
   where
@@ -62,7 +62,7 @@ routeNode = do
     P.many1 $ P.char ' '
     action <- PC.many1 $ P.satisfy (/='\n')
     P.many $ P.char '\n'
-    return $ RouteR uri (Request.strToMethod method) action
+    return $ RouteR uri (R.strToMethod method) action
 
 routesNode :: PS.Parser Routes
 routesNode = do
