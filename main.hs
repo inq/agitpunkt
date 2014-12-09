@@ -10,9 +10,9 @@ import qualified Control.Concurrent as CC
 
 import qualified Manicure.Route as Route
 import qualified Manicure.Request as Request
+import Handler.Main
  
 main = N.withSocketsDo $ do
-    putStrLn $ $(return $ TS.VarE $ TS.mkName "index")
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix ("manicure.sock")
     NS.listen socket_fd 10
@@ -28,7 +28,7 @@ accept_body :: NS.Socket -> IO ()
 accept_body fd = do
     request <- NSB.recv fd 4096
     putStrLn $ show $ Request.parse request fd    
-    NSB.sendAll fd $ response $ show $ index
+    NSB.sendAll fd $ response $ Route.extract routes "HELLO"
     NS.sClose fd
 
 parse_request :: BS.ByteString -> [BS.ByteString] 
@@ -44,8 +44,5 @@ response str =
       BS.pack str, 
       "\r\n"
     ]
-
-index :: String
-index = "HELLO"
 
 routes = $(Route.parseFile "config/routes.cfg")

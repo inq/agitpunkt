@@ -18,16 +18,16 @@ import qualified Data.String                as S
 import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
-    deriving Show
-data Route = Route String Request.Method String
-    deriving Show
+data Route = Route String Request.Method (String -> String)
+           | RouteR String Request.Method String
 
 instance TS.Lift Route where
-    lift (Route uri method action) = [| Route uri method action |]
+    lift (RouteR uri method action) = [| Route uri method $(return $ TS.VarE $ TS.mkName action) |]
 instance TS.Lift Routes where
     lift (Routes a) = [| Routes a |]
 
-extract :: Routes -> String
+
+extract :: Routes -> String -> String
 extract (Routes routes) =
     location
   where
@@ -62,7 +62,7 @@ routeNode = do
     P.many1 $ P.char ' '
     action <- PC.many1 $ P.satisfy (/='\n')
     P.many $ P.char '\n'
-    return $ Route uri (Request.strToMethod method) action
+    return $ RouteR uri (Request.strToMethod method) action
 
 routesNode :: PS.Parser Routes
 routesNode = do
