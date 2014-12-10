@@ -7,31 +7,33 @@ module Manicure.Route (
   extract
 ) where
 
-import qualified Data.ByteString.Char8      as BS
-import qualified Language.Haskell.TH.Quote  as TQ
-import qualified Language.Haskell.TH.Syntax as TS
-import qualified Text.Parsec                as P
-import qualified Text.Parsec.String         as PS
-import qualified Text.Parsec.Combinator     as PC
-import qualified Manicure.Request           as R
-import qualified Data.String                as S
+import qualified Data.ByteString.Char8          as BS
+import qualified Language.Haskell.TH.Quote      as TQ
+import qualified Language.Haskell.TH.Syntax     as TS
+import qualified Text.Parsec                    as P
+import qualified Text.Parsec.String             as PS
+import qualified Text.Parsec.Combinator         as PC
+import qualified Data.String                    as S
+import qualified Manicure.Request               as Req
+import qualified Manicure.Response              as Res
 import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
-data Route = Route String R.Method (R.Request -> String)
-           | RouteR String R.Method String
+data Route = Route String Req.Method (Req.Request -> Res.Response)
+           | RouteR String Req.Method String
 
 instance TS.Lift Route where
-    lift (RouteR uri method action) = [| Route uri method $(return $ TS.VarE $ TS.mkName action) |]
+    lift (RouteR uri method action) = 
+        [| Route uri method $(return $ TS.VarE $ TS.mkName action) |]
 instance TS.Lift Routes where
-    lift (Routes a) = [| Routes a |]
+    lift (Routes a) = 
+        [| Routes a |]
 
-
-extract :: Routes -> R.Request -> String
+extract :: Routes -> Req.Request -> Res.Response
 extract (Routes routes) =
-    location
+   action
   where
-    Route _ _ location = head routes
+    Route _ _ action = head routes
 
 parseFile :: FilePath -> TS.Q TS.Exp
 parseFile file_path = do
@@ -62,7 +64,7 @@ routeNode = do
     P.many1 $ P.char ' '
     action <- PC.many1 $ P.satisfy (/='\n')
     P.many $ P.char '\n'
-    return $ RouteR uri (R.strToMethod method) action
+    return $ RouteR uri (Req.strToMethod method) action
 
 routesNode :: PS.Parser Routes
 routesNode = do

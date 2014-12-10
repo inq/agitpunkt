@@ -7,17 +7,18 @@ module Manicure.Request (
   parse
 ) where
 
-import qualified Language.Haskell.TH.Syntax as TS
-import qualified Data.ByteString.Char8      as BS
-import Network.Socket (Socket)
-import Data.Char
+import qualified Language.Haskell.TH.Syntax     as TS
+import qualified Data.ByteString.Char8          as BS
+import qualified Manicure.Http                  as Http
+import qualified Network.Socket                 as NS
+import qualified Data.Char                      as C
 
 data Request = Request {
   method  :: Method,
-  version :: Version,
+  version :: Http.Version,
   uri     :: BS.ByteString,
   headers :: RequestHeaders,
-  request_socket :: Socket
+  request_socket :: NS.Socket
 } deriving (Show)
 
 data Method = GET | POST | PUT | DELETE | PATCH
@@ -34,11 +35,6 @@ instance TS.Lift Method where
     lift OPTIONS = [| OPTIONS |]
     lift CONNECT = [| CONNECT |]
 
-data Version = Version {
-  major :: !Int,
-  minor :: !Int
-} deriving (Show)
-
 strToMethod :: String -> Method
 strToMethod "GET" = GET
 strToMethod "POST" = POST
@@ -46,13 +42,13 @@ strToMethod "POST" = POST
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
 
-parse :: BS.ByteString -> Socket -> Request
+parse :: BS.ByteString -> NS.Socket -> Request
 parse ipt socket = 
     parseHead head (parseTail tail) socket
   where 
     head : tail = splitLines ipt
         
-parseHead :: BS.ByteString -> RequestHeaders -> Socket -> Request
+parseHead :: BS.ByteString -> RequestHeaders -> NS.Socket -> Request
 parseHead str =
     Request method version uri
   where
@@ -78,7 +74,9 @@ parseHead str =
         offset OPTIONS = 7
         offset CONNECT = 7
         offset _       = 6
-    version = Version (digitToInt $ BS.index str (length - 3)) (digitToInt $ BS.index str (length - 1))
+    version = Http.Version 
+        (C.digitToInt $ BS.index str (length - 3)) 
+        (C.digitToInt $ BS.index str (length - 1))
 
 parseTail :: [BS.ByteString] -> RequestHeaders
 parseTail list =
