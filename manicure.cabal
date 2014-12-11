@@ -16,6 +16,8 @@ executable manicure
   main-is:           main.hs
   other-modules:     Manicure.Request,
                      Manicure.Route,
+                     Manicure.Http,
+                     Manicure.Database,
                      Handler.Main
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
@@ -23,7 +25,12 @@ executable manicure
                        bytestring,
                        unix,
                        template-haskell,
-                       parsec
+                       monad-control,
+                       parsec,
+                       mtl,
+                       text,
+                       transformers,
+                       mongoDB
 
   -- hs-source-dirs:      
   default-language:    Haskell2010

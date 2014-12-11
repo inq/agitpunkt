@@ -11,28 +11,28 @@ import qualified Control.Concurrent             as CC
 import qualified Manicure.Route                 as Route
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
+import qualified Manicure.Database              as DB
+import qualified System.IO.Pipeline             as P
 import Handler.Main
  
 main = N.withSocketsDo $ do
+    db <- DB.connect "test"
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"
     NS.listen socket_fd 10
-    accept_socket socket_fd
+    accept_socket socket_fd db
 
-accept_socket :: NS.Socket -> IO ()
-accept_socket socket_fd = do
+accept_socket :: NS.Socket -> DB.Connection -> IO ()
+accept_socket socket_fd db = do
     (fd, _) <- NS.accept socket_fd
-    CC.forkIO $ accept_body fd
-    accept_socket socket_fd
+    CC.forkIO $ accept_body fd db
+    accept_socket socket_fd db
 
-accept_body :: NS.Socket -> IO () 
-accept_body fd = do
+accept_body :: NS.Socket -> DB.Connection -> IO () 
+accept_body fd db = do
     request <- NSB.recv fd 4096
-    NSB.sendAll fd $ Res.render $ Route.extract routes $ Req.parse request fd
+    response <- Route.extract routes db $ Req.parse request fd
+    NSB.sendAll fd $ Res.render response
     NS.sClose fd
-
-parse_request :: BS.ByteString -> [BS.ByteString] 
-parse_request request =
-    BS.split '\n' request
 
 routes = $(Route.parseFile "config/routes.cfg")

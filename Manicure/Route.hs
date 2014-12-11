@@ -16,10 +16,11 @@ import qualified Text.Parsec.Combinator         as PC
 import qualified Data.String                    as S
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
+import qualified Manicure.Database              as DB
 import Control.Applicative ((*>), (<*))
 
 data Routes = Routes [Route]
-data Route = Route String Req.Method (Req.Request -> Res.Response)
+data Route = Route String Req.Method (DB.Connection -> Req.Request -> IO Res.Response)
            | RouteR String Req.Method String
 
 instance TS.Lift Route where
@@ -29,7 +30,7 @@ instance TS.Lift Routes where
     lift (Routes a) = 
         [| Routes a |]
 
-extract :: Routes -> Req.Request -> Res.Response
+extract :: Routes -> DB.Connection -> Req.Request -> IO Res.Response
 extract (Routes routes) =
    action
   where
@@ -70,6 +71,3 @@ routesNode :: PS.Parser Routes
 routesNode = do
     lines <- P.many routeNode
     return $ Routes lines
-
-installRoutes action =
-    TS.VarE $ TS.mkName action
