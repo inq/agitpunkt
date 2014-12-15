@@ -1,0 +1,12 @@
+html
+  body
+    div
+      p
+        | Hello, world!
+      p
+        | This is a p tag
+      | Nice to meet you!
+      | How are you?
+    div
+      | 21:34 12-Dec-14
+    | I am fine
