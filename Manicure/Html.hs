@@ -15,6 +15,7 @@ import Text.Parsec ((<|>))
 
 data Node = Tag String [Node]
           | Text String
+          | Value String
           deriving Show
 data RNode = RTag BS.ByteString [RNode]
           | RText BS.ByteString
@@ -27,6 +28,8 @@ instance TS.Lift Node where
         [| RTag (BS.pack string) nodes |]
     lift (Text a) = 
         [| RText (BS.pack a) |]
+    lift (Value a) = 
+        [| RText $(return $ TS.VarE $ TS.mkName a) |]
 
 instance TS.Lift Status where
     lift Child = [| Child |]
@@ -65,7 +68,7 @@ parse = TQ.QuasiQuoter {
 parseLine :: PS.Parser (Int, Node)
 parseLine = do
     next_indent <- parseIndent
-    tag <- text_node <|> tag_node
+    tag <- value_node <|> text_node <|> tag_node
     P.try $ P.string "\n"
     return (next_indent, tag)
   where
@@ -73,6 +76,10 @@ parseLine = do
         | indent > next_indent = Child
         | indent < next_indent = Parent
         | otherwise = Sibling
+    value_node = do
+        P.try $ P.string "= "
+        res <- P.many $ P.noneOf "\n"
+        return $ Value res
     text_node = do
         P.try $ P.string "| "
         res <- P.many $ P.noneOf "\n"
@@ -100,6 +107,12 @@ buildTree ((now, Text name) : rest)
     | now < next = error "indentation error"
     | now > next = (now, [Text name], rest)
     | otherwise  = (now, (Text name) : res, remaining)
+  where
+    (next, res, remaining) = buildTree rest
+buildTree ((now, Value name) : rest)
+    | now < next = error "indentation error"
+    | now > next = (now, [Value name], rest)
+    | otherwise  = (now, (Value name) : res, remaining)
   where
     (next, res, remaining) = buildTree rest
 buildTree []  = 

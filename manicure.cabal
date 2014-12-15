@@ -12,25 +12,41 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
-executable manicure
-  main-is:           main.hs
-  other-modules:     Manicure.Request,
+library
+  exposed-modules:   Manicure.Request,
+                     Manicure.Response,
                      Manicure.Route,
                      Manicure.Http,
+                     Manicure.Html,
                      Manicure.Database,
                      Handler.Main
+  build-depends:     base,
+                     network,
+                     bytestring,
+                     unix,
+                     template-haskell,
+                     monad-control,
+                     parsec,
+                     mtl,
+                     text,
+                     transformers,
+                     mongoDB
+
+executable manicure
+  main-is:           main.hs
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8,
-                       network,
-                       bytestring,
-                       unix,
-                       template-haskell,
-                       monad-control,
-                       parsec,
-                       mtl,
-                       text,
-                       transformers,
-                       mongoDB
+  build-depends:     manicure,
+                     base,
+                     network,
+                     bytestring,
+                     unix,
+                     template-haskell,
+                     monad-control,
+                     parsec,
+                     mtl,
+                     text,
+                     transformers,
+                     mongoDB
 
   -- hs-source-dirs:      
   default-language:    Haskell2010

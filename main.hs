@@ -9,7 +9,6 @@ import qualified Network.Socket.ByteString      as NSB
 import qualified Control.Concurrent             as CC
 
 import qualified Manicure.Route                 as Route
-import qualified Manicure.Html                  as Html
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
@@ -17,7 +16,7 @@ import qualified System.IO.Pipeline             as P
 import Handler.Main
  
 main = N.withSocketsDo $ do
-    BS.putStrLn $ Html.render $ head html
+--    BS.putStrLn $ Html.render $ head html
     db <- DB.connect "test"
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"
@@ -38,4 +37,4 @@ accept_body fd db = do
     NS.sClose fd
 
 routes = $(Route.parseFile "config/routes.cfg")
-html = $(Html.parseFile "Views/index.html.qh")
+
