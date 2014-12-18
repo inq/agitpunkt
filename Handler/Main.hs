@@ -19,15 +19,7 @@ index :: DB.Connection -> Req.Request -> IO Res.Response
 index db req = do
     articles <- DB.query db DB.find
     titles <- extract articles "title"
-    let testData = BS.concat $ map wrap titles
-    return $ Res.success $ Html.render $ head $(Html.parseFile "Views/index.html.qh") 
-  where
-    wrap title = BS.concat [
-        "<div>",
-        BS.pack title,
-        "</div>"
-      ]
-
+    return $ Res.success $ head $(Html.parseFile "Views/index.html.qh") 
 
 post_test :: DB.Connection -> Req.Request -> IO Res.Response
 post_test db val = do

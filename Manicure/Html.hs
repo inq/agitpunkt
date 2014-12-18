@@ -10,40 +10,40 @@ import qualified Language.Haskell.TH.Syntax     as TS
 import qualified Text.Parsec                    as P
 import qualified Text.Parsec.String             as PS
 import qualified Text.Parsec.Combinator         as PC
+import qualified Manicure.ByteString            as ByteString
 import Control.Applicative ((*>), (<*))
 import Text.Parsec ((<|>))
 
 data Node = Tag String [Node]
           | Text String
           | Value String
-          deriving Show
-data RNode = RTag BS.ByteString [RNode]
-          | RText BS.ByteString
+          | Foreach String String [Node]
           deriving Show
 data Status = Child | Sibling | Parent
           deriving Show
 
 instance TS.Lift Node where
     lift (Tag string nodes) = 
-        [| RTag (BS.pack string) nodes |]
+        [| BS.concat $ 
+            ["<", string, ">"] ++ 
+            nodes ++ 
+            ["</", string, ">"] 
+        |]
     lift (Text a) = 
-        [| RText (BS.pack a) |]
+        [| BS.pack a |]
     lift (Value a) = 
-        [| RText $(return $ TS.VarE $ TS.mkName a) |]
+        [| ByteString.convert $(return $ TS.VarE $ TS.mkName a) |]
+    lift (Foreach vals val nodes) = 
+        [| BS.concat $ 
+            map
+                (\($(return $ TS.VarP $ TS.mkName val)) -> BS.concat nodes)  
+                $(return $ TS.VarE $ TS.mkName vals) 
+        |]
 
 instance TS.Lift Status where
     lift Child = [| Child |]
     lift Sibling = [| Sibling |]
     lift Parent = [| Parent |]
-
-render :: RNode -> BS.ByteString
-render (RTag name nodes) =
-    BS.concat [
-        "<", name, ">",
-        BS.concat $ map render nodes,
-        "</", name, ">"
-      ]
-render (RText text) = text
 
 parseFile :: FilePath -> TS.Q TS.Exp
 parseFile file_path = do
@@ -68,7 +68,7 @@ parse = TQ.QuasiQuoter {
 parseLine :: PS.Parser (Int, Node)
 parseLine = do
     next_indent <- parseIndent
-    tag <- value_node <|> text_node <|> tag_node
+    tag <- value_node <|> text_node <|> map_node <|> tag_node
     P.try $ P.string "\n"
     return (next_indent, tag)
   where
@@ -84,6 +84,12 @@ parseLine = do
         P.try $ P.string "| "
         res <- P.many $ P.noneOf "\n"
         return $ Text res
+    map_node = do
+        P.try $ P.string "- foreach "
+        vals <- P.many $ P.noneOf " "
+        P.try $ P.string " -> "
+        val <- P.many $ P.noneOf "\n"
+        return $ Foreach vals val []
     tag_node = do
         res <- P.many $ P.noneOf "\n"
         return $ Tag res []
@@ -97,6 +103,12 @@ parseIndent = do
     return indent
 
 buildTree :: [(Int, Node)] -> (Int, [Node], [(Int, Node)])
+buildTree ((now, Foreach vals val arg) : rest)
+    | now < next = buildTree $ (now, Foreach vals val res) : remaining
+    | now > next = (now, [Foreach vals val arg], rest)
+    | otherwise  = (now, (Foreach vals val arg) : res, remaining)
+  where
+    (next, res, remaining) = buildTree rest
 buildTree ((now, Tag name arg) : rest)
     | now < next = buildTree $ (now, Tag name res) : remaining
     | now > next = (now, [Tag name arg], rest)

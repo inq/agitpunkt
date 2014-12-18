@@ -3,8 +3,10 @@ html
     div
       p
         | Hello, world!
-      p
-        = testData
+      div
+        - foreach titles -> title
+          p
+            = title
       | Nice to meet you!
       | How are you?
     div
