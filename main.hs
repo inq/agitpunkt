@@ -16,7 +16,6 @@ import qualified System.IO.Pipeline             as P
 import Handler.Main
  
 main = N.withSocketsDo $ do
---    BS.putStrLn $ Html.render $ head html
     db <- DB.connect "test"
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"
@@ -37,4 +36,3 @@ accept_body fd db = do
     NS.sClose fd
 
 routes = $(Route.parseFile "config/routes.cfg")
-

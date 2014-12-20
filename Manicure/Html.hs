@@ -11,10 +11,14 @@ import qualified Text.Parsec                    as P
 import qualified Text.Parsec.String             as PS
 import qualified Text.Parsec.Combinator         as PC
 import qualified Manicure.ByteString            as ByteString
+import qualified Data.List                      as DL
 import Control.Applicative ((*>), (<*))
 import Text.Parsec ((<|>))
 
-data Node = Tag String [Node]
+data Attr = Dash String [Attr]
+          | Attr String String
+          deriving Show
+data Node = Tag String [Attr] [Node]
           | Text String
           | Value String
           | Foreach String String [Node]
@@ -23,27 +27,25 @@ data Status = Child | Sibling | Parent
           deriving Show
 
 instance TS.Lift Node where
-    lift (Tag string nodes) = 
-        [| BS.concat $ 
-            ["<", string, ">"] ++ 
-            nodes ++ 
-            ["</", string, ">"] 
+    lift (Tag string attrs nodes) = [| 
+          BS.concat ([$(TS.lift $ "<" ++ string ++ ">")] ++
+            $(TS.lift nodes) ++ 
+            [$(TS.lift $ "</" ++ string ++ ">")]
+          )
         |]
-    lift (Text a) = 
-        [| BS.pack a |]
-    lift (Value a) = 
-        [| ByteString.convert $(return $ TS.VarE $ TS.mkName a) |]
-    lift (Foreach vals val nodes) = 
-        [| BS.concat $ 
+    lift (Foreach vals val nodes) = [|
+          BS.concat $ 
             map
-                (\($(return $ TS.VarP $ TS.mkName val)) -> BS.concat nodes)  
-                $(return $ TS.VarE $ TS.mkName vals) 
+              (\($(return $ TS.VarP $ TS.mkName val)) -> BS.concat nodes)  
+              $(return $ TS.VarE $ TS.mkName vals) 
         |]
+    lift (Text a) = [| a |]
+    lift (Value a) = [| ByteString.convert $(return $ TS.VarE $ TS.mkName a) |]
 
 instance TS.Lift Status where
-    lift Child = [| Child |]
+    lift Child   = [| Child |]
     lift Sibling = [| Sibling |]
-    lift Parent = [| Parent |]
+    lift Parent  = [| Parent |]
 
 parseFile :: FilePath -> TS.Q TS.Exp
 parseFile file_path = do
@@ -91,8 +93,8 @@ parseLine = do
         val <- P.many $ P.noneOf "\n"
         return $ Foreach vals val []
     tag_node = do
-        res <- P.many $ P.noneOf "\n"
-        return $ Tag res []
+        res <- P.many $ P.noneOf " \n"
+        return $ Tag res [] []
 
 parseIndent :: PS.Parser Int
 parseIndent = do
@@ -103,30 +105,16 @@ parseIndent = do
     return indent
 
 buildTree :: [(Int, Node)] -> (Int, [Node], [(Int, Node)])
-buildTree ((now, Foreach vals val arg) : rest)
-    | now < next = buildTree $ (now, Foreach vals val res) : remaining
-    | now > next = (now, [Foreach vals val arg], rest)
-    | otherwise  = (now, (Foreach vals val arg) : res, remaining)
+buildTree ((indent, node) : rest)
+    | indent < next = buildTree $ (indent, replace node res) : remaining
+    | indent > next = (indent, [node], rest)
+    | otherwise  = (indent, (node) : res, remaining)
   where
     (next, res, remaining) = buildTree rest
-buildTree ((now, Tag name arg) : rest)
-    | now < next = buildTree $ (now, Tag name res) : remaining
-    | now > next = (now, [Tag name arg], rest)
-    | otherwise  = (now, (Tag name arg) : res, remaining)
-  where
-    (next, res, remaining) = buildTree rest
-buildTree ((now, Text name) : rest)
-    | now < next = error "indentation error"
-    | now > next = (now, [Text name], rest)
-    | otherwise  = (now, (Text name) : res, remaining)
-  where
-    (next, res, remaining) = buildTree rest
-buildTree ((now, Value name) : rest)
-    | now < next = error "indentation error"
-    | now > next = (now, [Value name], rest)
-    | otherwise  = (now, (Value name) : res, remaining)
-  where
-    (next, res, remaining) = buildTree rest
+    replace (Foreach vals val _) res = Foreach vals val res
+    replace (Tag name attr _) res    = Tag name attr res
+    replace (Text _) res = error "indentation error"
+    replace (Value _) res = error "indentation error"
 buildTree []  = 
     (0, [], [])
 

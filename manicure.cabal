@@ -31,6 +31,7 @@ library
                      text,
                      transformers,
                      mongoDB
+  ghc-options:       -ddump-splices 
 
 executable manicure
   main-is:           main.hs
@@ -49,4 +50,5 @@ executable manicure
                      mongoDB
 
   -- hs-source-dirs:      
+  ghc-options:       -ddump-splices 
   default-language:    Haskell2010
