@@ -28,11 +28,15 @@ data Status = Child | Sibling | Parent
 
 instance TS.Lift Node where
     lift (Tag string attrs nodes) = [| 
-          BS.concat ([$(TS.lift $ "<" ++ string ++ ">")] ++
+          BS.concat ([$(TS.lift $ "<" ++ string ++ print attrs ++ ">")] ++
             $(TS.lift nodes) ++ 
             [$(TS.lift $ "</" ++ string ++ ">")]
           )
         |]
+      where
+        print (Attr name value : attrs) = 
+            " " ++ name ++ "=" ++ value ++ print attrs
+        print [] = ""
     lift (Foreach vals val nodes) = [|
           BS.concat $ 
             map
@@ -67,6 +71,9 @@ parse = TQ.QuasiQuoter {
             Left err -> undefined
             Right tag -> [| tag |]
 
+token :: Char -> PS.Parser (Char)
+token c = P.spaces *> P.char c <* P.spaces
+
 parseLine :: PS.Parser (Int, Node)
 parseLine = do
     next_indent <- parseIndent
@@ -93,8 +100,22 @@ parseLine = do
         val <- P.many $ P.noneOf "\n"
         return $ Foreach vals val []
     tag_node = do
-        res <- P.many $ P.noneOf " \n"
-        return $ Tag res [] []
+        name <- P.many $ P.noneOf " \n"
+        args <- parse_args_list <|> (return [])
+        return $ Tag name args []
+    parse_args = do
+        x <- parse_arg `PC.sepBy` token ','
+        return x
+      where
+        parse_arg = do
+            key <- P.many1 $ P.noneOf ":"
+            P.try $ token ':'
+            val <- P.many1 $ P.noneOf ",}" 
+            return $ Attr key val
+    parse_args_list = do
+        P.many $ P.char ' '
+        args <- P.between (P.string "{") (P.string "}") parse_args
+        return args
 
 parseIndent :: PS.Parser Int
 parseIndent = do
