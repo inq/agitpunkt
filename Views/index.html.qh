@@ -3,7 +3,7 @@ html
     div
       p
         | Hello, world!
-      img {class: "image-01", src: "http://r.whitesky.net/t.jpg"}
+      img   {class: "image-01", src: "http://r.whitesky.net/t.jpg"}
       div
         - foreach titles -> title
           p

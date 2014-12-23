@@ -12,7 +12,7 @@ import qualified Text.Parsec.String             as PS
 import qualified Text.Parsec.Combinator         as PC
 import qualified Manicure.ByteString            as ByteString
 import qualified Data.List                      as DL
-import Control.Applicative ((*>), (<*))
+import Control.Applicative ((*>), (<*), (<$>), (<*>))
 import Text.Parsec ((<|>))
 
 data Attr = Dash String [Attr]
@@ -78,52 +78,35 @@ parseLine :: PS.Parser (Int, Node)
 parseLine = do
     next_indent <- parseIndent
     tag <- value_node <|> text_node <|> map_node <|> tag_node
-    P.try $ P.string "\n"
+    P.char '\n'
     return (next_indent, tag)
   where
     status indent next_indent
         | indent > next_indent = Child
         | indent < next_indent = Parent
         | otherwise = Sibling
-    value_node = do
-        P.try $ P.string "= "
-        res <- P.many $ P.noneOf "\n"
-        return $ Value res
-    text_node = do
-        P.try $ P.string "| "
-        res <- P.many $ P.noneOf "\n"
-        return $ Text res
-    map_node = do
-        P.try $ P.string "- foreach "
-        vals <- P.many $ P.noneOf " "
-        P.try $ P.string " -> "
-        val <- P.many $ P.noneOf "\n"
-        return $ Foreach vals val []
-    tag_node = do
-        name <- P.many $ P.noneOf " \n"
-        args <- parse_args_list <|> (return [])
-        return $ Tag name args []
-    parse_args = do
-        x <- parse_arg `PC.sepBy` token ','
-        return x
+    tag_node = Tag
+        <$> (P.many $ P.noneOf " \n")
+        <*> (P.try parse_args <|> return [])
+        <*> return []
       where
-        parse_arg = do
-            key <- P.many1 $ P.noneOf ":"
-            P.try $ token ':'
-            val <- P.many1 $ P.noneOf ",}" 
-            return $ Attr key val
-    parse_args_list = do
-        P.many $ P.char ' '
-        args <- P.between (P.string "{") (P.string "}") parse_args
-        return args
+        parse_args = token '{' *> (PC.sepBy parse_arg $ token ',') <* P.char '}'
+        parse_arg = Attr
+            <$> parse_until " :"
+            <*> (token ':' *> (P.many1 $ P.noneOf ",}"))
+    map_node = Foreach
+        <$> (P.string "- foreach " *> (P.many $ P.noneOf " ")) 
+        <*> (P.string " -> " *> (P.many $ P.noneOf "\n"))
+        <*> return []
+    value_node = Value <$> (P.string "= " *> (P.many $ P.noneOf "\n"))
+    text_node = Text <$> (P.string "| " *> (P.many $ P.noneOf "\n"))
+    parse_until str = P.many1 $ P.noneOf str
 
 parseIndent :: PS.Parser Int
-parseIndent = do
-    indent <- fmap sum $ P.many (
+parseIndent = fmap sum $ P.many (
         (P.char ' ' >> return 1) <|> 
         (P.char '\t' >> fail "tab charactor is not allowed")
       )
-    return indent
 
 buildTree :: [(Int, Node)] -> (Int, [Node], [(Int, Node)])
 buildTree ((indent, node) : rest)
