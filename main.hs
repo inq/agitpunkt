@@ -30,9 +30,12 @@ accept_socket socket_fd db = do
 
 accept_body :: NS.Socket -> DB.Connection -> IO () 
 accept_body fd db = do
-    request <- NSB.recv fd 4096
-    response <- Route.extract routes db $ Req.parse request fd
+    _request <- NSB.recv fd 4096
+    let request = Req.parse _request fd
+    let uri = Req.uri request
+    let method = Req.method request
+    response <- Route.match uri method route_tree db request
     NSB.sendAll fd $ Res.render response
     NS.sClose fd
 
-routes = $(Route.parseFile "config/routes.cfg")
+route_tree = $(Route.parseFile "config/routes.cfg")

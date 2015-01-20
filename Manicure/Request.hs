@@ -4,7 +4,9 @@ module Manicure.Request (
   Request,
   Method,
   strToMethod,
-  parse
+  parse,
+  method,
+  uri
 ) where
 
 import qualified Language.Haskell.TH.Syntax     as TS
@@ -23,7 +25,7 @@ data Request = Request {
 
 data Method = GET | POST | PUT | DELETE | PATCH
   | TRACE | OPTIONS | HEAD | CONNECT
-  deriving (Show)
+  deriving (Show, Eq, Ord)
 
 instance TS.Lift Method where
     lift GET     = [| GET |]
