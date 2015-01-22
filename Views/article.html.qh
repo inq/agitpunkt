@@ -1,0 +1,6 @@
+html
+  body
+    div
+      p
+        = article
+        | The article page!
