@@ -25,15 +25,12 @@ import Data.Map.Strict ((!))
 
 data Routes = Routes [Route]
 data Route = Route String Req.Method String
-data RouteTree = Node (M.Map BS.ByteString RouteTree) (M.Map Req.Method Res.Renderable)
+data RouteTree = Node (M.Map BS.ByteString RouteTree) (M.Map Req.Method Res.Handler)
     deriving Show
 
 instance TS.Lift Route where
     lift (Route uri method action) = [|
-            makeNode uri_tokens method (
-              $(return $ TS.ConE $ TS.mkName name)
-              $(return $ TS.VarE $ TS.mkName action)
-            )
+            makeNode uri_tokens method $(return $ TS.VarE $ TS.mkName action)
         |]
       where
         split _ [] "" = []
@@ -45,10 +42,6 @@ instance TS.Lift Route where
             | head == c    = r : split c tail ""
             | otherwise    = split c tail (r ++ [head])
         uri_tokens = filter (not . (== "")) $ split '/' uri ""
-        is_string = (== "#String")
-        name = if any is_string uri_tokens
-            then "Res.BR"
-            else "Res.R"
 instance TS.Lift Routes where
     lift (Routes a) = 
         [| foldl1 mergeNode a |]
@@ -57,17 +50,15 @@ mergeNode :: RouteTree -> RouteTree -> RouteTree
 mergeNode (Node a ha) (Node b hb) =
     Node (M.unionWith mergeNode a b) (M.union ha hb)
 
-makeNode :: [BS.ByteString] -> Req.Method -> Res.Renderable -> RouteTree
+makeNode :: [BS.ByteString] -> Req.Method -> Res.Handler -> RouteTree
 makeNode (head : tail) method action = 
     Node (M.singleton head $ makeNode tail method action) M.empty
 makeNode [] method action =     
     Node M.empty $ M.singleton method action
 
-match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Renderable
+match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
 match uri method tree =
-    case res of
-        Res.R a  -> Res.R a
-        Res.BR a -> Res.R (a $ head args)
+    res $ reverse args
   where
     res = map ! method
     (Node _ map, args) = find_node uri_tokens tree []

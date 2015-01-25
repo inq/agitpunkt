@@ -8,7 +8,8 @@ import qualified Manicure.Http                  as Http
 import qualified Manicure.Request               as Req
 import qualified Manicure.Database              as DB
 
-type Handler = DB.Connection -> Req.Request -> IO Response
+type Handler = [BS.ByteString] -> Action
+type Action = DB.Connection -> Req.Request -> IO Response
 
 data Response = Response {
   version :: Http.Version,
@@ -16,19 +17,10 @@ data Response = Response {
   content :: BS.ByteString
 } deriving Show
 
-data Renderable =
-    R  Handler |
-    BR (BS.ByteString -> Handler)
-  deriving Show
-
 instance Show (BS.ByteString -> Handler) where
     show _ = ""
 instance Show Handler where
     show _ = ""
-
-process :: Renderable -> Handler
-process (R a) = a
-process (BR a) = a ""
 
 render :: Response -> BS.ByteString
 render (Response version status_code content) =

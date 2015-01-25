@@ -34,6 +34,6 @@ accept_body fd db = do
     let request = Req.parse _request fd
     let uri = Req.uri request
     let method = Req.method request
-    response <- (Res.process $ Route.match uri method Handler.route_tree) db request
+    response <- (Route.match uri method Handler.route_tree) db request
     NSB.sendAll fd $ Res.render response
     NS.sClose fd

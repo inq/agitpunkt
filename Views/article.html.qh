@@ -2,5 +2,9 @@ html
   body
     div
       p
+        = category
+      p
         = article
-        | The article page!
+      p
+        = index
+
