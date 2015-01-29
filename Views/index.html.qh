@@ -1,15 +1,29 @@
 html
+  head
+    script {src: "/static/react-0.12.2.js"}
+    script {src: "/static/JSXTransformer-0.12.2.js"}
   body
     div
       p
         | Hello, world!
-      img   {class: "image-01", src: "/r/t.jpg"}
       div
         - foreach titles -> title
           p
             = title
+      script {type: "text/jsx"}
+        | var CommentBox = React.createClass({
+        |   render: function() {
+        |     return (
+        |       <div className="commentBox">
+        |         Hello, world! I am a CommentBox.
+        |       </div>
+        |     );
+        |   }
+        | });
+        | React.render(
+        |   <CommentBox />,
+        |   document.getElementById('content')
+        | );
       | Nice to meet you!
       | How are you?
-    div
-      | 21:34 12-Dec-14
-    | I am fine
+    div {id: "content"}
