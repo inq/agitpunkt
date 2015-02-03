@@ -18,7 +18,7 @@ article [category, article, index] db req = do
 new_article :: Res.Handler
 new_article [] db req = do
     let title = "The title" :: BS.ByteString
-    let content = Req.post req
+    let content = show $ Req.post req
     return $ Res.success $ head $(Html.parseFile "Views/new_article.html.qh")     
 
 index :: Res.Handler

@@ -16,13 +16,18 @@ import qualified Data.ByteString.Char8          as BS
 import qualified Manicure.Http                  as Http
 import qualified Network.Socket                 as NS
 import qualified Data.Char                      as C
+import qualified Data.Map                       as M
+import qualified Network.HTTP.Types.URI         as URI
+import qualified Data.Either                    as E
+
+type PostData = M.Map BS.ByteString BS.ByteString
 
 data Request = Request {
   method  :: Method,
   version :: Http.Version,
   uri     :: BS.ByteString,
   headers :: RequestHeaders,
-  post    :: BS.ByteString,
+  post    :: PostData,
   request_socket :: NS.Socket
 } deriving (Show)
 
@@ -52,10 +57,20 @@ parse ipt socket =
     parseHead head (parseTail tail) post socket
   where 
     lines = splitLines ipt
-    post  = last lines
+    post  = build $ last lines
     head : tail = init lines
+    build bs = M.fromList $ map transform (BS.split '&' bs)
+      where
+        transform line = pair
+          where
+            idx = case BS.elemIndex '=' line of
+                Just i -> i
+                Nothing -> 0
+            pair = (decode $ BS.take idx line, decode $ BS.drop (idx + 1) line)
+              where
+                decode = URI.urlDecode True
         
-parseHead :: BS.ByteString -> RequestHeaders -> BS.ByteString -> NS.Socket -> Request
+parseHead :: BS.ByteString -> RequestHeaders -> PostData -> NS.Socket -> Request
 parseHead str =
     Request method version uri
   where
@@ -102,5 +117,5 @@ splitLines :: BS.ByteString -> [BS.ByteString]
 splitLines str =
     case BS.elemIndex '\r' str of
         Just i | i > 2 -> BS.take i str : (splitLines $ BS.drop (i + 2) str)
-        Just i         -> [BS.drop 4 str]
+        Just i         -> [BS.drop 2 str]
         Nothing        -> [""]
