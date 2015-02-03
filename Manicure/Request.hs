@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes     #-}
 module Manicure.Request (
@@ -6,7 +7,8 @@ module Manicure.Request (
   strToMethod,
   parse,
   method,
-  uri
+  uri,
+  post
 ) where
 
 import qualified Language.Haskell.TH.Syntax     as TS
@@ -20,6 +22,7 @@ data Request = Request {
   version :: Http.Version,
   uri     :: BS.ByteString,
   headers :: RequestHeaders,
+  post    :: BS.ByteString,
   request_socket :: NS.Socket
 } deriving (Show)
 
@@ -46,11 +49,13 @@ type Header = (BS.ByteString, BS.ByteString)
 
 parse :: BS.ByteString -> NS.Socket -> Request
 parse ipt socket = 
-    parseHead head (parseTail tail) socket
+    parseHead head (parseTail tail) post socket
   where 
-    head : tail = splitLines ipt
+    lines = splitLines ipt
+    post  = last lines
+    head : tail = init lines
         
-parseHead :: BS.ByteString -> RequestHeaders -> NS.Socket -> Request
+parseHead :: BS.ByteString -> RequestHeaders -> BS.ByteString -> NS.Socket -> Request
 parseHead str =
     Request method version uri
   where
@@ -98,4 +103,4 @@ splitLines str =
     case BS.elemIndex '\r' str of
         Just i | i > 2 -> BS.take i str : (splitLines $ BS.drop (i + 2) str)
         Just i         -> [BS.drop 4 str]
-        Nothing        -> []
+        Nothing        -> [""]

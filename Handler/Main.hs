@@ -12,19 +12,25 @@ import qualified Data.Text                      as T
 import qualified Manicure.Html                  as Html
 
 article :: Res.Handler
-article [category, article, index] db teq = do
+article [category, article, index] db req = do
     return $ Res.success $ head $(Html.parseFile "Views/article.html.qh") 
 
-extract :: [M.Document] -> T.Text -> IO [String]
-extract documents key = mapM read documents
-  where
-    read document = M.lookup key document
+new_article :: Res.Handler
+new_article [] db req = do
+    let title = "The title" :: BS.ByteString
+    let content = Req.post req
+    return $ Res.success $ head $(Html.parseFile "Views/new_article.html.qh")     
 
 index :: Res.Handler
 index [] db req = do
     articles <- DB.query db DB.find
     titles <- extract articles "title"
     return $ Res.success $ head $(Html.parseFile "Views/index.html.qh") 
+  where
+    extract :: [M.Document] -> T.Text -> IO [String]
+    extract documents key = mapM read documents
+      where
+        read document = M.lookup key document
 
 test :: Res.Handler
 test [] db teq = do

@@ -4,8 +4,6 @@ html
     script {src: "/static/JSXTransformer-0.12.2.js"}
   body
     div
-      p
-        | Hello, world!
       div
         - foreach titles -> title
           p
@@ -14,9 +12,11 @@ html
         | var CommentBox = React.createClass({
         |   render: function() {
         |     return (
-        |       <div className="commentBox">
-        |         Hello, world! I am a CommentBox.
-        |       </div>
+        |       <form action="/article/new" method="post">
+        |         <input type="text" name="title"/>
+        |         <textarea name="content"></textarea>
+        |         <input type="submit" value="Submit"/>
+        |       </form>
         |     );
         |   }
         | });
@@ -24,6 +24,4 @@ html
         |   <CommentBox />,
         |   document.getElementById('content')
         | );
-      | Nice to meet you!
-      | How are you?
     div {id: "content"}
