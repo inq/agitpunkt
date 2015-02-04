@@ -10,6 +10,7 @@ import qualified Manicure.Database              as DB
 import qualified Database.MongoDB               as M
 import qualified Data.Text                      as T
 import qualified Manicure.Html                  as Html
+import Data.Map ((!))
 
 article :: Res.Handler
 article [category, article, index] db req = do
@@ -17,9 +18,11 @@ article [category, article, index] db req = do
 
 new_article :: Res.Handler
 new_article [] db req = do
-    let title = "The title" :: BS.ByteString
-    let content = show $ Req.post req
     return $ Res.success $ head $(Html.parseFile "Views/new_article.html.qh")     
+  where
+    title   = post ! "title"
+    content = post ! "content"
+    post    = Req.post req
 
 index :: Res.Handler
 index [] db req = do
