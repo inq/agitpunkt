@@ -1,0 +1,10 @@
+html
+  body
+    div
+      p
+        = category
+      p
+        = article
+      p
+        = index
+
