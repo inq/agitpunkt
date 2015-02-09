@@ -46,6 +46,7 @@ instance TS.Lift Method where
     lift CONNECT = [| CONNECT |]
 
 strToMethod :: String -> Method
+-- ^ Convert strings to the corresponding method
 strToMethod "GET" = GET
 strToMethod "POST" = POST
 
@@ -53,6 +54,7 @@ type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
 
 parse :: BS.ByteString -> NS.Socket -> Request
+-- ^ Read and parse the data from socket to make the Request data
 parse ipt socket = 
     parseHead head (parseTail tail) post socket
   where 
@@ -71,6 +73,7 @@ parse ipt socket =
                 decode = URI.urlDecode True
         
 parseHead :: BS.ByteString -> RequestHeaders -> PostData -> NS.Socket -> Request
+-- ^ Parse the first line of the HTTP header
 parseHead str =
     Request method version uri
   where
@@ -101,6 +104,7 @@ parseHead str =
         (C.digitToInt $ BS.index str (length - 1))
 
 parseTail :: [BS.ByteString] -> RequestHeaders
+-- ^ Parse the rest part of the HTTP header
 parseTail list =
     map split list 
   where
@@ -114,6 +118,7 @@ parseTail list =
         tail = BS.drop (idx + 1) line
 
 splitLines :: BS.ByteString -> [BS.ByteString]
+-- ^ Split the lines from the HTTP header
 splitLines str =
     case BS.elemIndex '\r' str of
         Just i | i > 2 -> BS.take i str : (splitLines $ BS.drop (i + 2) str)

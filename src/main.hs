@@ -1,19 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-import qualified Data.ByteString.Char8          as BS
-import qualified Language.Haskell.TH.Quote      as TQ
-import qualified Language.Haskell.TH.Syntax     as TS
 import qualified Network                        as N
 import qualified Network.Socket                 as NS
 import qualified Network.Socket.ByteString      as NSB 
 import qualified Control.Concurrent             as CC
-
 import qualified Manicure.Route                 as Route
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
 import qualified Manicure.Handler               as Handler
-import qualified System.IO.Pipeline             as P
  
+main :: IO ()
+-- ^ The main function
 main = N.withSocketsDo $ do
     putStrLn $ show Handler.route_tree
     db <- DB.connect "test"
@@ -23,12 +20,14 @@ main = N.withSocketsDo $ do
     accept_socket socket_fd db
 
 accept_socket :: NS.Socket -> DB.Connection -> IO ()
+-- ^ Accept a new socket with a new process
 accept_socket socket_fd db = do
     (fd, _) <- NS.accept socket_fd
     CC.forkIO $ accept_body fd db
     accept_socket socket_fd db
 
 accept_body :: NS.Socket -> DB.Connection -> IO () 
+-- ^ Processe the connection
 accept_body fd db = do
     _request <- NSB.recv fd 4096
     let request = Req.parse _request fd

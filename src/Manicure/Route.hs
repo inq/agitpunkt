@@ -47,16 +47,19 @@ instance TS.Lift Routes where
         [| foldl1 mergeNode a |]
 
 mergeNode :: RouteTree -> RouteTree -> RouteTree
+-- ^ Merge two nodes
 mergeNode (Node a ha) (Node b hb) =
     Node (M.unionWith mergeNode a b) (M.union ha hb)
 
 makeNode :: [BS.ByteString] -> Req.Method -> Res.Handler -> RouteTree
+-- ^ Parsing the given ByteStrings, make a route chain
 makeNode (head : tail) method action = 
     Node (M.singleton head $ makeNode tail method action) M.empty
 makeNode [] method action =     
     Node M.empty $ M.singleton method action
 
 match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
+-- ^ Find a corresponding route from the given request URI
 match uri method tree =
     res $ reverse args
   where
@@ -69,14 +72,15 @@ match uri method tree =
             Nothing -> find_node tail (children ! "#String") (head : args)
     find_node [] node args = (node, args)
     
-
 parseFile :: FilePath -> TS.Q TS.Exp
+-- ^ Parse the route definition file
 parseFile file_path = do
      TS.qAddDependentFile file_path
      s <- TS.qRunIO $ readFile file_path
      TQ.quoteExp parse s
 
 parse :: TQ.QuasiQuoter
+-- ^ A QuasiQuoter for parsing the route definition
 parse = TQ.QuasiQuoter {
         TQ.quoteExp = quote_exp,
         TQ.quotePat = undefined,
@@ -91,6 +95,7 @@ parse = TQ.QuasiQuoter {
             Right tag -> [| tag |]
 
 routeNode :: PS.Parser Route
+-- ^ The subparser
 routeNode = do
     P.many $ P.char '\n'
     uri <- PC.many1 $ P.satisfy (/=' ')
@@ -102,6 +107,7 @@ routeNode = do
     return $ Route uri (Req.strToMethod method) action
 
 routesNode :: PS.Parser Routes
+-- ^ The main parser
 routesNode = do
     lines <- P.many routeNode
     return $ Routes lines

@@ -23,6 +23,7 @@ instance Show Handler where
     show _ = ""
 
 render :: Response -> BS.ByteString
+-- ^ Render to the ByteString
 render (Response version status_code content) =
   BS.concat [
     "HTTP/1.0 200 OK\r\nContent-Length: ", 
@@ -32,7 +33,9 @@ render (Response version status_code content) =
   ]
 
 defaultVersion :: Http.Version
+-- ^ The default version is HTTP 1.1
 defaultVersion = Http.Version 1 1
 
 success :: BS.ByteString -> Response
+-- ^ Generate a Response data which represents 200 OK
 success bs = Response defaultVersion 200 bs

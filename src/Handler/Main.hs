@@ -16,10 +16,12 @@ import qualified Data.Bson                      as Bson
 import Data.Map ((!))
 
 article :: Res.Handler
+-- ^ Test parsing URI parameters
 article [category, article, index] db req = do
     return $ Res.success $ head $(Html.parseFile "Views/article.html.qh") 
 
 new_article :: Res.Handler
+-- ^ Create a new article from the given POST data
 new_article [] db req = do
     time <- C.getCurrentTime
     DB.query db (Article.save $ Article.Article {
@@ -34,6 +36,7 @@ new_article [] db req = do
     post    = Req.post req
 
 index :: Res.Handler
+-- ^ Render the main page
 index [] db req = do
     articles <- DB.query db DB.find
     titles <- extract articles "title"
@@ -48,9 +51,6 @@ index [] db req = do
             extract (Bson.Binary a) = a
 
 test :: Res.Handler
+-- ^ Render the test page
 test [] db teq = do
     return $ Res.success $ head $(Html.parseFile "Views/test.html.qh") 
-
-post_test :: Res.Handler
-post_test [] db val = do
-    return $ Res.success "post test"

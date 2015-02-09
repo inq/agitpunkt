@@ -15,6 +15,7 @@ data Article = Article {
 }
 
 save :: Article -> M.Action IO ()
+-- ^ Save the data into the DB
 save (Article _id title content created_at) = do
     M.insert "articles" [
         "title"      =: Bson.Binary title,
