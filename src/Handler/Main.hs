@@ -18,7 +18,7 @@ import Data.Map ((!))
 article :: Res.Handler
 -- ^ Test parsing URI parameters
 article [category, article, index] db req = do
-    return $ Res.success $ head $(Html.parseFile "Views/article.html.qh") 
+    return $ Res.success (head $(Html.parseFile "Views/article.html.qh")) []
 
 new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
@@ -29,7 +29,7 @@ new_article [] db req = do
         Article.content    = content,
         Article.created_at = time
       })
-    return $ Res.success $ head $(Html.parseFile "Views/new_article.html.qh")     
+    return $ Res.success (head $(Html.parseFile "Views/new_article.html.qh")) ["HELLO=WORLD"]
   where
     title   = post ! "title"
     content = post ! "content"
@@ -40,7 +40,8 @@ index :: Res.Handler
 index [] db req = do
     articles <- DB.query db DB.find
     titles <- extract articles "title"
-    return $ Res.success $ head $(Html.parseFile "Views/index.html.qh") 
+    let cookie = [Req.extract_cookie req]
+    return $ Res.success (head $(Html.parseFile "Views/index.html.qh")) []
   where
     extract documents key = mapM read documents :: IO [BS.ByteString]
       where
@@ -53,4 +54,4 @@ index [] db req = do
 test :: Res.Handler
 -- ^ Render the test page
 test [] db teq = do
-    return $ Res.success $ head $(Html.parseFile "Views/test.html.qh") 
+    return $ Res.success (head $(Html.parseFile "Views/test.html.qh")) []

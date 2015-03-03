@@ -27,7 +27,7 @@ accept_socket socket_fd db = do
     accept_socket socket_fd db
 
 accept_body :: NS.Socket -> DB.Connection -> IO () 
--- ^ Processe the connection
+-- ^ Process the connection
 accept_body fd db = do
     _request <- NSB.recv fd 4096
     let request = Req.parse _request fd

@@ -8,7 +8,8 @@ module Manicure.Request (
   parse,
   method,
   uri,
-  post
+  post,
+  extract_cookie
 ) where
 
 import qualified Language.Haskell.TH.Syntax     as TS
@@ -52,6 +53,15 @@ strToMethod "POST" = POST
 
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
+
+extract_cookie :: Request -> BS.ByteString
+-- ^ Extract cookie from the request header
+extract_cookie req = 
+    find_cookie $ headers req
+  where
+    find_cookie (("Cookie", context) : _) = context
+    find_cookie (head : tail)             = find_cookie tail
+    find_cookie []                        = ""
 
 parse :: BS.ByteString -> NS.Socket -> Request
 -- ^ Read and parse the data from socket to make the Request data
