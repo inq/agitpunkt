@@ -8,7 +8,7 @@ import qualified Data.Bson                      as Bson
 import Database.MongoDB ((=:))
 
 data Article = Article {
-  _id        :: Bson.ObjectId,
+  _id        :: Maybe Bson.ObjectId,
   title      :: BS.ByteString,
   content    :: BS.ByteString,
   created_at :: TC.UTCTime

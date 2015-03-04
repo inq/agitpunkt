@@ -8,11 +8,11 @@ import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
 import qualified Manicure.Handler               as Handler
+import qualified Manicure.Session               as Session
  
 main :: IO ()
 -- ^ The main function
 main = N.withSocketsDo $ do
-    putStrLn $ show Handler.route_tree
     db <- DB.connect "test"
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"

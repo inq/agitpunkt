@@ -24,11 +24,7 @@ new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
 new_article [] db req = do
     time <- C.getCurrentTime
-    DB.query db (Article.save $ Article.Article {
-        Article.title      = title,
-        Article.content    = content,
-        Article.created_at = time
-      })
+    DB.query db (Article.save $ Article.Article Nothing title content time)
     return $ Res.success (head $(Html.parseFile "Views/new_article.html.qh")) ["HELLO=WORLD"]
   where
     title   = post ! "title"

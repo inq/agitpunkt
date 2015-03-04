@@ -16,6 +16,7 @@ library
                      Manicure.Http,
                      Manicure.Html,
                      Manicure.Database,
+                     Manicure.Session,
                      Models.Article,
                      Handler.Main
   build-depends:     base,
@@ -32,7 +33,9 @@ library
                      containers,
                      time,
                      mongoDB,
-                     bson
+                     bson,
+                     hedis,
+                     cryptohash
   hs-source-dirs:    src
 executable manicure
   main-is:           main.hs
@@ -51,6 +54,8 @@ executable manicure
                      containers,
                      time,
                      mongoDB,
-                     bson
+                     bson,
+                     hedis,
+                     cryptohash
   hs-source-dirs:    src
   default-language:  Haskell2010
