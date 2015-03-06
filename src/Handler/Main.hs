@@ -20,6 +20,11 @@ article :: Res.Handler
 article [category, article, index] db req = do
     return $ Res.success (head $(Html.parseFile "Views/article.html.qh")) []
 
+signin :: Res.Handler
+-- ^ Sign in page
+signin [] db req = do
+    return $ Res.redirect "https://www.facebook.com/dialog/oauth?client_id=444217945628444&redirect_uri=https://whitesky.net/step2"
+
 new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
 new_article [] db req = do

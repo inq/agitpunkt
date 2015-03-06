@@ -25,7 +25,7 @@ instance Show Handler where
 
 render :: Response -> BS.ByteString
 -- ^ Render to the ByteString
-render (Response version status_code cookies content) =
+render (Response version 200 cookies content) =
     BS.concat (
       ["HTTP/1.0 200 OK\r\n"] ++ 
       map cookie_to_string cookies ++
@@ -36,6 +36,12 @@ render (Response version status_code cookies content) =
       ])
   where
     cookie_to_string cookie = BS.concat ["Set-Cookie: ", cookie, "; path=/\r\n"]
+render (Response version 303 cookies url) =
+    BS.concat (
+      ["HTTP/1.0 303 See Other\r\n",
+        "Location: ", url,
+        "\r\n\r\n"
+      ])
 
 defaultVersion :: Http.Version
 -- ^ The default version is HTTP 1.1
@@ -44,3 +50,7 @@ defaultVersion = Http.Version 1 1
 success :: BS.ByteString -> [BS.ByteString] -> Response
 -- ^ Generate a Response data which represents 200 OK
 success bs cookies = Response defaultVersion 200 cookies bs
+
+redirect :: BS.ByteString -> Response
+-- ^ Redirect to the specific URL
+redirect url = Response defaultVersion 303 [] url
