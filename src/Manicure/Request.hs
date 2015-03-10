@@ -9,7 +9,8 @@ module Manicure.Request (
   method,
   uri,
   post,
-  extract_cookie
+  extract_cookie,
+  query_str
 ) where
 
 import qualified Language.Haskell.TH.Syntax     as TS
@@ -20,15 +21,15 @@ import qualified Data.Char                      as C
 import qualified Data.Map                       as M
 import qualified Network.HTTP.Types.URI         as URI
 import qualified Data.Either                    as E
-
-type PostData = M.Map BS.ByteString BS.ByteString
+import qualified Manicure.ByteString            as ByteString
 
 data Request = Request {
-  method  :: Method,
-  version :: Http.Version,
-  uri     :: BS.ByteString,
-  headers :: RequestHeaders,
-  post    :: PostData,
+  method    :: Method,
+  version   :: Http.Version,
+  uri       :: BS.ByteString,
+  headers   :: RequestHeaders,
+  post      :: ByteString.QueryString,
+  query_str :: ByteString.QueryString,
   request_socket :: NS.Socket
 } deriving (Show)
 
@@ -69,23 +70,13 @@ parse ipt socket =
     parseHead head (parseTail tail) post socket
   where 
     lines = splitLines ipt
-    post  = build $ last lines
+    post  = ByteString.split_and_decode $ last lines
     head : tail = init lines
-    build bs = M.fromList $ map transform (BS.split '&' bs)
-      where
-        transform line = pair
-          where
-            idx = case BS.elemIndex '=' line of
-                Just i -> i
-                Nothing -> 0
-            pair = (decode $ BS.take idx line, decode $ BS.drop (idx + 1) line)
-              where
-                decode = URI.urlDecode True
         
-parseHead :: BS.ByteString -> RequestHeaders -> PostData -> NS.Socket -> Request
+parseHead :: BS.ByteString -> RequestHeaders -> ByteString.QueryString -> NS.Socket -> Request
 -- ^ Parse the first line of the HTTP header
-parseHead str =
-    Request method version uri
+parseHead str headers query socket =
+    Request method version uri headers query query_string socket
   where
     method = case BS.index str 0 of
         'G' -> GET
@@ -99,7 +90,7 @@ parseHead str =
             'E' -> HEAD
             _   -> TRACE
     length = BS.length str
-    uri = BS.drop (offset method) $ BS.take (length - 9) str
+    uri_long = BS.drop (offset method) $ BS.take (length - 9) str
       where
         offset :: Method -> Int
         offset GET     = 4
@@ -109,6 +100,8 @@ parseHead str =
         offset OPTIONS = 7
         offset CONNECT = 7
         offset _       = 6
+    (uri, query_string_raw) = BS.break (== '?') uri_long
+    query_string = ByteString.split_and_decode $ BS.tail query_string_raw
     version = Http.Version 
         (C.digitToInt $ BS.index str (length - 3)) 
         (C.digitToInt $ BS.index str (length - 1))

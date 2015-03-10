@@ -25,6 +25,11 @@ signin :: Res.Handler
 signin [] db req = do
     return $ Res.redirect "https://www.facebook.com/dialog/oauth?client_id=444217945628444&redirect_uri=https://whitesky.net/step2"
 
+step2 :: Res.Handler
+-- ^ OAuth2 step 2
+step2 [] db req = do
+    return $ Res.redirect "http://naver.com"
+
 new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
 new_article [] db req = do
@@ -54,5 +59,7 @@ index [] db req = do
 
 test :: Res.Handler
 -- ^ Render the test page
-test [] db teq = do
+test [] db req = do
     return $ Res.success (head $(Html.parseFile "Views/test.html.qh")) []
+  where
+    query_string = (Req.query_str req) ! "hello"

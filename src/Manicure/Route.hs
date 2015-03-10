@@ -55,7 +55,7 @@ makeNode :: [BS.ByteString] -> Req.Method -> Res.Handler -> RouteTree
 -- ^ Parsing the given ByteStrings, make a route chain
 makeNode (head : tail) method action = 
     Node (M.singleton head $ makeNode tail method action) M.empty
-makeNode [] method action =     
+makeNode [] method action =
     Node M.empty $ M.singleton method action
 
 match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
@@ -63,7 +63,7 @@ match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
 match uri method tree =
     res $ reverse args
   where
-    res = map ! method
+    res = map ! method :: Res.Handler
     (Node _ map, args) = find_node uri_tokens tree []
     uri_tokens = filter (not . BS.null) $ BS.split '/' uri
     find_node (head : tail) (Node children _) args = 
