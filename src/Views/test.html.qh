@@ -2,4 +2,4 @@ html
   body
     div
       p
-        = query_string
+        = query

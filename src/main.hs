@@ -9,6 +9,7 @@ import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
 import qualified Manicure.Handler               as Handler
 import qualified Manicure.Session               as Session
+import qualified Manicure.Auth                  as Auth
  
 main :: IO ()
 -- ^ The main function

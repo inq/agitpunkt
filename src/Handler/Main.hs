@@ -3,16 +3,21 @@
 module Handler.Main where
 
 import qualified Data.ByteString.Char8          as BS
+import qualified Manicure.Auth                  as Auth
 import qualified Manicure.Route                 as Route
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
 import qualified Database.MongoDB               as M
+import qualified Manicure.ByteString            as ByteString
 import qualified Data.Text                      as T
 import qualified Manicure.Html                  as Html
 import qualified Models.Article                 as Article
 import qualified Data.Time.Clock                as C
 import qualified Data.Bson                      as Bson
+import qualified Network.Curl                   as Curl
+
+import Control.Monad
 import Data.Map ((!))
 
 article :: Res.Handler
@@ -23,12 +28,16 @@ article [category, article, index] db req = do
 signin :: Res.Handler
 -- ^ Sign in page
 signin [] db req = do
-    return $ Res.redirect "https://www.facebook.com/dialog/oauth?client_id=444217945628444&redirect_uri=https://whitesky.net/step2"
+    return $ Res.redirect $ Auth.oauth_url "https://whitesky.net/step2"
 
 step2 :: Res.Handler
 -- ^ OAuth2 step 2
 step2 [] db req = do
-    return $ Res.redirect "http://naver.com"
+    query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.access_token_url "https://whitesky.net/step2" code) []
+    let query = ((ByteString.split_and_decode . BS.pack) query_str) ! "access_token"
+    return $ Res.success (head $(Html.parseFile "Views/test.html.qh")) []
+  where
+    code = Req.query_str req ! "code"
 
 new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
@@ -56,10 +65,3 @@ index [] db req = do
             return $ extract res 
           where
             extract (Bson.Binary a) = a
-
-test :: Res.Handler
--- ^ Render the test page
-test [] db req = do
-    return $ Res.success (head $(Html.parseFile "Views/test.html.qh")) []
-  where
-    query_string = (Req.query_str req) ! "hello"
