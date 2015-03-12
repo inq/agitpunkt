@@ -124,8 +124,8 @@ buildTree ((indent, node) : rest)
 buildTree []  = 
     (0, [], [])
 
-parseNode :: PS.Parser [Node]
+parseNode :: PS.Parser Node
 parseNode = do
     nodes <- P.many parseLine
     let (_, res, _) = buildTree nodes
-    return $ res
+    return $ head res

@@ -101,7 +101,10 @@ parseHead str headers query socket =
         offset CONNECT = 7
         offset _       = 6
     (uri, query_string_raw) = BS.break (== '?') uri_long
-    query_string = ByteString.split_and_decode $ BS.tail query_string_raw
+    query_string_tail | BS.null query_string_raw        = ""
+                      | BS.head query_string_raw == '?' = BS.tail query_string_raw
+                      | otherwise                       = ""
+    query_string = ByteString.split_and_decode query_string_tail
     version = Http.Version 
         (C.digitToInt $ BS.index str (length - 3)) 
         (C.digitToInt $ BS.index str (length - 1))
