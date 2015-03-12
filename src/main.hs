@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+import qualified Text.Parsec                    as P
 import qualified Network                        as N
 import qualified Network.Socket                 as NS
 import qualified Network.Socket.ByteString      as NSB 
@@ -9,7 +10,7 @@ import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
 import qualified Manicure.Handler               as Handler
 import qualified Manicure.Session               as Session
-import qualified Manicure.Auth                  as Auth
+import qualified Manicure.Json                  as Json
  
 main :: IO ()
 -- ^ The main function

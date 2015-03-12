@@ -19,6 +19,7 @@ library
                      Manicure.Session,
                      Manicure.ByteString,
                      Manicure.Auth,
+                     Manicure.Json,
                      Models.Article,
                      Handler.Main
   build-depends:     base,
