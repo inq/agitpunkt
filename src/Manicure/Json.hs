@@ -37,17 +37,12 @@ parse_json = parse_object <|> parse_array <|> parse_string <|> parse_boolean <|>
             key <- P.spaces *> parse_string <* P.spaces <* P.char ':'
             value <- P.spaces *> parse_json <* P.spaces 
             return (raw_string key, value)
-    parse_boolean = parse_true <|> parse_false
-    raw_string (JSString x) = x
+        raw_string (JSString x) = x
+    parse_boolean = liftM JSBoolean (parse_true <|> parse_false)
+      where
+        parse_true = do P.try (P.spaces *> P.string "true" *> P.spaces); return True
+        parse_false = do P.try (P.spaces *> P.string "false" *> P.spaces); return False
+    parse_int = liftM (JSInt . read) $ P.try (P.many1 P.digit)
     op c = P.try (P.spaces *> P.char c)
     cl c = P.char c <* P.spaces
-    parse_true = do
-        dummy <- P.try (P.spaces *> P.string "true" *> P.spaces)
-        return $ JSBoolean True
-    parse_false = do
-        dummy <- P.try (P.spaces *> P.string "false" *> P.spaces)
-        return $ JSBoolean False
-    parse_int = do
-        number <- liftM read $ P.try (P.many1 P.digit)
-        return $ JSInt number
 
