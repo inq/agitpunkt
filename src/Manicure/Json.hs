@@ -17,7 +17,7 @@ data Json = JSString  BS.ByteString
           | JSObject  (M.Map BS.ByteString Json)
           | JSArray   [Json]
           | JSBoolean Bool
-          deriving Show
+          deriving (Eq, Show)
 
 parse :: BS.ByteString -> Json
 -- ^ Parse the given bytestring

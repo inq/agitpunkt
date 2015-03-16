@@ -9,6 +9,15 @@ category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
 
+test-suite spec
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Spec.hs
+  build-depends:     base,
+                     bytestring,
+                     manicure,
+                     hspec
+
 library
   exposed-modules:   Manicure.Request,
                      Manicure.Response,
