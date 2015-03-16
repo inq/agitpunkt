@@ -16,8 +16,8 @@ test-suite spec
   build-depends:     base,
                      bytestring,
                      manicure,
-                     hspec
-
+                     hspec,
+                     containers
 library
   exposed-modules:   Manicure.Request,
                      Manicure.Response,
