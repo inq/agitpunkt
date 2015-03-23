@@ -14,6 +14,13 @@ client_secret :: BS.ByteString
   where
     config = $(Config.parseFile "config/facebook.cfg")
 
+facebook_me_url :: BS.ByteString -> BS.ByteString
+-- ^ Get the user information
+facebook_me_url access_token = BS.concat [
+    "https://graph.facebook.com/v2.2/me?locale=ko_KR&access_token=",
+    access_token
+  ]
+
 oauth_url :: BS.ByteString -> BS.ByteString
 -- ^ Generate the OAuth2 URL
 oauth_url redirect_uri = BS.concat [

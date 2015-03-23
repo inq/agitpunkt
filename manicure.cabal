@@ -30,6 +30,7 @@ library
                      Manicure.Auth,
                      Manicure.Json,
                      Models.Article,
+                     Models.User
                      Handler.Main
   build-depends:     base,
                      network,

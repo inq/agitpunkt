@@ -12,9 +12,14 @@ import qualified Manicure.Handler               as Handler
 import qualified Manicure.Session               as Session
 import qualified Manicure.Json                  as Json
  
+import qualified Crypto.Hash.SHA256             as SHA256
+import qualified Data.ByteString.Char8          as BS
+
 main :: IO ()
 -- ^ The main function
 main = N.withSocketsDo $ do
+    key <- Session.generateKey
+    putStrLn (BS.unpack key)
     db <- DB.connect "test"
     socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"

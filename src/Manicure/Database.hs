@@ -46,4 +46,4 @@ close pipe = do
 find :: (MonadIO m, MonadBaseControl IO m)  => M.Action m [M.Document]
 -- ^ ** Find articles
 find = do
-    (M.find $ M.select [] "articles") >>= M.rest
+    (M.find $ M.select [] "users") >>= M.rest

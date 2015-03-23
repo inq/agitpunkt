@@ -8,7 +8,7 @@ import qualified Manicure.Route                 as Route
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
-import qualified Manicure.Json                  as Json
+import qualified Manicure.Session               as Session
 import qualified Database.MongoDB               as Mongo
 import qualified Manicure.ByteString            as ByteString
 import qualified Data.Text                      as T
@@ -18,6 +18,7 @@ import qualified Data.Time.Clock                as C
 import qualified Data.Bson                      as Bson
 import qualified Network.Curl                   as Curl
 import qualified Data.Map                       as M
+import qualified Models.User                    as User
 import Control.Monad
 import Data.Map ((!))
 
@@ -35,10 +36,11 @@ signin [] db req = response
         Just code -> do 
             query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.access_token_url redirect_uri code) []
             let access_token = ((ByteString.split_and_decode . BS.pack) query_str) ! "access_token"
-            query_str <- liftM snd $ Curl.curlGetString ("https://graph.facebook.com/v2.2/me?locale=ko_KR&access_token=" ++ BS.unpack access_token) []
-            putStrLn $ query_str
-            let query = show $ Json.parse $ BS.pack query_str
-            return $ Res.success $(Html.parseFile "Views/test.html.qh") []
+            query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url access_token) []
+            let query = show $ User.from_json $ BS.pack query_str
+            DB.query db (User.upsert $ User.from_json (BS.pack query_str))
+            session_key <- Session.generateKey
+            return $ Res.success $(Html.parseFile "Views/test.html.qh") [BS.concat ["SESSION_KEY=", session_key]]
         Nothing   -> do
             return $ Res.redirect $ Auth.oauth_url redirect_uri
 
@@ -57,7 +59,7 @@ index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
     articles <- DB.query db DB.find
-    titles <- extract articles "title"
+    titles <- extract articles "name"
     let cookie = [Req.extract_cookie req]
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where
