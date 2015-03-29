@@ -27,11 +27,22 @@ redisSet (Connection r _ _) key value = do
     res <- R.runRedis r $ R.set key value
     return ()
 
+redisHashGet :: Connection -> BS.ByteString -> IO [(BS.ByteString, BS.ByteString)]
+-- ^ Get a hash data
+redisHashGet (Connection r _ _) key = do
+    (Right res) <- R.runRedis r $ R.hgetall key
+    return res
+
 redisGet :: Connection -> BS.ByteString -> IO BS.ByteString 
 -- ^ Read a bytestring from redis
 redisGet (Connection r _ _) key = do
-     (Right (Just res)) <- R.runRedis r $ R.get key
-     return res
+    (Right (Just res)) <- R.runRedis r $ R.get key
+    return res
+
+run_redis :: Connection -> R.Redis (Either R.Reply R.Status) -> IO ()
+run_redis (Connection r _ _) redis = do
+    _ <- R.runRedis r redis
+    return () 
 
 query :: MonadIO m => Connection -> M.Action m a -> m a
 -- ^ Send the given query
@@ -47,3 +58,4 @@ find :: (MonadIO m, MonadBaseControl IO m)  => M.Action m [M.Document]
 -- ^ ** Find articles
 find = do
     (M.find $ M.select [] "users") >>= M.rest
+

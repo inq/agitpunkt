@@ -38,8 +38,10 @@ signin [] db req = response
             let access_token = ((ByteString.split_and_decode . BS.pack) query_str) ! "access_token"
             query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url access_token) []
             let query = show $ User.from_json $ BS.pack query_str
-            DB.query db (User.upsert $ User.from_json (BS.pack query_str))
+            let user = User.from_json (BS.pack query_str)
+            DB.query db (User.upsert user)
             session_key <- Session.generateKey
+            DB.run_redis db $ User.redis_hash session_key user
             return $ Res.success $(Html.parseFile "Views/test.html.qh") [BS.concat ["SESSION_KEY=", session_key]]
         Nothing   -> do
             return $ Res.redirect $ Auth.oauth_url redirect_uri
