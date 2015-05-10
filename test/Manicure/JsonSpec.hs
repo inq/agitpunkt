@@ -23,5 +23,6 @@ spec = do
             it "parses quoted string" $ do
                  parse " \" \\\" Hello \" " `shouldBe`
                      JSString " \" Hello "
+
 main :: IO ()
 main = hspec spec

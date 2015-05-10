@@ -5,6 +5,7 @@
 module Manicure.Json where
 
 import qualified Data.ByteString.Char8          as BS
+import qualified Data.ByteString.UTF8           as UTF8
 import qualified Text.Parsec.ByteString         as PB
 import qualified Text.Parsec                    as P
 import qualified Data.Map.Strict                as M
@@ -30,7 +31,7 @@ parse_json :: PB.Parser Json
 -- ^ The actual parser
 parse_json = parse_object <|> parse_array <|> parse_string <|> parse_boolean <|> parse_int
   where
-    parse_string = liftM (JSString . BS.pack) $ op '"' *> P.manyTill any_char (P.char '"')
+    parse_string = liftM (JSString . UTF8.fromString) $ op '"' *> P.manyTill any_char (P.char '"')
       where
         escape_map = M.fromList [
             ('"',  '"'),
