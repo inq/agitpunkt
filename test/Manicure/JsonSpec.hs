@@ -20,5 +20,8 @@ spec = do
             it "parses simple object" $ do
                  parse " { \"key\":[\"value\"] } " `shouldBe`
                      JSObject (M.fromList [("key", JSArray [JSString "value"])])
+            it "parses quoted string" $ do
+                 parse " \" \\\" Hello \" " `shouldBe`
+                     JSString " \" Hello "
 main :: IO ()
 main = hspec spec

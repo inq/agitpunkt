@@ -55,14 +55,14 @@ strToMethod "POST" = POST
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
 
-extract_cookie :: Request -> BS.ByteString
+extract_cookie :: Request -> M.Map BS.ByteString BS.ByteString
 -- ^ Extract cookie from the request header
 extract_cookie req = 
     find_cookie $ headers req
   where
-    find_cookie (("Cookie", context) : _) = context
-    find_cookie (head : tail)             = find_cookie tail
-    find_cookie []                        = ""
+    find_cookie (("Cookie", context) : tail) = ByteString.split_and_decode ';' context
+    find_cookie (head : tail)                = find_cookie tail
+    find_cookie []                           = M.empty
 
 parse :: BS.ByteString -> NS.Socket -> Request
 -- ^ Read and parse the data from socket to make the Request data
@@ -70,7 +70,7 @@ parse ipt socket =
     parseHead head (parseTail tail) post socket
   where 
     lines = splitLines ipt
-    post  = ByteString.split_and_decode $ last lines
+    post  = ByteString.split_and_decode '&' $ last lines
     head : tail = init lines
         
 parseHead :: BS.ByteString -> RequestHeaders -> ByteString.QueryString -> NS.Socket -> Request
@@ -104,7 +104,7 @@ parseHead str headers query socket =
     query_string_tail | BS.null query_string_raw        = ""
                       | BS.head query_string_raw == '?' = BS.tail query_string_raw
                       | otherwise                       = ""
-    query_string = ByteString.split_and_decode query_string_tail
+    query_string = ByteString.split_and_decode '&' query_string_tail
     version = Http.Version 
         (C.digitToInt $ BS.index str (length - 3)) 
         (C.digitToInt $ BS.index str (length - 1))

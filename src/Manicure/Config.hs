@@ -20,7 +20,6 @@ instance TS.Lift Config where
             M.fromList $ map (\(a, b) -> (BS.pack a, BS.pack b)) list
         |]
 
-
 parseFile :: FilePath -> TS.Q TS.Exp
 -- ^ Parse the configuration file
 parseFile file_path = do

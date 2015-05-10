@@ -9,6 +9,9 @@ html
           p
             = title
       script {type: "text/jsx"}
+        | var temp = "
+        = cookie
+        | ";
         | var CommentBox = React.createClass({
         |   render: function() {
         |     return (
@@ -25,3 +28,4 @@ html
         |   document.getElementById('content')
         | );
     div {id: "content"}
+

@@ -35,7 +35,7 @@ signin [] db req = response
     response = case M.lookup "code" $ Req.query_str req of
         Just code -> do 
             query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.access_token_url redirect_uri code) []
-            let access_token = ((ByteString.split_and_decode . BS.pack) query_str) ! "access_token"
+            let access_token = ((ByteString.split_and_decode '&' . BS.pack) query_str) ! "access_token"
             query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url access_token) []
             let query = show $ User.from_json $ BS.pack query_str
             let user = User.from_json (BS.pack query_str)
@@ -62,7 +62,7 @@ index :: Res.Handler
 index [] db req = do
     articles <- DB.query db DB.find
     titles <- extract articles "name"
-    let cookie = [Req.extract_cookie req]
+    let cookie = "Hello" :: BS.ByteString
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where
     extract documents key = mapM read documents :: IO [BS.ByteString]
@@ -72,3 +72,5 @@ index [] db req = do
             return $ extract res 
           where
             extract (Bson.Binary a) = a
+    tmp = (Req.extract_cookie req)
+    cookies = M.lookup "SESSION_KEY" tmp
