@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "hangang";
+    src: url("/static/hangang.woff") format('woff');
+}
+
+body {
+    font-family: "hangang";
+    font-size: 0.8em;
+}

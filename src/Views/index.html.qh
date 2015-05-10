@@ -1,5 +1,7 @@
 html
   head
+    meta   {charset: "UTF-8"}
+    link   {href: "/static/q.css", rel: "stylesheet"}
     script {src: "/static/react-0.12.2.js"}
     script {src: "/static/JSXTransformer-0.12.2.js"}
   body
