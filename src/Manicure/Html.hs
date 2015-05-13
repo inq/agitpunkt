@@ -12,6 +12,7 @@ import qualified Text.Parsec.String             as PS
 import qualified Text.Parsec.Combinator         as PC
 import qualified Manicure.ByteString            as ByteString
 import qualified Data.List                      as DL
+import qualified Data.ByteString.UTF8           as UTF8
 import Control.Applicative ((*>), (<*), (<$>), (<*>))
 import Text.Parsec ((<|>))
 
@@ -43,7 +44,7 @@ instance TS.Lift Node where
               (\($(return $ TS.VarP $ TS.mkName val)) -> BS.concat nodes)  
               $(return $ TS.VarE $ TS.mkName vals) 
         |]
-    lift (Text a) = [| a |]
+    lift (Text a) = [| UTF8.fromString a |]
     lift (Value a) = [| ByteString.convert $(return $ TS.VarE $ TS.mkName a) |]
 
 instance TS.Lift Status where

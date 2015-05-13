@@ -4,13 +4,14 @@ module Manicure.ByteString where
 import qualified Data.ByteString.Char8          as BS
 import qualified Data.Map                       as M
 import qualified Network.HTTP.Types.URI         as URI
+import qualified Data.ByteString.UTF8           as UTF8
 
 class StringFamily a where
     convert :: a -> BS.ByteString
 instance StringFamily BS.ByteString where
     convert bs = bs
 instance StringFamily String where
-    convert str = BS.pack str
+    convert str = UTF8.fromString str
 
 type QueryString = M.Map BS.ByteString BS.ByteString
 
