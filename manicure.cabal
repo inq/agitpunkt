@@ -10,6 +10,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 test-suite spec
+  ghc-options:       -fllvm
   type: exitcode-stdio-1.0
   hs-source-dirs: test
   main-is: Spec.hs
@@ -18,7 +19,9 @@ test-suite spec
                      manicure,
                      hspec,
                      containers
+  default-language:  Haskell2010
 library
+  ghc-options:       -fllvm
   exposed-modules:   Manicure.Request,
                      Manicure.Response,
                      Manicure.Route,
@@ -29,6 +32,7 @@ library
                      Manicure.ByteString,
                      Manicure.Auth,
                      Manicure.Json,
+                     Manicure.Handler,
                      Models.Article,
                      Models.User
                      Handler.Main
@@ -51,28 +55,16 @@ library
                      hedis,
                      cryptohash,
                      curl
-  hs-source-dirs:    src
+  hs-source-dirs:    lib
+  default-language:  Haskell2010
 executable manicure
+  ghc-options:       -fllvm
   main-is:           main.hs
   build-depends:     manicure,
                      base,
                      network,
                      bytestring,
-                     utf8-string,
-                     http-types,
-                     unix,
-                     template-haskell,
-                     monad-control,
                      parsec,
-                     mtl,
-                     text,
-                     transformers,
-                     containers,
-                     time,
-                     mongoDB,
-                     bson,
-                     hedis,
-                     cryptohash,
-                     curl
+                     cryptohash
   hs-source-dirs:    src
   default-language:  Haskell2010

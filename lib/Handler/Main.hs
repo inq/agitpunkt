@@ -19,6 +19,7 @@ import qualified Data.Bson                      as Bson
 import qualified Network.Curl                   as Curl
 import qualified Data.Map                       as M
 import qualified Models.User                    as User
+import qualified Models.Article                 as Article
 import Control.Monad
 import Data.Map ((!))
 
@@ -60,8 +61,8 @@ new_article [] db req = do
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
-    articles <- DB.query db DB.find
-    titles <- extract articles "name"
+    articles <- DB.query db Article.find
+    titles <- extract articles "title"
     let cookie = "Hello" :: BS.ByteString
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where
