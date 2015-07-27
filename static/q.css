@@ -2,8 +2,30 @@
     font-family: "hangang";
     src: url("/static/hangang.woff") format('woff');
 }
+@font-face {
+    font-family: "jura";
+    src: url("/static/jura.woff") format('woff');
+}
 
 body {
     font-family: "hangang";
     font-size: 0.8em;
+    background-color: #ffffff;
+}
+
+.header {
+    font-family: "jura";
+    width: 800px;
+    margin: 0 auto;
+    font-size: 3em;
+}
+
+.content {
+    width: 800px;
+    margin: 0 auto;
+    background-color: #eeeeee;
+}
+
+.content .artifle {
+    
 }
