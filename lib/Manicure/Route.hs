@@ -63,7 +63,7 @@ match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
 match uri method tree =
     res $ reverse args
   where
-    res = map ! method :: Res.Handler
+    res = map ! method
     (Node _ map, args) = find_node uri_tokens tree []
     uri_tokens = filter (not . BS.null) $ BS.split '/' uri
     find_node (head : tail) (Node children _) args = 

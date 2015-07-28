@@ -39,10 +39,9 @@ redisGet (Connection r _ _) key = do
     (Right (Just res)) <- R.runRedis r $ R.get key
     return res
 
-run_redis :: Connection -> R.Redis (Either R.Reply R.Status) -> IO ()
-run_redis (Connection r _ _) redis = do
-    _ <- R.runRedis r redis
-    return () 
+run_redis :: Connection -> R.Redis a -> IO a
+-- ^ A wrapper for runRedis
+run_redis (Connection r _ _) redis = R.runRedis r redis
 
 query :: MonadIO m => Connection -> M.Action m a -> m a
 -- ^ Send the given query

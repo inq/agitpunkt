@@ -7,15 +7,13 @@ html
   body
     div { class: "header" }
       | WHITESKY.NET
+      = name
     div { class: "content" }
       div
         - foreach titles -> title
           p
             = title
       script {type: "text/jsx"}
-        | var temp = "
-        = cookie
-        | ";
         | var CommentBox = React.createClass({
         |   render: function() {
         |     return (

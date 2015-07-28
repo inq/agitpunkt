@@ -4,10 +4,12 @@ module Models.User where
 import qualified Manicure.Json                  as Json
 import qualified Data.ByteString.Char8          as BS
 import qualified Data.Time.Clock                as TC
-import qualified Database.MongoDB               as M
+import qualified Database.MongoDB               as Mongo
 import qualified Database.MongoDB.Query         as MQ
 import qualified Database.Redis                 as R
 import qualified Data.Bson                      as Bson
+import qualified Data.Map                       as M
+import Control.Monad (liftM)
 import Data.Map ((!))
 
 import Database.MongoDB ((=:))
@@ -29,10 +31,10 @@ from_json bs = User Nothing facebook_id email name Nothing
     Json.JSString email       = json ! "email"
     Json.JSString name        = json ! "name"
 
-upsert :: User -> M.Action IO ()
+upsert :: User -> Mongo.Action IO ()
 -- ^ Update or insert the User
 upsert (User _ facebook_id email name created_at) = do
-    M.upsert (MQ.Select ["facebook_id" =: Bson.Binary facebook_id] "users") [
+    Mongo.upsert (MQ.Select ["facebook_id" =: Bson.Binary facebook_id] "users") [
         "facebook_id" =: Bson.Binary facebook_id,
         "email"       =: Bson.Binary email,
         "name"        =: Bson.Binary name,
@@ -51,10 +53,23 @@ redis_hash key (User _ facebook_id email name created_at) = R.hmset key values
         ("created_at",  BS.pack $ show created_at)
       ]
 
-save :: User -> M.Action IO ()
+from_map :: M.Map BS.ByteString BS.ByteString -> User
+-- ^ Construct an user from the given map
+from_map map = 
+    User Nothing (map ! "facebook_id") (map ! "email") (map ! "name") Nothing
+
+redis_get :: BS.ByteString -> R.Redis (Maybe User)
+-- ^ Find a user by session key
+redis_get key = do
+    res <- R.hgetall key
+    return $ case res of 
+        Left  _    -> Nothing
+        Right list -> Just $ from_map (M.fromList list)
+
+save :: User -> Mongo.Action IO ()
 -- ^ Save the data into the DB
 save (User _id facebook_id email name (Just created_at)) = do
-    M.insert "users" [
+    Mongo.insert "users" [
         "facebook_id" =: Bson.Binary facebook_id,
         "email"       =: Bson.Binary email,
         "name"        =: Bson.Binary name,
