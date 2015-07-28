@@ -36,6 +36,7 @@ library
                      Models.Article,
                      Models.User
                      Handler.Main
+                     Handler.Exception
   build-depends:     base,
                      network,
                      bytestring,

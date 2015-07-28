@@ -20,6 +20,7 @@ import qualified Data.String                    as S
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Data.Map.Strict                as M
+import qualified Handler.Exception              as EP
 import Control.Applicative ((*>), (<*))
 import Data.Map.Strict ((!))
 
@@ -61,15 +62,18 @@ makeNode [] method action =
 match :: BS.ByteString -> Req.Method -> RouteTree -> Res.Action
 -- ^ Find a corresponding route from the given request URI
 match uri method tree =
-    res $ reverse args
+    case M.lookup method map of
+        Just res -> res $ reverse args
+        Nothing  -> EP.default404 []
   where
-    res = map ! method
     (Node _ map, args) = find_node uri_tokens tree []
     uri_tokens = filter (not . BS.null) $ BS.split '/' uri
     find_node (head : tail) (Node children _) args = 
         case M.lookup head children of
             Just a  -> find_node tail a args
-            Nothing -> find_node tail (children ! "#String") (head : args)
+            Nothing -> case M.lookup "#String" children of
+                Just a -> find_node tail a (head : args)
+                Nothing -> (Node M.empty M.empty, [])
     find_node [] node args = (node, args)
     
 parseFile :: FilePath -> TS.Q TS.Exp
