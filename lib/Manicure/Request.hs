@@ -22,6 +22,10 @@ import qualified Data.Map                       as M
 import qualified Network.HTTP.Types.URI         as URI
 import qualified Data.Either                    as E
 import qualified Manicure.ByteString            as ByteString
+import qualified Text.Parsec                    as P
+import qualified Text.Parsec.ByteString         as PB
+import qualified Text.Parsec.Combinator         as PC
+import Control.Applicative ((*>), (<*), (<$>), (<*>))
 
 data Request = Request {
   method    :: Method,
@@ -115,13 +119,13 @@ parseTail list =
     map split list 
   where
     split line = 
-        (head, tail)
-      where 
-        idx = case BS.elemIndex ':' line of
-            Just i -> i
-            Nothing -> 0
-        head = BS.take idx line
-        tail = BS.drop (idx + 1) line
+        res :: (BS.ByteString, BS.ByteString)
+      where
+        Right res = P.parse syntax "" line
+        syntax = do 
+            head <- P.spaces *> (P.many $ P.noneOf " :") <* P.spaces <* P.char ':'
+            tail <- P.spaces *> (P.many $ P.noneOf " \n") <* P.spaces
+            return (BS.pack head, BS.pack tail)
 
 splitLines :: BS.ByteString -> [BS.ByteString]
 -- ^ Split the lines from the HTTP header

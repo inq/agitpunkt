@@ -61,9 +61,10 @@ new_article [] db req = do
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
+    putStrLn $ show $ req
     articles <- DB.query db Article.find
     titles <- extract articles "title"
-    let cookie = "Hello" :: BS.ByteString
+    let cookie = tmp :: BS.ByteString
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where
     extract documents key = mapM read documents :: IO [BS.ByteString]
@@ -73,5 +74,5 @@ index [] db req = do
             return $ extract res 
           where
             extract (Bson.Binary a) = a
-    tmp = (Req.extract_cookie req)
-    cookies = M.lookup "SESSION_KEY" tmp
+    tmp = (Req.extract_cookie req) ! "SESSION_KEY"
+    

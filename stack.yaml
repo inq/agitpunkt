@@ -2,6 +2,9 @@ packages:
 - '.'
 resolver: ghc-7.8
 flags:
+  manicure:
+    executable-profiling: true
+    library-profiling: true
   text:
     integer-simple: false
   curl:
