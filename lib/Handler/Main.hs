@@ -61,22 +61,23 @@ new_article [] db req = do
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
-    -- putStrLn $ show $ req
-    articles <- DB.query db Article.find
-    titles <- extract articles "title"
+    putStrLn $ show $ req
+    temp <- DB.query db Article.find
+    articles <- (mapM read) temp
+    putStrLn $ show temp
     user <- userM
     let name = case user of
           Just (User.User _ _ _ name _) -> name
           Nothing -> "anonymous"
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where
-    extract documents key = mapM read documents :: IO [BS.ByteString]
+    read :: Bson.Document -> IO [BS.ByteString]
+    read document = do
+        title   <- Mongo.lookup "title" document
+        content <- Mongo.lookup "content" document          
+        return [extract title, extract content]
       where
-        read document = do
-            res <- Mongo.lookup key document
-            return $ extract res 
-          where
-            extract (Bson.Binary a) = a
+        extract (Bson.Binary a) = a
     userM = case M.lookup "SESSION_KEY" (Req.extract_cookie req) of
         Just key -> DB.run_redis db $ User.redis_get key
         Nothing  -> return Nothing

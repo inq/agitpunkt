@@ -6,13 +6,18 @@ html
     script { src: "/static/JSXTransformer-0.12.2.js" }
   body
     div { class: "header" }
-      | WHITESKY.NET
+      | inkyu.kr
       = name
     div { class: "content" }
       div
-        - foreach titles -> title
-          p
-            = title
+        - foreach articles -> title,content
+          div { class: "article" }
+            div { class: "label" }
+              span { class: "
+            div { class: "title" }
+              = title
+            div { class: "content" }
+              = content
       script {type: "text/jsx"}
         | var CommentBox = React.createClass({
         |   render: function() {

@@ -22,7 +22,7 @@ data Attr = Dash String [Attr]
 data Node = Tag String [Attr] [Node]
           | Text String
           | Value String
-          | Foreach String String [Node]
+          | Foreach String [String] [Node]
           deriving Show
 data Status = Child | Sibling | Parent
           deriving Show
@@ -38,12 +38,13 @@ instance TS.Lift Node where
         print (Attr name value : attrs) = 
             " " ++ name ++ "=" ++ value ++ print attrs
         print [] = ""
-    lift (Foreach vals val nodes) = [|
+    lift (Foreach vals vs nodes) = [|
           BS.concat $ 
             map
-              (\($(return $ TS.VarP $ TS.mkName val)) -> BS.concat nodes)  
+              (\($(return $ (TS.ListP $ map (TS.VarP . TS.mkName) vs))) -> BS.concat nodes)
               $(return $ TS.VarE $ TS.mkName vals) 
         |]
+       
     lift (Text a) = [| UTF8.fromString a |]
     lift (Value a) = [| ByteString.convert $(return $ TS.VarE $ TS.mkName a) |]
 
@@ -99,7 +100,7 @@ parseLine = do
             <*> (token ':' *> (P.many1 $ P.noneOf ",}"))
     map_node = Foreach
         <$> (P.string "- foreach " *> (P.many $ P.noneOf " ")) 
-        <*> (P.string " -> " *> (P.many $ P.noneOf "\n"))
+        <*> (P.string " -> " *> (P.sepBy (P.spaces *> P.many (P.noneOf " ,\n")) $ P.char ','))
         <*> return []
     value_node = Value <$> (P.string "= " *> (P.many $ P.noneOf "\n"))
     text_node = Text <$> (P.string "| " *> (P.many $ P.noneOf "\n"))
