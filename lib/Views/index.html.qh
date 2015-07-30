@@ -7,16 +7,25 @@ html
   body
     div { class: "header" }
       | inkyu.kr
-      = name
+      span
+        = name
     div { class: "content" }
       div
-        - foreach articles -> title,content
+        - foreach articles -> title,content,date,month,year,time
           div { class: "article" }
             div { class: "label" }
-              span { class: "
-            div { class: "title" }
-              = title
+              span { class: "date" }
+                = date
+              span { class: "month-year" }
+                span { class: "month" }
+                  = month
+                span { class: "year" }
+                  = year
+              span { class: "time" }
+                = time
             div { class: "content" }
+              div { class: "title" }
+                = title
               = content
       script {type: "text/jsx"}
         | var CommentBox = React.createClass({
