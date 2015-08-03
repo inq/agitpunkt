@@ -34,16 +34,22 @@ signin :: Res.Handler
 -- ^ Sign in page
 signin [] db req = response
   where
-    redirect_uri = "https://whitesky.net/signin"
+    redirect_uri = "https://inkyu.kr/signin"
     response = case M.lookup "code" $ Req.query_str req of
         Just code -> do 
+            BS.putStrLn $ Auth.access_token_url redirect_uri code
             query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.access_token_url redirect_uri code) []
-            let access_token = ((ByteString.split_and_decode '&' . BS.pack) query_str) ! "access_token"
-            query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url access_token) []
+            let access_token = M.lookup "access_token" ((ByteString.split_and_decode '&' . BS.pack) query_str) 
+            query_str <- case access_token of
+                Just token -> liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url token) []
+                Nothing -> return ""
+            putStrLn query_str
             let query = show $ User.from_json $ BS.pack query_str
             let user = User.from_json (BS.pack query_str)
             DB.query db (User.upsert user)
+            BS.putStrLn "HEHDD"
             session_key <- Session.generateKey
+            BS.putStrLn session_key
             DB.run_redis db $ User.redis_hash session_key user
             return $ Res.success $(Html.parseFile "Views/test.html.qh") [BS.concat ["SESSION_KEY=", session_key]]
         Nothing   -> do
@@ -63,13 +69,12 @@ new_article [] db req = do
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
-    putStrLn $ show $ req
     temp <- DB.query db Article.find
     articles <- (mapM read) temp
     putStrLn $ show temp
     user <- userM
     let name = case user of
-          Just (User.User _ _ _ name _) -> name
+          Just (User.User _ _ name _) -> name
           Nothing -> "anonymous"
     return $ Res.success $(Html.parseFile "Views/index.html.qh") []
   where

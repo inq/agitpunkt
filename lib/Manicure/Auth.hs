@@ -10,9 +10,17 @@ import Data.Map.Strict ((!))
 client_id     :: BS.ByteString
 client_secret :: BS.ByteString
 -- ^ Client ID & Client Secret Key
-(client_id, client_secret) = (config ! "client_id", config ! "client_secret")
+(client_id, client_secret, admin_id) = (
+      config ! "client_id", 
+      config ! "client_secret", 
+      config ! "admin_id")
   where
     config = $(Config.parseFile "config/facebook.cfg")
+
+is_admin_user :: BS.ByteString -> Bool
+-- ^ Check if the given facebook id is of admin
+is_admin_user user_id =
+    user_id == admin_id
 
 facebook_me_url :: BS.ByteString -> BS.ByteString
 -- ^ Get the user information
