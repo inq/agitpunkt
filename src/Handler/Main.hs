@@ -43,7 +43,6 @@ signin [] db req = response
             query_str <- case access_token of
                 Just token -> liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url token) []
                 Nothing -> return ""
-            putStrLn query_str
             let query = show $ User.from_json $ BS.pack query_str
             let user = User.from_json (BS.pack query_str)
             DB.query db (User.upsert user)

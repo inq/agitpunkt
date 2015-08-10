@@ -57,7 +57,7 @@ library
                      cryptohash,
                      curl,
                      old-locale
-  hs-source-dirs:    lib
+  hs-source-dirs:    src
   default-language:  Haskell2010
 executable manicure
   ghc-options:       -fllvm
@@ -68,6 +68,6 @@ executable manicure
                      bytestring,
                      parsec,
                      cryptohash
-  hs-source-dirs:    src
+  hs-source-dirs:    app
   default-language:  Haskell2010
 

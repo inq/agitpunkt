@@ -59,7 +59,7 @@ parseFile file_path = do
     s <- TS.qRunIO $ readFile path
     TQ.quoteExp parse s
   where
-    path = "lib/" ++ file_path
+    path = "src/" ++ file_path
 
 parse :: TQ.QuasiQuoter
 parse = TQ.QuasiQuoter {
