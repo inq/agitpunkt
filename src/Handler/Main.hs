@@ -3,6 +3,7 @@
 module Handler.Main where
 
 import qualified Data.ByteString.Char8          as BS
+import qualified Data.ByteString.Lazy.Char8     as BSL
 import qualified Manicure.Auth                  as Auth
 import qualified Manicure.Route                 as Route
 import qualified Manicure.Request               as Req
@@ -16,12 +17,13 @@ import qualified Manicure.Html                  as Html
 import qualified Models.Article                 as Article
 import qualified Data.Time.Clock                as C
 import qualified Data.Bson                      as Bson
-import qualified Network.Curl                   as Curl
+import qualified Network.Wreq                   as Wreq
 import qualified Data.Map                       as M
 import qualified Models.User                    as User
 import qualified Models.Article                 as Article
 import qualified Data.Time.Format               as TF
 import qualified System.Locale                  as L
+import Control.Lens ((^.))
 import Control.Monad
 import Data.Map ((!))
 
@@ -37,16 +39,15 @@ signin [] db req = response
     redirect_uri = "https://inkyu.kr/signin"
     response = case M.lookup "code" $ Req.query_str req of
         Just code -> do 
-            BS.putStrLn $ Auth.access_token_url redirect_uri code
-            query_str <- liftM snd $ Curl.curlGetString (BS.unpack $ Auth.access_token_url redirect_uri code) []
-            let access_token = M.lookup "access_token" ((ByteString.split_and_decode '&' . BS.pack) query_str) 
-            query_str <- case access_token of
-                Just token -> liftM snd $ Curl.curlGetString (BS.unpack $ Auth.facebook_me_url token) []
-                Nothing -> return ""
+            resp <- Wreq.get (BS.unpack $ Auth.access_token_url redirect_uri code)
+            let query_str = BSL.unpack (resp ^. Wreq.responseBody)
+            let access_token = M.lookup "access_token" ((ByteString.split_and_decode '&' . BS.pack) query_str)
+            resp <- case access_token of
+                Just token -> Wreq.get (BS.unpack $ Auth.facebook_me_url token)
+            let query_str = BSL.unpack (resp ^. Wreq.responseBody)
             let query = show $ User.from_json $ BS.pack query_str
             let user = User.from_json (BS.pack query_str)
             DB.query db (User.upsert user)
-            BS.putStrLn "HEHDD"
             session_key <- Session.generateKey
             BS.putStrLn session_key
             DB.run_redis db $ User.redis_hash session_key user

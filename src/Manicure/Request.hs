@@ -13,19 +13,19 @@ module Manicure.Request (
   query_str
 ) where
 
-import qualified Language.Haskell.TH.Syntax     as TS
-import qualified Data.ByteString.Char8          as BS
-import qualified Manicure.Http                  as Http
-import qualified Network.Socket                 as NS
-import qualified Data.Char                      as C
-import qualified Data.Map                       as M
-import qualified Network.HTTP.Types.URI         as URI
-import qualified Data.Either                    as E
-import qualified Manicure.ByteString            as ByteString
-import qualified Text.Parsec                    as P
-import qualified Text.Parsec.ByteString         as PB
-import qualified Text.Parsec.Combinator         as PC
-import Control.Applicative ((*>), (<*), (<$>), (<*>))
+import qualified Language.Haskell.TH.Syntax       as TS
+import qualified Data.ByteString.Char8            as BS
+import qualified Manicure.Http                    as Http
+import qualified Network.Socket                   as NS
+import qualified Data.Char                        as C
+import qualified Data.Map                         as M
+import qualified Network.HTTP.Types.URI           as URI
+import qualified Data.Either                      as E
+import qualified Manicure.ByteString              as ByteString
+import qualified Data.Attoparsec.ByteString       as AB
+import qualified Data.Attoparsec.ByteString.Char8 as AC
+import Data.Word (Word8)
+import Control.Applicative ((*>), (<*), (<$>), (<*>), many)
 
 data Request = Request {
   method    :: Method,
@@ -42,12 +42,12 @@ data Method = GET | POST | PUT | DELETE | PATCH
   deriving (Show, Eq, Ord)
 
 instance TS.Lift Method where
-    lift GET     = [| GET |]
-    lift POST    = [| POST |]
-    lift PUT     = [| PUT |]
-    lift DELETE  = [| DELETE |]
-    lift PATCH   = [| PATCH |]
-    lift TRACE   = [| TRACE |]
+    lift GET     = [| GET     |]
+    lift POST    = [| POST    |]
+    lift PUT     = [| PUT     |]
+    lift DELETE  = [| DELETE  |]
+    lift PATCH   = [| PATCH   |]
+    lift TRACE   = [| TRACE   |]
     lift OPTIONS = [| OPTIONS |]
     lift CONNECT = [| CONNECT |]
 
@@ -71,11 +71,29 @@ extract_cookie req =
 parse :: BS.ByteString -> NS.Socket -> Request
 -- ^ Read and parse the data from socket to make the Request data
 parse ipt socket = 
-    parseHead head (parseTail tail) post socket
+    parseHead head res post socket
   where 
-    lines = splitLines ipt
-    post  = ByteString.split_and_decode '&' $ last lines
-    head : tail = init lines
+    post  = ByteString.split_and_decode '&' pdata
+    (head, res, pdata) = case AC.parseOnly request ipt of
+        Right res -> res
+        Left  str -> error str
+    isToken w = w <= 127 && AB.notInClass "\0-\31()<>@,;:\\\"/[]?={} \t" w
+    request = (,,)
+        <$> (AB.takeTill AC.isEndOfLine <* AC.endOfLine)
+        <*> many header 
+        <*> AC.takeByteString
+    header = (,)
+        <$> (AB.takeWhile isToken <* AC.char8 ':' <* AB.skipWhile AC.isHorizontalSpace)
+        <*> (AB.takeTill AC.isEndOfLine <* AC.endOfLine)
+    
+splitLines :: BS.ByteString -> [BS.ByteString]
+-- ^ Split the lines from the HTTP header
+splitLines str =
+    case BS.elemIndex '\r' str of
+        Just i | i > 2 -> BS.take i str : (splitLines $ BS.drop (i + 2) str)
+        Just i         -> [BS.drop 2 str]
+        Nothing        -> [""]
+
         
 parseHead :: BS.ByteString -> RequestHeaders -> ByteString.QueryString -> NS.Socket -> Request
 -- ^ Parse the first line of the HTTP header
@@ -112,25 +130,3 @@ parseHead str headers query socket =
     version = Http.Version 
         (C.digitToInt $ BS.index str (length - 3)) 
         (C.digitToInt $ BS.index str (length - 1))
-
-parseTail :: [BS.ByteString] -> RequestHeaders
--- ^ Parse the rest part of the HTTP header
-parseTail list =
-    map split list 
-  where
-    split line = 
-        res :: (BS.ByteString, BS.ByteString)
-      where
-        Right res = P.parse syntax "" line
-        syntax = do 
-            head <- P.spaces *> (P.many $ P.noneOf " :") <* P.spaces <* P.char ':'
-            tail <- P.spaces *> (P.many $ P.noneOf " \n") <* P.spaces
-            return (BS.pack head, BS.pack tail)
-
-splitLines :: BS.ByteString -> [BS.ByteString]
--- ^ Split the lines from the HTTP header
-splitLines str =
-    case BS.elemIndex '\r' str of
-        Just i | i > 2 -> BS.take i str : (splitLines $ BS.drop (i + 2) str)
-        Just i         -> [BS.drop 2 str]
-        Nothing        -> [""]

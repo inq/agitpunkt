@@ -7,6 +7,10 @@ import qualified Data.ByteString.Char8          as BS
 import qualified Manicure.Config                as Config
 import Data.Map.Strict ((!))
 
+
+signin :: BS.ByteString
+
+
 client_id     :: BS.ByteString
 client_secret :: BS.ByteString
 -- ^ Client ID & Client Secret Key
@@ -25,7 +29,7 @@ is_admin_user user_id =
 facebook_me_url :: BS.ByteString -> BS.ByteString
 -- ^ Get the user information
 facebook_me_url access_token = BS.concat [
-    "https://graph.facebook.com/v2.2/me?locale=ko_KR&access_token=",
+    "https://graph.facebook.com/v2.4/me?locale=ko_KR&access_token=",
     access_token
   ]
 
