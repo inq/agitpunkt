@@ -1,6 +1,7 @@
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell      #-}
+{-# LANGUAGE QuasiQuotes          #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE FlexibleContexts     #-}
 module Manicure.Auth where
 
 import qualified Data.ByteString.Char8          as BS
@@ -8,7 +9,7 @@ import qualified Manicure.Config                as Config
 import Data.Map.Strict ((!))
 
 
-signin :: BS.ByteString
+--signin :: BS.ByteString
 
 
 client_id     :: BS.ByteString

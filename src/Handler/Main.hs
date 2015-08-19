@@ -93,10 +93,10 @@ index [] db req = do
           ]
       where
         extract (Bson.Bin (Bson.Binary a)) = a
-        extract_date (Bson.UTC a) = BS.pack $ TF.formatTime L.defaultTimeLocale "%d" a
-        extract_month (Bson.UTC a) = BS.pack $ TF.formatTime L.defaultTimeLocale "%b" a
-        extract_year (Bson.UTC a) = BS.pack $ TF.formatTime L.defaultTimeLocale "%Y" a
-        extract_time (Bson.UTC a) = BS.pack $ TF.formatTime L.defaultTimeLocale "%H:%M:%S" a
+        extract_date (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%d" a
+        extract_month (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%b" a
+        extract_year (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%Y" a
+        extract_time (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%H:%M:%S" a
 
     userM = case M.lookup "SESSION_KEY" (Req.extract_cookie req) of
         Just key -> DB.run_redis db $ User.redis_get key

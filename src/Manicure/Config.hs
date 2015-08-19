@@ -1,6 +1,7 @@
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell      #-}
+{-# LANGUAGE QuasiQuotes          #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE FlexibleContexts     #-}
 module Manicure.Config where
 
 import qualified Manicure.Route                 as Route

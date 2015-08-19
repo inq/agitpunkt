@@ -2,6 +2,7 @@
 {-# LANGUAGE QuasiQuotes          #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE OverloadedStrings    #-}
 module Manicure.Route (
   Routes,

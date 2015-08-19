@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE EmptyCase         #-}
+{-# LANGUAGE FlexibleContexts  #-}
 module Manicure.Json where
 
 import qualified Data.ByteString.Char8          as BS
