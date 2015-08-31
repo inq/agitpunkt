@@ -21,12 +21,11 @@ spec = do
     describe "Manicure.RequestSpec" $ do
         context "Simple Text" $ do
             it "parses simple header" $ do
- 
                 BS.putStrLn head
               where
-                head = case AC.parse request "HTTP 1.1 dsajds\r\nHELLO\r\n" of
-                   AC.Done _ res  -> res
-                   AC.Fail i a b -> error b
+                head = case AC.parseOnly request "GET / HTTP/1.1\r\nHello: hihi\r\n\r\n" of
+                   Right res  -> res
+                   Left  str -> error str
                 isToken w = w <= 127 && AB.notInClass "\0-\31()<>@,;:\\\"/[]?={} \t" w
                 request = AC.takeByteString
 

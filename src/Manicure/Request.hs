@@ -22,8 +22,7 @@ import qualified Data.Map                         as M
 import qualified Network.HTTP.Types.URI           as URI
 import qualified Data.Either                      as E
 import qualified Manicure.ByteString              as ByteString
-import qualified Data.Attoparsec.ByteString       as AB
-import qualified Data.Attoparsec.ByteString.Char8 as AC
+import qualified Manicure.Parser                  as P
 import Data.Word (Word8)
 import Control.Applicative ((*>), (<*), (<$>), (<*>), many)
 
@@ -74,17 +73,16 @@ parse ipt socket =
     parseHead head res post socket
   where 
     post  = ByteString.split_and_decode '&' pdata
-    (head, res, pdata) = case AC.parseOnly request ipt of
+    (head, res, pdata) = case P.parseOnly request ipt of
         Right res -> res
         Left  str -> error str
-    isToken w = w <= 127 && AB.notInClass "\0-\31()<>@,;:\\\"/[]?={} \t" w
     request = (,,)
-        <$> (AB.takeTill AC.isEndOfLine <* AC.endOfLine)
+        <$> (P.takeTill P.isEndOfLine <* P.endOfLine)
         <*> many header 
-        <*> AC.takeByteString
+        <*> P.takeByteString
     header = (,)
-        <$> (AB.takeWhile isToken <* AC.char8 ':' <* AB.skipWhile AC.isHorizontalSpace)
-        <*> (AB.takeTill AC.isEndOfLine <* AC.endOfLine)
+        <$> (P.takeWhile P.isToken <* P.char ':' <* P.skipWhile P.isHorizontalSpace)
+        <*> (P.takeTill P.isEndOfLine <* P.endOfLine)
     
 splitLines :: BS.ByteString -> [BS.ByteString]
 -- ^ Split the lines from the HTTP header

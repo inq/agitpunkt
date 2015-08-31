@@ -5,11 +5,12 @@
 module Manicure.Config where
 
 import qualified Manicure.Route                 as Route
-import qualified Manicure.Response              as Res
+import qualified Manicure.Response              as Resi
+import qualified Manicure.Parser                as P
 import qualified Data.ByteString.Char8          as BS
 import qualified Language.Haskell.TH.Syntax     as TS
 import qualified Language.Haskell.TH.Quote      as TQ
-import qualified Text.Parsec                    as P
+
 import qualified Data.Map.Strict                as M
 import Control.Applicative ((*>), (<*))
 import Control.Monad (liftM2)
@@ -35,8 +36,7 @@ parseFile file_path = do
         TQ.quoteDec = undefined
       }
     quote_exp str = do
-        filename <- fmap TS.loc_filename TS.location
-        case P.parse parseData filename str of
+        case P.parseOnly parseData (BS.pack str) of
             Left err -> undefined
             Right tag -> [| tag |]
     parseData = do
@@ -44,8 +44,8 @@ parseFile file_path = do
         return $ Config lines
     parseLine = do
         (P.many . P.char) '\n'
-        key <- (P.many1 . P.satisfy) (liftM2 (&&) (/=' ') (/='=')) <* (P.many . P.char) ' '
+        key <- P.noneOf1 " =" <* (P.many . P.char) ' '
         P.char '='
-        value <- (P.many . P.char) ' ' *> (P.many1 . P.satisfy) (/='\n')
+        value <- (P.many . P.char) ' ' *> P.noneOf1 "\n"
         (P.many . P.char) '\n'
-        return (key, value)
+        return (BS.unpack key, BS.unpack value)

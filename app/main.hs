@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-import qualified Text.Parsec                    as P
 import qualified Network                        as N
 import qualified Network.Socket                 as NS
 import qualified Network.Socket.ByteString      as NSB 

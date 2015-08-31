@@ -4,24 +4,22 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE OverloadedStrings    #-}
-module Manicure.Route (
-  Routes,
-  parse,
-  parseFile,
-  match,
-) where
+module Manicure.Route
+    ( Routes
+    , parse
+    , parseFile
+    , match
+    ) where
 
-import qualified Data.ByteString.Char8          as BS
-import qualified Language.Haskell.TH.Quote      as TQ
-import qualified Language.Haskell.TH.Syntax     as TS
-import qualified Text.Parsec                    as P
-import qualified Text.Parsec.String             as PS
-import qualified Text.Parsec.Combinator         as PC
-import qualified Data.String                    as S
-import qualified Manicure.Request               as Req
-import qualified Manicure.Response              as Res
-import qualified Data.Map.Strict                as M
-import qualified Handler.Exception              as EP
+import qualified Data.ByteString.Char8            as BS
+import qualified Language.Haskell.TH.Quote        as TQ
+import qualified Language.Haskell.TH.Syntax       as TS
+import qualified Data.String                      as S
+import qualified Manicure.Request                 as Req
+import qualified Manicure.Response                as Res
+import qualified Data.Map.Strict                  as M
+import qualified Handler.Exception                as EP
+import qualified Manicure.Parser                  as P
 import Control.Applicative ((*>), (<*))
 import Data.Map.Strict ((!))
 
@@ -86,32 +84,31 @@ parseFile file_path = do
 
 parse :: TQ.QuasiQuoter
 -- ^ A QuasiQuoter for parsing the route definition
-parse = TQ.QuasiQuoter {
-        TQ.quoteExp = quote_exp,
-        TQ.quotePat = undefined,
-        TQ.quoteType = undefined,
-        TQ.quoteDec = undefined
+parse = TQ.QuasiQuoter 
+    { TQ.quoteExp = quote_exp
+    , TQ.quotePat = undefined
+    , TQ.quoteType = undefined
+    , TQ.quoteDec = undefined
     }
   where
     quote_exp str = do
-        filename <- fmap TS.loc_filename TS.location
-        case P.parse routesNode filename str of
+        case P.parseOnly routesNode (BS.pack str) of
             Left err -> undefined
             Right tag -> [| tag |]
 
-routeNode :: PS.Parser Route
+routeNode :: P.Parser Route
 -- ^ The subparser
 routeNode = do
     P.many $ P.char '\n'
-    uri <- PC.many1 $ P.satisfy (/=' ')
+    uri <- P.noneOf1 " "
     P.many1 $ P.char ' '
-    method <- PC.many1 $ P.satisfy (/=' ')
-    P.many1 $ P.char ' '
-    action <- PC.many1 $ P.satisfy (/='\n')
+    method <- P.noneOf1 " "
+    P.many $ P.char ' '
+    action <- P.noneOf1 "\n"
     P.many $ P.char '\n'
-    return $ Route uri (Req.strToMethod method) action
+    return $ Route (BS.unpack uri) (Req.strToMethod $ BS.unpack method) $ BS.unpack action
 
-routesNode :: PS.Parser Routes
+routesNode :: P.Parser Routes
 -- ^ The main parser
 routesNode = do
     lines <- P.many routeNode

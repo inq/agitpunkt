@@ -34,6 +34,7 @@ library
                      Manicure.Auth,
                      Manicure.Json,
                      Manicure.Handler,
+                     Manicure.Parser,
                      Models.Article,
                      Models.User
                      Handler.Main
@@ -46,7 +47,6 @@ library
                      unix,
                      template-haskell,
                      monad-control,
-                     parsec,
                      attoparsec,
                      mtl,
                      text,
@@ -69,7 +69,6 @@ executable manicure
                      base,
                      network,
                      bytestring,
-                     parsec,
                      cryptohash
   hs-source-dirs:    app
   default-language:  Haskell2010
