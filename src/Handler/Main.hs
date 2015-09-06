@@ -32,29 +32,6 @@ article :: Res.Handler
 article [category, article, index] db req = do
     return $ Res.success $(Html.parseFile "Views/article.html.qh") []
 
-signin :: Res.Handler
--- ^ Sign in page
-signin [] db req = response
-  where
-    redirect_uri = "https://inkyu.kr/signin"
-    response = case M.lookup "code" $ Req.query_str req of
-        Just code -> do 
-            resp <- Wreq.get (BS.unpack $ Auth.access_token_url redirect_uri code)
-            let query_str = BSL.unpack (resp ^. Wreq.responseBody)
-            let access_token = M.lookup "access_token" ((ByteString.split_and_decode '&' . BS.pack) query_str)
-            resp <- case access_token of
-                Just token -> Wreq.get (BS.unpack $ Auth.facebook_me_url token)
-            let query_str = BSL.unpack (resp ^. Wreq.responseBody)
-            let query = show $ User.from_json $ BS.pack query_str
-            let user = User.from_json (BS.pack query_str)
-            DB.query db (User.upsert user)
-            session_key <- Session.generateKey
-            BS.putStrLn session_key
-            DB.run_redis db $ User.redis_hash session_key user
-            return $ Res.success $(Html.parseFile "Views/test.html.qh") [BS.concat ["SESSION_KEY=", session_key]]
-        Nothing   -> do
-            return $ Res.redirect $ Auth.oauth_url redirect_uri
-
 new_article :: Res.Handler
 -- ^ Create a new article from the given POST data
 new_article [] db req = do

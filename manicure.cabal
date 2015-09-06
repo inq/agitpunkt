@@ -36,8 +36,9 @@ library
                      Manicure.Handler,
                      Manicure.Parser,
                      Models.Article,
-                     Models.User
-                     Handler.Main
+                     Models.User,
+                     Handler.Main,
+                     Handler.Auth,
                      Handler.Exception
   build-depends:     base,
                      network,
