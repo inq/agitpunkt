@@ -1,7 +1,0 @@
-html
-  body
-    div
-      p
-        = title
-      p
-        = content

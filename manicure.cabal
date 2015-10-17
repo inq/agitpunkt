@@ -39,6 +39,7 @@ library
                      Models.User,
                      Handler.Main,
                      Handler.Auth,
+                     Handler.Article,
                      Handler.Exception
   build-depends:     base,
                      network,

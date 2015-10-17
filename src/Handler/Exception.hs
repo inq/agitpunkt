@@ -10,4 +10,4 @@ import Data.Map ((!))
 default404 :: Res.Handler
 -- ^ 404 page
 default404 [] db req = do
-    return $ Res.success $(Html.parseFile "Views/404.html.qh") []
+    return $ Res.success $(Html.parseFile "404.html.qh") []

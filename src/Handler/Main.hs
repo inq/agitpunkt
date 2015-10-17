@@ -2,46 +2,17 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Main where
 
+import qualified Data.Bson                      as Bson
+import qualified Database.MongoDB               as Mongo
 import qualified Data.ByteString.Char8          as BS
-import qualified Data.ByteString.Lazy.Char8     as BSL
-import qualified Manicure.Auth                  as Auth
-import qualified Manicure.Route                 as Route
+import qualified Data.Time.Format               as TF
+import qualified Data.Map                       as M
 import qualified Manicure.Request               as Req
 import qualified Manicure.Response              as Res
 import qualified Manicure.Database              as DB
-import qualified Manicure.Session               as Session
-import qualified Database.MongoDB               as Mongo
-import qualified Manicure.ByteString            as ByteString
-import qualified Data.Text                      as T
-import qualified Manicure.Html                  as Html
 import qualified Models.Article                 as Article
-import qualified Data.Time.Clock                as C
-import qualified Data.Bson                      as Bson
-import qualified Network.Wreq                   as Wreq
-import qualified Data.Map                       as M
 import qualified Models.User                    as User
-import qualified Models.Article                 as Article
-import qualified Data.Time.Format               as TF
-import qualified System.Locale                  as L
-import Control.Lens ((^.))
-import Control.Monad
-import Data.Map ((!))
-
-article :: Res.Handler
--- ^ Test parsing URI parameters
-article [category, article, index] db req = do
-    return $ Res.success $(Html.parseFile "Views/article.html.qh") []
-
-new_article :: Res.Handler
--- ^ Create a new article from the given POST data
-new_article [] db req = do
-    time <- C.getCurrentTime
-    DB.query db (Article.save $ Article.Article Nothing title content time)
-    return $ Res.success $(Html.parseFile "Views/new_article.html.qh") ["HELLO=WORLD"]
-  where
-    title   = post ! "title"
-    content = post ! "content"
-    post    = Req.post req
+import qualified Manicure.Html                  as Html
 
 index :: Res.Handler
 -- ^ Render the main page
@@ -53,7 +24,7 @@ index [] db req = do
     let name = case user of
           Just (User.User _ _ name _) -> name
           Nothing -> "anonymous"
-    return $ Res.success $(Html.parseFile "Views/index.html.qh") []
+    return $ Res.success $(Html.parseFile "main/index.html.qh") []
   where
     read :: Bson.Document -> IO [BS.ByteString]
     read document = do
