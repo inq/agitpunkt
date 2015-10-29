@@ -35,6 +35,7 @@ library
                      Manicure.Json,
                      Manicure.Handler,
                      Manicure.Parser,
+                     Manicure.Markdown,
                      Models.Article,
                      Models.User,
                      Handler.Main,
