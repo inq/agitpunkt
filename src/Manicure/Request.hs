@@ -1,17 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes     #-}
-module Manicure.Request (
-  Request,
-  Method,
-  strToMethod,
-  parse,
-  method,
-  uri,
-  post,
-  extract_cookie,
-  query_str
-) where
+module Manicure.Request where
 
 import qualified Language.Haskell.TH.Syntax       as TS
 import qualified Data.ByteString.Char8            as BS
@@ -32,8 +22,8 @@ data Request = Request {
   uri       :: BS.ByteString,
   headers   :: RequestHeaders,
   post      :: ByteString.QueryString,
-  query_str :: ByteString.QueryString,
-  request_socket :: NS.Socket
+  queryStr  :: ByteString.QueryString,
+  requestSocket :: NS.Socket
 } deriving (Show)
 
 data Method = GET | POST | PUT | DELETE | PATCH
@@ -58,21 +48,21 @@ strToMethod "POST" = POST
 type RequestHeaders = [Header]
 type Header = (BS.ByteString, BS.ByteString)
 
-extract_cookie :: Request -> M.Map BS.ByteString BS.ByteString
+extractCookie :: Request -> M.Map BS.ByteString BS.ByteString
 -- ^ Extract cookie from the request header
-extract_cookie req = 
-    find_cookie $ headers req
+extractCookie req = 
+    findCookie $ headers req
   where
-    find_cookie (("Cookie", context) : tail) = ByteString.split_and_decode ';' context
-    find_cookie (head : tail)                = find_cookie tail
-    find_cookie []                           = M.empty
+    findCookie (("Cookie", context) : tail) = ByteString.splitAndDecode ';' context
+    findCookie (head : tail)                = findCookie tail
+    findCookie []                           = M.empty
 
 parse :: BS.ByteString -> NS.Socket -> Request
 -- ^ Read and parse the data from socket to make the Request data
 parse ipt socket = 
     parseHead head res post socket
   where 
-    post  = ByteString.split_and_decode '&' pdata
+    post  = ByteString.splitAndDecode '&' pdata
     (head, res, pdata) = case P.parseOnly request ipt of
         Right res -> res
         Left  str -> error str
@@ -96,7 +86,7 @@ splitLines str =
 parseHead :: BS.ByteString -> RequestHeaders -> ByteString.QueryString -> NS.Socket -> Request
 -- ^ Parse the first line of the HTTP header
 parseHead str headers query socket =
-    Request method version uri headers query query_string socket
+    Request method version uri headers query queryString socket
   where
     method = case BS.index str 0 of
         'G' -> GET
@@ -110,7 +100,7 @@ parseHead str headers query socket =
             'E' -> HEAD
             _   -> TRACE
     length = BS.length str
-    uri_long = BS.drop (offset method) $ BS.take (length - 9) str
+    uriLong = BS.drop (offset method) $ BS.take (length - 9) str
       where
         offset :: Method -> Int
         offset GET     = 4
@@ -120,11 +110,11 @@ parseHead str headers query socket =
         offset OPTIONS = 7
         offset CONNECT = 7
         offset _       = 6
-    (uri, query_string_raw) = BS.break (== '?') uri_long
-    query_string_tail | BS.null query_string_raw        = ""
-                      | BS.head query_string_raw == '?' = BS.tail query_string_raw
-                      | otherwise                       = ""
-    query_string = ByteString.split_and_decode '&' query_string_tail
+    (uri, queryStringRaw) = BS.break (== '?') uriLong
+    queryStringTail | BS.null queryStringRaw        = ""
+                    | BS.head queryStringRaw == '?' = BS.tail queryStringRaw
+                    | otherwise                     = ""
+    queryString = ByteString.splitAndDecode '&' queryStringTail
     version = Http.Version 
         (C.digitToInt $ BS.index str (length - 3)) 
         (C.digitToInt $ BS.index str (length - 1))

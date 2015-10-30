@@ -13,7 +13,7 @@ type Action = DB.Connection -> Req.Request -> IO Response
 
 data Response = Response {
   version :: Http.Version,
-  status_code :: Int,
+  statusCode :: Int,
   cookies :: [BS.ByteString],
   content :: BS.ByteString
 } deriving Show
@@ -28,14 +28,14 @@ render :: Response -> BS.ByteString
 render (Response version 200 cookies content) =
     BS.concat (
       ["HTTP/1.0 200 OK\r\n"] ++ 
-      map cookie_to_string cookies ++
+      map cookieToString cookies ++
       [
         "Content-Length: ", BS.pack $ show $ BS.length content,
         "\r\n\r\n", 
         content
       ])
   where
-    cookie_to_string cookie = BS.concat ["Set-Cookie: ", cookie, "; path=/\r\n"]
+    cookieToString cookie = BS.concat ["Set-Cookie: ", cookie, "; path=/\r\n"]
 render (Response version 303 cookies url) =
     BS.concat (
       ["HTTP/1.0 303 See Other\r\n",

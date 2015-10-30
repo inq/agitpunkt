@@ -53,52 +53,52 @@ instance TS.Lift Status where
     lift Parent  = [| Parent |]
 
 parseFile :: FilePath -> TS.Q TS.Exp
-parseFile file_path = do
+parseFile filePath = do
     TS.qAddDependentFile path
     s <- TS.qRunIO $ readFile path
     TQ.quoteExp parse s
   where
-    path = "views/" ++ file_path
+    path = "views/" ++ filePath
 
 parse :: TQ.QuasiQuoter
 parse = TQ.QuasiQuoter {
-        TQ.quoteExp = quote_exp,
+        TQ.quoteExp = quoteExp,
         TQ.quotePat = undefined,
         TQ.quoteType = undefined,
         TQ.quoteDec = undefined
     }
   where
-    quote_exp str = do
+    quoteExp str = do
         case P.parseOnly parseNode (BS.pack str) of
             Left err -> undefined
             Right tag -> [| tag |]
 
 parseLine :: P.Parser (Int, Node)
 parseLine = do
-    next_indent <- parseIndent
-    tag <- value_node <|> text_node <|> map_node <|> tag_node
+    nextIndent <- parseIndent
+    tag <- valueNode <|> textNode <|> mapNode <|> tagNode
     P.char '\n'
-    return (next_indent, tag)
+    return (nextIndent, tag)
   where
-    status indent next_indent
-        | indent > next_indent = Child
-        | indent < next_indent = Parent
+    status indent nextIndent
+        | indent > nextIndent = Child
+        | indent < nextIndent = Parent
         | otherwise = Sibling
-    tag_node = Tag
+    tagNode = Tag
         <$> liftM BS.unpack (P.noneOf " \n")
-        <*> (P.try parse_args <|> return [])
+        <*> (P.try parseArgs <|> return [])
         <*> return []
       where
-        parse_args = P.token '{' *> (P.sepBy parse_arg $ P.token ',') <* P.char '}'
-        parse_arg = Attr
+        parseArgs = P.token '{' *> (P.sepBy parseArg $ P.token ',') <* P.char '}'
+        parseArg = Attr
             <$> liftM BS.unpack (P.noneOf " :")
             <*> liftM BS.unpack (P.token ':' *> P.noneOf1 ",}")
-    map_node = Foreach
+    mapNode = Foreach
         <$> liftM BS.unpack (P.string "- foreach " *> P.noneOf " ")
         <*> liftM (map BS.unpack) (P.string " -> " *> (P.sepBy (P.spaces *> P.noneOf " ,\n") $ P.char ','))
         <*> return []
-    value_node = Value <$> liftM BS.unpack (P.string "= " *> P.noneOf "\n")
-    text_node = Text <$> liftM BS.unpack (P.string "| " *> P.noneOf "\n")
+    valueNode = Value <$> liftM BS.unpack (P.string "= " *> P.noneOf "\n")
+    textNode = Text <$> liftM BS.unpack (P.string "| " *> P.noneOf "\n")
 
 parseIndent :: P.Parser Int
 parseIndent = fmap sum $ P.many (

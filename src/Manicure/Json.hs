@@ -23,17 +23,17 @@ data Json = JSString  BS.ByteString
 
 parse :: BS.ByteString -> Json
 -- ^ Parse the given bytestring
-parse str = case AC.parseOnly parse_json str of
+parse str = case AC.parseOnly parseJson str of
     Right val -> val
     Left err -> undefined
 
-parse_json :: AB.Parser Json
+parseJson :: AB.Parser Json
 -- ^ The actual parser
-parse_json = parse_object <|> parse_array <|> parse_string <|> parse_boolean <|> parse_int
+parseJson = parseObject <|> parseArray <|> parseString <|> parseBoolean <|> parseInt
   where
-    parse_string = liftM (JSString . UTF8.fromString) $ op '"' *> AC.manyTill any_char (AC.char8 '"')
+    parseString = liftM (JSString . UTF8.fromString) $ op '"' *> AC.manyTill anyChar (AC.char8 '"')
       where
-        escape_map = M.fromList [
+        escapeMap = M.fromList [
             ('"',  '"'),
             ('\\', '\\'),
             ('/',  '/'),
@@ -46,11 +46,11 @@ parse_json = parse_object <|> parse_array <|> parse_string <|> parse_boolean <|>
         isHexDigit w = (w >= '0' && w <= '9') ||
                        (w >= 'A' && w <= 'F') ||
                        (w >= 'a' && w <= 'f')
-        any_char = escaped <|> AC.anyChar
+        anyChar = escaped <|> AC.anyChar
         escaped = do
             AC.char8 '\\'
             c <- AC.anyChar
-            case M.lookup c escape_map of
+            case M.lookup c escapeMap of
                 Just ch -> return ch
                 Nothing -> if c == 'u'
                     then do 
@@ -61,18 +61,18 @@ parse_json = parse_object <|> parse_array <|> parse_string <|> parse_boolean <|>
                     else fail "broken escape character"
         
     spaces = AB.skipWhile AC.isHorizontalSpace
-    parse_array = liftM JSArray $ op '[' *> AC.sepBy (spaces *> parse_json <* spaces) (AC.char8 ',') <* cl ']'
-    parse_object = liftM (JSObject . M.fromList) $ op '{' *> AC.sepBy pair (AC.char8 ',') <* cl '}'
+    parseArray = liftM JSArray $ op '[' *> AC.sepBy (spaces *> parseJson <* spaces) (AC.char8 ',') <* cl ']'
+    parseObject = liftM (JSObject . M.fromList) $ op '{' *> AC.sepBy pair (AC.char8 ',') <* cl '}'
       where
         pair = do
-            key <- spaces *> parse_string <* spaces <* AC.char8 ':'
-            value <- spaces *> parse_json <* spaces 
-            return (raw_string key, value)
-        raw_string (JSString x) = x
-    parse_boolean = liftM JSBoolean (parse_true <|> parse_false)
+            key <- spaces *> parseString <* spaces <* AC.char8 ':'
+            value <- spaces *> parseJson <* spaces 
+            return (rawString key, value)
+        rawString (JSString x) = x
+    parseBoolean = liftM JSBoolean (parseTrue <|> parseFalse)
       where
-        parse_true = do AC.try (spaces *> AC.string "true" *> spaces); return True
-        parse_false = do AC.try (spaces *> AC.string "false" *> spaces); return False
-    parse_int = liftM (JSInt . read) $ AC.try (AC.many1 AC.digit)
+        parseTrue = do AC.try (spaces *> AC.string "true" *> spaces); return True
+        parseFalse = do AC.try (spaces *> AC.string "false" *> spaces); return False
+    parseInt = liftM (JSInt . read) $ AC.try (AC.many1 AC.digit)
     op c = AC.try (spaces *> AC.char8 c)
     cl c = AC.char c <* spaces

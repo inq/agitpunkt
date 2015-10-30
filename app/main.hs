@@ -20,25 +20,25 @@ main = N.withSocketsDo $ do
     key <- Session.generateKey
     putStrLn (BS.unpack key)
     db <- DB.connect "test"
-    socket_fd <- NS.socket NS.AF_UNIX NS.Stream 0
-    NS.bind socket_fd $ NS.SockAddrUnix "manicure.sock"
-    NS.listen socket_fd 10
-    accept_socket socket_fd db
+    socketFd <- NS.socket NS.AF_UNIX NS.Stream 0
+    NS.bind socketFd $ NS.SockAddrUnix "manicure.sock"
+    NS.listen socketFd 10
+    acceptSocket socketFd db
 
-accept_socket :: NS.Socket -> DB.Connection -> IO ()
+acceptSocket :: NS.Socket -> DB.Connection -> IO ()
 -- ^ Accept a new socket with a new process
-accept_socket socket_fd db = do
-    (fd, _) <- NS.accept socket_fd
-    CC.forkIO $ accept_body fd db
-    accept_socket socket_fd db
+acceptSocket socketFd db = do
+    (fd, _) <- NS.accept socketFd
+    CC.forkIO $ acceptBody fd db
+    acceptSocket socketFd db
 
-accept_body :: NS.Socket -> DB.Connection -> IO () 
+acceptBody :: NS.Socket -> DB.Connection -> IO () 
 -- ^ Process the connection
-accept_body fd db = do
-    _request <- NSB.recv fd 4096
-    let request = Req.parse _request fd
+acceptBody fd db = do
+    req <- NSB.recv fd 4096
+    let request = Req.parse req fd
     let uri = Req.uri request
     let method = Req.method request
-    response <- (Route.match uri method Handler.route_tree) db request
+    response <- (Route.match uri method Handler.routeTree) db request
     NSB.sendAll fd $ Res.render response
     NS.sClose fd

@@ -24,18 +24,18 @@ instance TS.Lift Config where
 
 parseFile :: FilePath -> TS.Q TS.Exp
 -- ^ Parse the configuration file
-parseFile file_path = do
-    TS.qAddDependentFile file_path
-    s <- TS.qRunIO $ readFile file_path
+parseFile filePath = do
+    TS.qAddDependentFile filePath
+    s <- TS.qRunIO $ readFile filePath
     TQ.quoteExp parse s
   where
     parse = TQ.QuasiQuoter {
-        TQ.quoteExp = quote_exp,
+        TQ.quoteExp = quoteExp,
         TQ.quotePat = undefined,
         TQ.quoteType = undefined,
         TQ.quoteDec = undefined
       }
-    quote_exp str = do
+    quoteExp str = do
         case P.parseOnly parseData (BS.pack str) of
             Left err -> undefined
             Right tag -> [| tag |]

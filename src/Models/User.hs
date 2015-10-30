@@ -15,59 +15,59 @@ import Data.Map ((!))
 import Database.MongoDB ((=:))
 
 data User = User {
-  _id         :: Maybe Bson.ObjectId,
-  facebook_id :: BS.ByteString,
-  name        :: BS.ByteString,
-  created_at  :: Maybe TC.UTCTime
+  id         :: Maybe Bson.ObjectId,
+  facebookId :: BS.ByteString,
+  name       :: BS.ByteString,
+  createdAt  :: Maybe TC.UTCTime
 } deriving Show
 
-from_json :: BS.ByteString -> User
+fromJson :: BS.ByteString -> User
 -- ^ Construct an User data from the JSON Bytestring
-from_json bs = User Nothing facebook_id name Nothing
+fromJson bs = User Nothing facebookId name Nothing
   where
-    Json.JSObject json        = Json.parse bs
-    Json.JSString facebook_id = json ! "id"
-    Json.JSString name        = json ! "name"
+    Json.JSObject json       = Json.parse bs
+    Json.JSString facebookId = json ! "id"
+    Json.JSString name       = json ! "name"
 
 upsert :: User -> Mongo.Action IO ()
 -- ^ Update or insert the User
-upsert (User _ facebook_id name created_at) = do
-    Mongo.upsert (MQ.Select ["facebook_id" =: Bson.Binary facebook_id] "users") [
-        "facebook_id" =: Bson.Binary facebook_id,
+upsert (User _ facebookId name createdAt) = do
+    Mongo.upsert (MQ.Select ["facebook_id" =: Bson.Binary facebookId] "users") [
+        "facebook_id" =: Bson.Binary facebookId,
         "name"        =: Bson.Binary name,
-        "created_at"  =: created_at
+        "created_at"  =: createdAt
       ]
     return ()
 
-redis_hash :: BS.ByteString -> User -> R.Redis (Either R.Reply R.Status)
+redisHash :: BS.ByteString -> User -> R.Redis (Either R.Reply R.Status)
 -- ^ Save the data into the Redis
-redis_hash key (User _ facebook_id name created_at) = R.hmset key values
+redisHash key (User _ facebookId name createdAt) = R.hmset key values
   where
     values = [
-        ("facebook_id", facebook_id),
+        ("facebook_id", facebookId),
         ("name",        name),
-        ("created_at",  BS.pack $ show created_at)
+        ("created_at",  BS.pack $ show createdAt)
       ]
 
-from_map :: M.Map BS.ByteString BS.ByteString -> User
+fromMap :: M.Map BS.ByteString BS.ByteString -> User
 -- ^ Construct an user from the given map
-from_map map = 
+fromMap map = 
     User Nothing (map ! "facebook_id") (map ! "name") Nothing
 
-redis_get :: BS.ByteString -> R.Redis (Maybe User)
+redisGet :: BS.ByteString -> R.Redis (Maybe User)
 -- ^ Find a user by session key
-redis_get key = do
+redisGet key = do
     res <- R.hgetall key
     return $ case res of 
         Left  _    -> Nothing
-        Right list -> Just $ from_map (M.fromList list)
+        Right list -> Just $ fromMap (M.fromList list)
 
 save :: User -> Mongo.Action IO ()
 -- ^ Save the data into the DB
-save (User _id facebook_id name (Just created_at)) = do
+save (User id facebookId name (Just createdAt)) = do
     Mongo.insert "users" [
-        "facebook_id" =: Bson.Binary facebook_id,
+        "facebook_id" =: Bson.Binary facebookId,
         "name"        =: Bson.Binary name,
-        "created_at"  =: created_at
+        "created_at"  =: createdAt
       ]
     return ()

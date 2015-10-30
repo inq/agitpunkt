@@ -15,9 +15,9 @@ instance StringFamily String where
 
 type QueryString = M.Map BS.ByteString BS.ByteString
 
-split_and_decode :: Char -> BS.ByteString -> QueryString
+splitAndDecode :: Char -> BS.ByteString -> QueryString
 -- ^ Split the given string and construct the Map
-split_and_decode and bs = M.fromList $ map transform (BS.split and bs)
+splitAndDecode and bs = M.fromList $ map transform (BS.split and bs)
   where
     transform line = pair
       where

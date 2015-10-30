@@ -9,4 +9,4 @@ import qualified Handler.Article                 as Article
 import qualified Handler.Main                    as Main
 import qualified Handler.Auth                    as Auth
 
-route_tree = $(Route.parseFile "config/routes.cfg")
+routeTree = $(Route.parseFile "config/routes.cfg")

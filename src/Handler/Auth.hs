@@ -23,20 +23,20 @@ signin :: Res.Handler
 -- ^ Sign in page
 signin [] db req = response
   where
-    redirect_uri = "https://inkyu.kr/signin"
-    response = case M.lookup "code" $ Req.query_str req of
+    redirectUri = "https://inkyu.kr/signin"
+    response = case M.lookup "code" $ Req.queryStr req of
         Just code -> do 
-            query_str <- Http.fetch $ Auth.access_token_url redirect_uri code
-            user_info <- case M.lookup "access_token" $ ByteString.split_and_decode '&' query_str of
-                Just token -> Http.fetch $ Auth.facebook_me_url token
+            queryStr <- Http.fetch $ Auth.accessTokenUrl redirectUri code
+            userInfo <- case M.lookup "access_token" $ ByteString.splitAndDecode '&' queryStr of
+                Just token -> Http.fetch $ Auth.facebookMeUrl token
                 Nothing    -> return ""
-            let user = User.from_json user_info
+            let user = User.fromJson userInfo
             DB.query db $ User.upsert user
-            session_key <- Session.generateKey
-            DB.run_redis db $ User.redis_hash session_key user
+            sessionKey <- Session.generateKey
+            DB.runRedis db $ User.redisHash sessionKey user
             let query = show user
             return $ Res.success $(Html.parseFile "auth/test.html.qh") [
-                BS.concat ["SESSION_KEY=", session_key]
+                BS.concat ["SESSION_KEY=", sessionKey]
               ]
         Nothing   -> do
-            return $ Res.redirect $ Auth.oauth_url redirect_uri
+            return $ Res.redirect $ Auth.oauthUrl redirectUri

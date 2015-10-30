@@ -12,46 +12,46 @@ import Data.Map.Strict ((!))
 --signin :: BS.ByteString
 
 
-client_id     :: BS.ByteString
-client_secret :: BS.ByteString
+clientId     :: BS.ByteString
+clientSecret :: BS.ByteString
 -- ^ Client ID & Client Secret Key
-(client_id, client_secret, admin_id) = (
+(clientId, clientSecret, adminId) = (
       config ! "client_id", 
       config ! "client_secret", 
       config ! "admin_id")
   where
     config = $(Config.parseFile "config/facebook.cfg")
 
-is_admin_user :: BS.ByteString -> Bool
+isAdminUser :: BS.ByteString -> Bool
 -- ^ Check if the given facebook id is of admin
-is_admin_user user_id =
-    user_id == admin_id
+isAdminUser userId =
+    userId == adminId
 
-facebook_me_url :: BS.ByteString -> BS.ByteString
+facebookMeUrl :: BS.ByteString -> BS.ByteString
 -- ^ Get the user information
-facebook_me_url access_token = BS.concat [
+facebookMeUrl accessToken = BS.concat [
     "https://graph.facebook.com/v2.4/me?locale=ko_KR&access_token=",
-    access_token
+    accessToken
   ]
 
-oauth_url :: BS.ByteString -> BS.ByteString
+oauthUrl :: BS.ByteString -> BS.ByteString
 -- ^ Generate the OAuth2 URL
-oauth_url redirect_uri = BS.concat [
+oauthUrl redirectUri = BS.concat [
     "https://www.facebook.com/dialog/oauth?client_id=",
-    client_id,
+    clientId,
     "&redirect_uri=",
-    redirect_uri
+    redirectUri
   ]
 
-access_token_url :: BS.ByteString -> BS.ByteString -> BS.ByteString
+accessTokenUrl :: BS.ByteString -> BS.ByteString -> BS.ByteString
 -- ^ Generate the access token URL
-access_token_url redirect_uri code = BS.concat [
+accessTokenUrl redirectUri code = BS.concat [
     "https://graph.facebook.com/oauth/access_token?client_id=",
-    client_id,
+    clientId,
     "&redirect_uri=",
-    redirect_uri,
+    redirectUri,
     "&client_secret=",
-    client_secret,
+    clientSecret,
     "&code=",
     code
   ]

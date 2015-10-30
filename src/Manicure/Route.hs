@@ -4,12 +4,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE OverloadedStrings    #-}
-module Manicure.Route
-    ( Routes
-    , parse
-    , parseFile
-    , match
-    ) where
+module Manicure.Route where
 
 import qualified Data.ByteString.Char8            as BS
 import qualified Language.Haskell.TH.Quote        as TQ
@@ -30,7 +25,7 @@ data RouteTree = Node (M.Map BS.ByteString RouteTree) (M.Map Req.Method Res.Hand
 
 instance TS.Lift Route where
     lift (Route uri method action) = [|
-            makeNode uri_tokens method $(return $ TS.VarE $ TS.mkName action)
+            makeNode uriTokens method $(return $ TS.VarE $ TS.mkName action)
         |]
       where
         split _ [] "" = []
@@ -41,7 +36,7 @@ instance TS.Lift Route where
         split c (head : tail) r
             | head == c    = r : split c tail ""
             | otherwise    = split c tail (r ++ [head])
-        uri_tokens = filter (not . (== "")) $ split '/' uri ""
+        uriTokens = filter (not . (== "")) $ split '/' uri ""
 instance TS.Lift Routes where
     lift (Routes a) = 
         [| foldl1 mergeNode a |]
@@ -65,33 +60,33 @@ match uri method tree =
         Just res -> res $ reverse args
         Nothing  -> EP.default404 []
   where
-    (Node _ map, args) = find_node uri_tokens tree []
-    uri_tokens = filter (not . BS.null) $ BS.split '/' uri
-    find_node (head : tail) (Node children _) args = 
+    (Node _ map, args) = findNode uriTokens tree []
+    uriTokens = filter (not . BS.null) $ BS.split '/' uri
+    findNode (head : tail) (Node children _) args = 
         case M.lookup head children of
-            Just a  -> find_node tail a args
+            Just a  -> findNode tail a args
             Nothing -> case M.lookup "#String" children of
-                Just a -> find_node tail a (head : args)
+                Just a -> findNode tail a (head : args)
                 Nothing -> (Node M.empty M.empty, [])
-    find_node [] node args = (node, args)
+    findNode [] node args = (node, args)
     
 parseFile :: FilePath -> TS.Q TS.Exp
 -- ^ Parse the route definition file
-parseFile file_path = do
-     TS.qAddDependentFile file_path
-     s <- TS.qRunIO $ readFile file_path
+parseFile filePath = do
+     TS.qAddDependentFile filePath
+     s <- TS.qRunIO $ readFile filePath
      TQ.quoteExp parse s
 
 parse :: TQ.QuasiQuoter
 -- ^ A QuasiQuoter for parsing the route definition
 parse = TQ.QuasiQuoter 
-    { TQ.quoteExp = quote_exp
+    { TQ.quoteExp = quoteExp
     , TQ.quotePat = undefined
     , TQ.quoteType = undefined
     , TQ.quoteDec = undefined
     }
   where
-    quote_exp str = do
+    quoteExp str = do
         case P.parseOnly routesNode (BS.pack str) of
             Left err -> undefined
             Right tag -> [| tag |]

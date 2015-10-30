@@ -19,12 +19,12 @@ generateKey :: IO BS.ByteString
 -- ^ Generate a session key
 generateKey = do
     t <- POSIX.getPOSIXTime
-    return $ to_hex . SHA256.hash . BS.pack $ show t
+    return $ toHex . SHA256.hash . BS.pack $ show t
   where
-    hex_digest d
+    hexDigest d
         | d < 10 = d + 48
         | otherwise = d + 87
-    to_hex bs = BSI.unsafeCreate nl $ go 0
+    toHex bs = BSI.unsafeCreate nl $ go 0
       where
         len = BS.length bs
         nl = 2 * len
@@ -32,8 +32,8 @@ generateKey = do
           | i == len  = return ()
           | otherwise = case BSU.unsafeIndex bs i of
               w -> do 
-                  FS.poke p (hex_digest $ w `B.shiftR` 4)
-                  FS.poke (p `FP.plusPtr` 1) (hex_digest $ w .&. 0xF)
+                  FS.poke p (hexDigest $ w `B.shiftR` 4)
+                  FS.poke (p `FP.plusPtr` 1) (hexDigest $ w .&. 0xF)
                   go (i + 1) (p `FP.plusPtr` 2)
 
 mkSession :: IO BS.ByteString

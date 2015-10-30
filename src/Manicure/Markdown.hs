@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings    #-}
 module Manicure.Markdown where
 
 import qualified Data.ByteString.Char8            as BS
@@ -16,15 +17,15 @@ data Item = H5 BS.ByteString | H4 BS.ByteString
 
 parse :: BS.ByteString -> Markdown
 -- ^ Parse the given bytestring
-parse str = case P.parseOnly parse_markdown str of
+parse str = case P.parseOnly parseMarkdown str of
     Right val -> val
     Left err  -> undefined
 
-parse_item :: P.Parser Item
+parseItem :: P.Parser Item
 -- ^ The subparser
-parse_item = (parse_header <|> parse_quote <|> parse_paragraph) <* P.many1 (P.char '\n')
+parseItem = (parseHeader <|> parseQuote <|> parseParagraph) <* P.many1 (P.char '\n')
   where
-    parse_header = do
+    parseHeader = do
         sharps <- P.try (P.many1 (P.char '#')) <* P.spaces
         rest <- P.noneOf1 "\n"
         return $ case length sharps of
@@ -33,20 +34,20 @@ parse_item = (parse_header <|> parse_quote <|> parse_paragraph) <* P.many1 (P.ch
             3 -> H3 rest
             4 -> H4 rest
             5 -> H5 rest
-    parse_quote = do
+    parseQuote = do
         P.try (P.char '>') <* P.spaces
         rest <- P.noneOf1 "\n"
         return $ Quote rest
-    parse_paragraph = do
+    parseParagraph = do
         rest <- P.noneOf1 "\n"
         return $ Paragraph rest
 
-parse_markdown :: P.Parser Markdown
+parseMarkdown :: P.Parser Markdown
 -- ^ The actual parser
-parse_markdown = do
-    items <- P.many1 parse_item
+parseMarkdown = do
+    items <- P.many1 parseItem
     return $ Markdown items
 
-to_html :: Markdown -> BS.ByteString
+toHtml :: Markdown -> BS.ByteString
 -- ^ Generate html
-to_html md = ""
+toHtml md = ""
