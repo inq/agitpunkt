@@ -46,3 +46,7 @@ parse_markdown :: P.Parser Markdown
 parse_markdown = do
     items <- P.many1 parse_item
     return $ Markdown items
+
+to_html :: Markdown -> BS.ByteString
+-- ^ Generate html
+to_html md = ""
