@@ -1,3 +1,5 @@
+logs
+pids
 dist
 cabal-dev
 *.o
