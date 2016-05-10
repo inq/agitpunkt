@@ -1,15 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Manicure.JsonSpec where
+module Core.JsonSpec where
 
 import qualified Data.ByteString.Char8       as BS
 import qualified Data.Map.Strict                as M
-import Manicure.Json
+import Core.Json
 import SpecHelper
 
 
 spec :: Spec
 spec = do
-    describe "Manicure.JsonSpec" $ do
+    describe "Core.JsonSpec" $ do
         context "Simple Text" $ do
             it "parses simple string" $ do
                  parse " \"Sample String\" " `shouldBe`

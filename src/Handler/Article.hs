@@ -2,11 +2,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Article where
 
-import qualified Manicure.Request               as Req
-import qualified Manicure.Response              as Res
-import qualified Manicure.Html                  as Html                
+import qualified Core.Request                   as Req
+import qualified Core.Response                  as Res
+import qualified Core.Html                      as Html                
 import qualified Data.Time.Clock                as C
-import qualified Manicure.Database              as DB
+import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
 import Data.Map ((!))
 

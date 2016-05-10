@@ -7,12 +7,12 @@ import qualified Database.MongoDB               as Mongo
 import qualified Data.ByteString.Char8          as BS
 import qualified Data.Time.Format               as TF
 import qualified Data.Map                       as M
-import qualified Manicure.Request               as Req
-import qualified Manicure.Response              as Res
-import qualified Manicure.Database              as DB
+import qualified Core.Request                   as Req
+import qualified Core.Response                  as Res
+import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
 import qualified Models.User                    as User
-import qualified Manicure.Html                  as Html
+import qualified Core.Html                      as Html
 
 index :: Res.Handler
 -- ^ Render the main page
@@ -22,22 +22,22 @@ index [] db req = do
     putStrLn $ show temp
     user <- userM
     let name = case user of
-          Just (User.User _ _ name _) -> name
+          Just (User.User {User.name = name}) -> name
           Nothing -> "anonymous"
     return $ Res.success $(Html.parseFile "main/index.html.qh") []
   where
     read :: Bson.Document -> IO [BS.ByteString]
     read document = do
-        title     <- Mongo.lookup "title" document
-        content   <- Mongo.lookup "content" document          
+        title <- Mongo.lookup "title" document
+        content <- Mongo.lookup "content" document          
         createdAt <- Mongo.lookup "created_at" document
-        return [
-            extract title, 
-            extract content,
-            extractDate createdAt, 
-            extractMonth createdAt,
-            extractYear createdAt,
-            extractTime createdAt
+        return
+          [ extract title
+          , extract content
+          , extractDate createdAt
+          , extractMonth createdAt
+          , extractYear createdAt
+          , extractTime createdAt
           ]
       where
         extract (Bson.Bin (Bson.Binary a)) = a

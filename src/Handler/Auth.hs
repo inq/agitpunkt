@@ -1,42 +1,61 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
-module Handler.Auth     
-    ( signin
-    ) where
+module Handler.Auth where
 
-import qualified Data.ByteString.Char8          as BS
-import qualified Manicure.Auth                  as Auth
-import qualified Manicure.Request               as Req
-import qualified Manicure.Response              as Res
-import qualified Manicure.Database              as DB
-import qualified Manicure.Session               as Session
-import qualified Manicure.ByteString            as ByteString
-import qualified Manicure.Html                  as Html
-import qualified Manicure.Http                  as Http
-import qualified Data.Map                       as M
-import qualified Models.User                    as User
-import qualified Models.Article                 as Article
-import Control.Monad
+import qualified Core.Request                     as Req
+import qualified Core.Response                    as Res
+import qualified Core.Html                        as Html                
+import qualified Core.Session                     as Ses
+import qualified Core.Database                    as DB
+import qualified Data.Time.Clock                  as C
+import qualified Data.ByteString.Char8            as BS
+import qualified Models.User                      as User
+
 import Data.Map ((!))
 
+new :: Res.Handler
+-- ^ Render the form
+new [] db req = do
+    error "prevented!"
+    return $ Res.success $(Html.parseFile "auth/signup.html.qh") []
+
+index :: Res.Handler
+-- ^ Render the signin form
+index [] db req = do
+    return $ Res.success $(Html.parseFile "auth/signin.html.qh") []
+
 signin :: Res.Handler
--- ^ Sign in page
-signin [] db req = response
+-- ^ Sign in and redirect to home
+signin [] db req = do
+    user <- DB.query db (User.signIn email password)
+    case user of
+        Just a -> do
+            key <- Ses.generateKey
+            putStrLn $ show a
+            DB.runRedis db $ User.redisHash key a
+            return $ Res.success $(Html.parseFile "auth/signin.html.qh") [BS.concat ["SESSION_KEY=", key]]
+        Nothing ->
+            return $ Res.redirect "/" []
   where
-    redirectUri = "https://inkyu.kr/signin"
-    response = case M.lookup "code" $ Req.queryStr req of
-        Just code -> do 
-            queryStr <- Http.fetch $ Auth.accessTokenUrl redirectUri code
-            userInfo <- case M.lookup "access_token" $ ByteString.splitAndDecode '&' queryStr of
-                Just token -> Http.fetch $ Auth.facebookMeUrl token
-                Nothing    -> return ""
-            let user = User.fromJson userInfo
-            DB.query db $ User.upsert user
-            sessionKey <- Session.generateKey
-            DB.runRedis db $ User.redisHash sessionKey user
-            let query = show user
-            return $ Res.success $(Html.parseFile "auth/test.html.qh") [
-                BS.concat ["SESSION_KEY=", sessionKey]
-              ]
-        Nothing   -> do
-            return $ Res.redirect $ Auth.oauthUrl redirectUri
+    email = post ! "email"
+    password = User.hashPassword (post ! "password")
+    post = Req.post req
+
+create :: Res.Handler
+-- ^ Create a new article from the given POST data
+create [] db req = do
+    error "prevented!"
+    time <- C.getCurrentTime
+    DB.query db (User.save $ User.User 
+      { User._id = Nothing
+      , User.email = email
+      , User.name = name
+      , User.password = Just password
+      , User.createdAt = Nothing } )
+    return $ Res.success $(Html.parseFile "auth/signup.html.qh") ["HELLO=WORLD"]
+  where
+    name = post ! "name"
+    email = post ! "email"
+    password = User.hashPassword (post ! "password")
+    post = Req.post req
+ 

@@ -1,0 +1,42 @@
+name:                agitpunkt
+version:             0.1.0.0
+synopsis:            
+license:             AGPL-3
+license-file:        LICENSE
+author:              inkyu lee
+maintainer:          gofiri@gmail.com
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+test-suite spec
+  ghc-options:       -fllvm -ddump-deriv
+  type: exitcode-stdio-1.0
+  hs-source-dirs:    spec
+  main-is:           Spec.hs
+  build-depends:     base
+                   , manicure
+                   , bytestring
+                   , hspec
+                   , containers
+                   , attoparsec
+  default-language:  Haskell2010
+executable agitpunkt
+  ghc-options:       -fllvm -O2 -dynamic
+  main-is:           main.hs
+  build-depends:     manicure
+                   , utf8-string
+                   , base
+                   , network
+                   , bytestring
+                   , cryptohash
+                   , containers
+                   , hedis
+                   , bson
+                   , mongoDB
+                   , time
+                   , mtl
+                   , monad-control
+  hs-source-dirs:    src
+  default-language:  Haskell2010
+

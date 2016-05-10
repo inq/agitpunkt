@@ -1,0 +1,7 @@
+resolver: lts-5.15
+packages:
+- '.'
+- 'deps/manicure'
+extra-deps: []
+flags: {}
+extra-package-dbs: []

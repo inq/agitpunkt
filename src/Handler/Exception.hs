@@ -2,8 +2,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Handler.Exception where
 
-import qualified Manicure.Response              as Res
-import qualified Manicure.Html                  as Html
+import qualified Core.Response                  as Res
+import qualified Core.Html                      as Html
 import Control.Monad
 import Data.Map ((!))
 
