@@ -20,6 +20,8 @@ test-suite spec
                    , hspec
                    , containers
                    , attoparsec
+  other-modules:     Core.JsonSpec
+                   , SpecHelper
   default-language:  Haskell2010
 executable agitpunkt
   ghc-options:       -fllvm -O2 -dynamic
@@ -37,6 +39,12 @@ executable agitpunkt
                    , time
                    , mtl
                    , monad-control
+  other-modules:     Core.Handler
+                   , Handler.Article
+                   , Handler.Auth
+                   , Handler.Main
+                   , Models.Article
+                   , Models.User
   hs-source-dirs:    src
   default-language:  Haskell2010
 
