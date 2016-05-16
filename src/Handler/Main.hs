@@ -21,10 +21,9 @@ index [] db req = do
     articles <- (mapM read) temp
     putStrLn $ show temp
     user <- userM
-    let name = case user of
-          Just (User.User {User.name = name}) -> name
-          Nothing -> "anonymous"
-
+    let (name, login) = case user of
+          Just (User.User {User.name = name}) -> (name, True)
+          Nothing -> ("anonymous", False)
     return $ Res.success $(Html.parseFile "main/index.html.qh") []
   where
     read :: Bson.Document -> IO [BS.ByteString]
@@ -46,7 +45,6 @@ index [] db req = do
         extractMonth (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%b" a
         extractYear (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%Y" a
         extractTime (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%H:%M:%S" a
-
     userM = case M.lookup "SESSION_KEY" (Req.extractCookie req) of
         Just key -> DB.runRedis db $ User.redisGet key
         Nothing  -> return Nothing
