@@ -7,7 +7,6 @@ import qualified Core.Html                      as Html
 main :: IO ()
 -- ^ The main function
 main = do
-    putStrLn "HELLO"
     Launcher.daemonize pidFile stdOut stdErr process
   where
     process = Launcher.run Handler.routeTree response404 databaseName socketFile
