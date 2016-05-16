@@ -1,0 +1,8 @@
+span { class: "name-box" }
+  = name
+span { class: "signup-box" }
+  a { href: "/auth/signup" }
+    | Sign up
+span { class: "signin-box" }
+  a { href: "/auth/signin" }
+    | Sign in

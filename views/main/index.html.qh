@@ -9,14 +9,7 @@ html
         p
           | inkyu.kr
       div { class: "content" }
-        span { class: "name-box" }
-          = name
-        span { class: "signup-box" }
-          a { href: "/auth/signup" }
-            | Sign up
-        span { class: "signin-box" }
-          a { href: "/auth/signin" }
-            | Sign in1
+        - render partial/login-box.qh
         - foreach articles -> title,content,date,month,year,time
           div { class: "article" }
             div { class: "label" }
