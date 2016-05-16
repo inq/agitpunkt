@@ -19,6 +19,11 @@ new [] db req = do
     error "prevented!"
     return $ Res.success $(Html.parseFile "auth/signup.html.qh") []
 
+destroy :: Res.Handler
+-- ^ Render the form
+destroy [] db req = do
+    return $ Res.success $(Html.parseFile "auth/signin.html.qh") ["SESSION_KEY="]
+
 index :: Res.Handler
 -- ^ Render the signin form
 index [] db req = do
