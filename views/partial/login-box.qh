@@ -4,6 +4,8 @@ span { class: "signin-box" }
   - if login
     a { href: "/auth/signout" }
       | Sign out
+    a { href: "/article/new" }
+      | new article
   - if not login
     a { href: "/auth/signin" }
       | Sign in

@@ -1,6 +1,8 @@
 resolver: lts-5.17
 packages:
 - '.'
+- 'deps/bson'
+- 'deps/mongodb'
 - 'deps/manicure'
 extra-deps: []
 flags: {}
