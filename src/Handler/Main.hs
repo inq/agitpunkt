@@ -18,11 +18,10 @@ index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
     temp <- DB.query db Article.find
-    articles <- (mapM read) temp
-    putStrLn $ show temp
+    articles <- mapM read temp
     user <- userM
     let (name, login) = case user of
-          Just (User.User {User.name = name}) -> (name, True)
+          Just User.User {User.name = name} -> (name, True)
           Nothing -> ("anonymous", False)
     return $ Res.success $(Html.parseFile "main/index.html.qh") []
   where
@@ -40,7 +39,7 @@ index [] db req = do
           , extractTime createdAt
           ]
       where
-        extract (Bson.Bin (Bson.Binary a)) = a
+        extract (Bson.String a) = a
         extractDate (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%d" a
         extractMonth (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%b" a
         extractYear (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%Y" a

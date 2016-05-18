@@ -63,8 +63,8 @@ signIn email password = do
         [doc] -> do
              return $ Just $ User
                    { _id = (doc !? "_id")
-                   , email = UTF8.fromString (Bson.at "email" doc)
-                   , name = UTF8.fromString (Bson.at "name" doc)
+                   , email = (Bson.at "email" doc)
+                   , name = (Bson.at "name" doc)
                    , password = Nothing
                    , createdAt = Nothing
                    }
