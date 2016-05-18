@@ -2,7 +2,6 @@ html
   head
     meta   { charset: "UTF-8" }
     link   { href: "/static/q.css", rel: "stylesheet" }
-    script { src: "/static/q.js" }
   body
     div { id: "wrapper" }
       div { id: "header" }
