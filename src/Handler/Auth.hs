@@ -21,26 +21,25 @@ new [] db req = do
 
 destroy :: Res.Handler
 -- ^ Render the form
-destroy [] db req = do
-    return $ Res.success $(Html.parseFile "auth/signin.html.qh") ["SESSION_KEY="]
+destroy [] db req = 
+    return $ Res.redirect "/" ["SESSION_KEY="]
 
 index :: Res.Handler
 -- ^ Render the signin form
-index [] db req = do
+index [] db req = 
     return $ Res.success $(Html.parseFile "auth/signin.html.qh") []
 
 signin :: Res.Handler
 -- ^ Sign in and redirect to home
 signin [] db req = do
     user <- DB.query db (User.signIn email password)
-    case user of
+    cookies <- case user of
         Just a -> do
             key <- Ses.generateKey
-            putStrLn $ show a
             DB.runRedis db $ User.redisHash key a
-            return $ Res.success $(Html.parseFile "auth/signin.html.qh") [BS.concat ["SESSION_KEY=", key]]
-        Nothing ->
-            return $ Res.redirect "/" []
+            return [BS.concat ["SESSION_KEY=", key]]
+        Nothing -> return []
+    return $ Res.redirect "/" cookies
   where
     email = post ! "email"
     password = User.hashPassword (post ! "password")
