@@ -27,6 +27,7 @@ executable agitpunkt
   ghc-options:       -fllvm -O2 -dynamic
   main-is:           main.hs
   build-depends:     manicure
+                   , template-haskell
                    , utf8-string
                    , base
                    , network

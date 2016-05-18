@@ -13,6 +13,8 @@ import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
 import qualified Models.User                    as User
 import qualified Core.Html                      as Html
+import qualified Language.Haskell.TH            as TH
+import qualified Data.Time                      as T
 
 index :: Res.Handler
 -- ^ Render the main page
@@ -47,3 +49,4 @@ index [] db req = do
     userM = case M.lookup "SESSION_KEY" (Req.extractCookie req) of
         Just key -> DB.runRedis db $ User.redisGet key
         Nothing  -> return Nothing
+    compiled = BS.concat ["compiled at ", $(TH.stringE =<< TH.runIO ((TF.formatTime TF.defaultTimeLocale "%Y-%m-%d %H:%M:%S") <$> T.getCurrentTime))]

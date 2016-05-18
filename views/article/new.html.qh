@@ -2,9 +2,20 @@ html
   head
     meta   { charset: "UTF-8" }
     link   { href: "/static/q.css", rel: "stylesheet" }
+    script { src: "/static/q.js" }
   body
-    div
-      form { action: "/article/new", method: "post" }
-        input { type: "text", name: "title" }
-        textarea { name: "content" }
-        input { type: "submit", value: "Submit" }
+    div { id: "wrapper" }
+      div { id: "header" }
+        p
+          | inkyu.kr
+      div { class: "content" }
+        div
+          form { action: "/article/new", method: "post" }
+            input { type: "text", name: "title" }
+            textarea { name: "content" id: "content-box" }
+            input { type: "submit", value: "Submit" }
+        div { id: "tail" }
+          a { href: "https://github.com/inq/agitpunkt" }
+            img { src: "/static/github.png" }
+      div  { id: "footer" }
+        = compiled

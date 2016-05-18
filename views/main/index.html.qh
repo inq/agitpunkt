@@ -9,7 +9,8 @@ html
         p
           | inkyu.kr
       div { class: "content" }
-        - render partial/login-box.qh
+        div { id: "signin-box" }
+          - render partial/login-box.qh
         - foreach articles -> title,content,date,month,year,time
           div { class: "article" }
             div { class: "label" }
@@ -22,7 +23,12 @@ html
                   = year
               span { class: "time" }
                 = time
+            div { class: "title" }
+              = title
             div { class: "content" }
-              div { class: "title" }
-                = title
               = content
+        div { id: "tail" }
+          a { href: "https://github.com/inq/agitpunkt" }
+            img { src: "/static/github.png" }
+      div  { id: "footer" }
+        = compiled
