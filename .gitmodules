@@ -1,9 +1,0 @@
-[submodule "deps/manicure"]
-	path = deps/manicure
-	url = https://github.com/inq/manicure.git
-[submodule "deps/mongodb"]
-	path = deps/mongodb
-	url = https://github.com/inq/mongodb.git
-[submodule "deps/bson"]
-	path = deps/bson
-	url = https://github.com/inq/bson.git
