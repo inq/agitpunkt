@@ -32,6 +32,7 @@ create :: Res.Handler
 -- ^ Create a new article from the given POST data
 create [] db req = do
     time <- C.getCurrentTime
+    print req
     DB.query db (Article.save $ Article.Article Nothing title content time)
     return $ Res.success $(Html.parseFile "article/new.html.qh") ["HELLO=WORLD"]
   where
