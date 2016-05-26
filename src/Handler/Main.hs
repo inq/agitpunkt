@@ -5,11 +5,13 @@ module Handler.Main where
 import qualified Data.Bson                      as Bson
 import qualified Database.MongoDB               as Mongo
 import qualified Data.ByteString.Char8          as BS
+import qualified Data.ByteString.Lazy           as LS
 import qualified Data.Time.Format               as TF
 import qualified Data.Map                       as M
 import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
 import qualified Core.Database                  as DB
+import qualified Core.Markdown                  as MD
 import qualified Models.Article                 as Article
 import qualified Models.User                    as User
 import qualified Core.Html                      as Html
@@ -35,13 +37,16 @@ index [] db req = do
         createdAt <- Mongo.lookup "created_at" document
         return
           [ extract title
-          , extract content
+          , convert content
           , extractDate createdAt
           , extractMonth createdAt
           , extractYear createdAt
           , extractTime createdAt
           ]
       where
+        convert content = case MD.convert $ LS.fromStrict $ extract content of
+            Just str -> LS.toStrict str
+            _ -> "parse error"
         extract (Bson.String a) = a
         extractDate (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%d" a
         extractMonth (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%b" a
