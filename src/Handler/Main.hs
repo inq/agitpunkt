@@ -25,7 +25,8 @@ index [] db req = do
     let (name, login) = case user of
           Just User.User {User.name = name} -> (name, True)
           Nothing -> ("anonymous", False)
-    return $ Res.success $(Html.parseFile "main/index.html.qh") []
+    let view = $(Html.parseFile "main/index.html.qh")
+    return $ Res.success view []
   where
     read :: Bson.Document -> IO [BS.ByteString]
     read document = do

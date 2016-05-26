@@ -9,9 +9,7 @@ packages:
     git: 'https://github.com/inq/mongodb.git'
     commit: 'bc25d6d749676e2e2c6077fbd8bc21eb91113965'
   extra-dep: true
-- location:
-    git: 'https://github.com/inq/manicure.git'
-    commit: '3c92de83ed3db9c536efaa47d5981f69cac3cdf6'
+- location: ./deps/manicure
   extra-dep: true
 extra-deps: []
 flags: {}
