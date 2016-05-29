@@ -16,12 +16,32 @@ body {
     background-color: #ffffff;
 }
 
+blockquote {
+    background-color: #e0e0e0;
+    border-left: 12px solid #c0c0c0;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    quotes: "\201C""\201D""\2018""\2019";
+}
+
+blockquote:before {
+    color: #a0a0a0;
+    content: open-quote;
+    font-size: 6em;
+    line-height: 0.1em;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+}
+
+blockquote p {
+    display: inline;
+}
+
 div#signin-box {
     float: right;
 }
 
 div#wrapper {
-    overflow: auto;
     margin: 0 auto 0 auto;
     width: 1024px;
 }
@@ -52,7 +72,7 @@ div#tail > img {
 div#header > p {
     font-family: "jura";
     font-size: 3em;
-    color: #444444;;
+    color: #444444;
     margin: 0;
     padding: 0.1em 0.1em 0.1em 0.3em;
 }
