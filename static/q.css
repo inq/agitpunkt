@@ -7,6 +7,35 @@
     src: url("/static/jura.woff") format('woff');
 }
 
+.code-snippet {
+    
+    background-color: #e0e0e0;
+    margin: 1.5em 10px 1em 10px;
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    padding: 0;
+    font-family: Consolas, Menlo, Courier, monospace;
+    font-size: 1em;
+    border-collapse: collapse;
+}
+
+.code-snippet .td-line-num:before {
+    content: attr(data-line-num);
+}
+
+.code-snippet .td-line-num {
+    padding-right: 1em;
+    width: 40px;
+    text-align: right;
+    background-color: #d0d0d0;
+    border-right: 1px solid #666666;
+}
+
+.code-snippet .td-content {
+    white-space: pre;
+    padding-left: 1em;
+}
+
 body {
     margin: 0;
     padding: 0;
