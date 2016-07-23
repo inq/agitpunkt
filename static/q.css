@@ -3,11 +3,6 @@
     src: url("/static/jura.woff") format('woff');
 }
 
-@font-face {
-    font-family: "hangang";
-    src: url("/static/hangang.woff") format('woff');
-}
-
 .code-snippet {
     background-color: #f1f0f0;
     margin: 10px 0;
