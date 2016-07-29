@@ -19,7 +19,44 @@ a:link, a:visited {
 }
 
 #menu ul {
-    margin-top: 2em;
+    padding: 0;
+    margin: -1px 0 0 0;
+    list-style: none;
+}
+
+#menu li {
+    line-height: 2.2em;
+    margin: 0;
+    padding: 0 0 0 3.2em;
+    color: #333;
+    background: 
+    linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
+    linear-gradient(315deg, #cc8477 50%, #aa6255 0, #aa6255 50%),#cc8477;
+    background-size: 2.2em 2.2em;
+    background-repeat: no-repeat;
+    background-position: 0.3em 0;
+    border-top: 1px solid #aa6255;
+}
+
+#menu li:first-child {
+    background: 
+    linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
+    linear-gradient(315deg, #cc8477 50%, #333 0, #333 50%),#cc8477;
+    background-size: 2.2em 2.2em;
+    background-repeat: no-repeat;
+    background-position: 0.3em 0;
+    border-top: 1px solid #333;
+}
+
+#menu li.l2 {
+    background: 
+    linear-gradient(45deg, #eec099 65%, transparent 0, transparent 35%),
+    linear-gradient(315deg, #eec099 50%, #bb9055 0, #bb9055 50%),#eec099;
+    background-size: 2.2em 2.2em;
+    background-repeat: no-repeat;
+    background-position: 0.6em 0;
+    border-top: 1px solid #bb9055;
+    padding: 0 0 0 3.5em;
 }
 
 #speech {
