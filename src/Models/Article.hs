@@ -27,7 +27,7 @@ save (Article _id' title' content' createdAt') = do
       ]
     return ()
 
-find :: (MonadIO m, MonadBaseControl IO m)  => M.Action m [M.Document]
--- ^ ** Find articles
+find :: (MonadIO m, MonadBaseControl IO m) => M.Action m [M.Document]
+-- ^ Find articles
 find = do
     (M.find $ M.select [] "articles") >>= M.rest

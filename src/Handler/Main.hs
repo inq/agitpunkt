@@ -14,6 +14,7 @@ import qualified Core.Database                  as DB
 import qualified Core.Markdown                  as MD
 import qualified Models.Article                 as Article
 import qualified Models.User                    as User
+import qualified Models.Category                as Category
 import qualified Core.Html                      as Html
 import qualified Language.Haskell.TH            as TH
 import qualified Data.Time                      as T
@@ -21,6 +22,7 @@ import qualified Data.Time                      as T
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
+    categories <- map ((:[]) . Category.name) <$> DB.query db Category.find
     temp <- DB.query db Article.find
     articles <- mapM read temp
     user <- userM
@@ -33,7 +35,7 @@ index [] db req = do
     read :: Bson.Document -> IO [BS.ByteString]
     read document = do
         title <- Mongo.lookup "title" document
-        content <- Mongo.lookup "content" document          
+        content <- Mongo.lookup "content" document
         createdAt <- Mongo.lookup "created_at" document
         return
           [ extract title

@@ -15,18 +15,9 @@ html
             | }
     div { id: "menu" }
       ul
-        li { class: "l1" }
-          | 낙서
-        li { class: "l1" }
-          | 메모
-        li { class: "l1" }
-          | 잡동사니
-        li { class: "l2" }
-          | 숫자놀이
-        li { class: "l2" }
-          | Haskell
-        li { class: "l2" }
-          | Rust
+        - foreach categories -> name
+          li { class: "l1" }
+            = name
     - foreach articles -> title,content,date,month,year,time
       div { class: "article" }
         div { class: "wrapper" }
