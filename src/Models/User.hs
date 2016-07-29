@@ -2,7 +2,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Models.User where
 
-import qualified Core.Json                        as Json
 import qualified Data.ByteString.Char8            as BS
 import qualified Data.Time.Clock                  as TC
 import qualified Database.MongoDB                 as Mongo
@@ -17,16 +16,14 @@ import qualified Data.ByteString.Internal         as BSI
 import qualified Data.Bits                        as B
 import qualified Foreign.Storable                 as FS
 import qualified Foreign.Ptr                      as FP
-import qualified Data.ByteString.UTF8             as UTF8
 import GHC.Generics (Generic)
-import Control.Monad (liftM)
 import Data.Bson ((!?))
 import Data.Map ((!))
 import Data.Bits ((.&.))
 
 import Database.MongoDB ((=:))
 
-data User = User 
+data User = User
   { _id        :: Maybe Bson.ObjectId
   , email      :: BS.ByteString
   , name       :: BS.ByteString
@@ -47,7 +44,7 @@ hashPassword = toHex . SHA256.hash
         go i p
           | i == len  = return ()
           | otherwise = case BSU.unsafeIndex bs i of
-              w -> do 
+              w -> do
                   FS.poke p (hexDigest $ w `B.shiftR` 4)
                   FS.poke (p `FP.plusPtr` 1) (hexDigest $ w .&. 0xF)
                   go (i + 1) (p `FP.plusPtr` 2)
@@ -57,9 +54,9 @@ hashPassword = toHex . SHA256.hash
 
 signIn :: BS.ByteString -> BS.ByteString -> Mongo.Action IO (Maybe User)
 -- ^ Try to signin
-signIn email password = do
-    res <- Mongo.find (Mongo.select ["email" =: email, "password" =: password] "users") >>= MQ.rest
-    case res of 
+signIn email' password' = do
+    res <- Mongo.find (Mongo.select ["email" =: email', "password" =: password'] "users") >>= MQ.rest
+    case res of
         [doc] -> do
              return $ Just $ User
                    { _id = (doc !? "_id")
@@ -79,20 +76,20 @@ upsert user@User{_id=_id} = do
 
 redisHash :: BS.ByteString -> User -> R.Redis (Either R.Reply R.Status)
 -- ^ Save the data into the Redis
-redisHash key (User _ email name password createdAt) = R.hmset key values
+redisHash key (User _ email' name' _password' _createdAt') = R.hmset key values
   where
-    values = 
-      [ ("name" :: BSI.ByteString, name)
-      , ("email" :: BSI.ByteString, email)
+    values =
+      [ ("name" :: BSI.ByteString, name')
+      , ("email" :: BSI.ByteString, email')
       ]
 
 fromMap :: M.Map BS.ByteString BS.ByteString -> User
 -- ^ Construct an user from the given map
-fromMap map = 
-    User 
+fromMap map' =
+    User
       { _id = Nothing
-      , email = (map ! "email")
-      , name = (map ! "name")
+      , email = (map' ! "email")
+      , name = (map' ! "name")
       , password = Nothing
       , createdAt = Nothing
       }
@@ -101,7 +98,7 @@ redisGet :: BS.ByteString -> R.Redis (Maybe User)
 -- ^ Find a user by session key
 redisGet key = do
     res <- R.hgetall key
-    return $ case res of 
+    return $ case res of
         Left  _    -> Nothing
         Right []   -> Nothing
         Right list -> Just $ fromMap (M.fromList list)
@@ -109,5 +106,5 @@ redisGet key = do
 save :: User -> Mongo.Action IO ()
 -- ^ Save the data into the DB
 save user = do
-    Mongo.insert "users" $ Model.toDocument user
+    _ <- Mongo.insert "users" $ Model.toDocument user
     return ()
