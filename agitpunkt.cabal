@@ -42,6 +42,7 @@ executable agitpunkt
                    , monad-control
   other-modules:     Core.Handler
                    , Handler.Article
+                   , Handler.Base
                    , Handler.Auth
                    , Handler.Main
                    , Models.Article
