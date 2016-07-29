@@ -55,4 +55,4 @@ index [] db req = do
     userM = case M.lookup "SESSION_KEY" (Req.extractCookie req) of
         Just key -> DB.runRedis db $ User.redisGet key
         Nothing  -> return Nothing
-    compiled = BS.concat ["compiled at ", $(TH.stringE =<< TH.runIO ((TF.formatTime TF.defaultTimeLocale "%Y-%m-%d %H:%M:%S") <$> T.getCurrentTime))]
+    compiled = BS.concat ["compiled at ", $(TH.stringE =<< TH.runIO ((TF.formatTime TF.defaultTimeLocale "%Y-%m-%d") <$> T.getCurrentTime))]

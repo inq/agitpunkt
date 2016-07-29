@@ -3,15 +3,33 @@ html
     meta   { charset: "UTF-8" }
     link   { href: "/static/q.css", rel: "stylesheet" }
   body
-    div { id: "wrapper" }
-      div { id: "header" }
-        p
-          | inkyu.kr
-      div { class: "content" }
+    div { id: "header" }
+      div { class: "wrapper" }
         div { id: "signin-box" }
           - render partial/login-box.qh
-        - foreach articles -> title,content,date,month,year,time
-          div { class: "article" }
+        p
+          span { class: "red" }
+            | {
+          | inkyu.kr
+          span { class: "red" }
+            | }
+    div { id: "menu" }
+      ul
+        li { class: "l1" }
+          | 낙서
+        li { class: "l1" }
+          | 메모
+        li { class: "l1" }
+          | 잡동사니
+        li { class: "l2" }
+          | 숫자놀이
+        li { class: "l2" }
+          | Haskell
+        li { class: "l2" }
+          | Rust
+    - foreach articles -> title,content,date,month,year,time
+      div { class: "article" }
+        div { class: "wrapper" }
             div { class: "label" }
               span { class: "date" }
                 = date
@@ -26,8 +44,13 @@ html
               = title
             div { class: "content" }
               = content
-        div { id: "tail" }
-          a { href: "https://github.com/inq/agitpunkt" }
-            img { src: "/static/github.png" }
-      div  { id: "footer" }
-        = compiled
+    div  { id: "footer" }
+      div { id: "footer-left" }
+        p { id: "compiled-at" }
+          = compiled
+        p { id: "author" }
+          | Inkyu Lee
+      div { id: "footer-right" }
+        a { href: "https://github.com/inq/agitpunkt" }
+          - render partial/github.qh
+

@@ -1,11 +1,11 @@
-span { class: "name-box" }
-  = name
 span { class: "signin-box" }
   - if login
+    span { class: "name-box" }
+      = name
     a { href: "/auth/signout" }
       | Sign out
     a { href: "/article/new" }
       | new article
   - if not login
     a { href: "/auth/signin" }
-      | Sign in
+      | sign in
