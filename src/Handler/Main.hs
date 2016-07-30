@@ -21,7 +21,7 @@ import Handler.Base
 index :: Res.Handler
 -- ^ Render the main page
 index [] db req = do
-    categories <- map ((:[]) . Category.name) <$> DB.query db Category.find
+    categories <- (toStrList . convert . reverse) <$> DB.query db Category.find
     temp <- DB.query db Article.find
     articles <- mapM read temp
     user <- userM

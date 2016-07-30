@@ -15,9 +15,14 @@ html
             | }
     div { id: "menu" }
       ul
-        - foreach categories -> name
-          li { class: "l1" }
-            = name
+        - foreach categories -> name,id,lvl
+          | <li class="
+          = lvl
+          | " data-id="
+          = id
+          | ">
+          = name
+          | </li>
     - foreach articles -> title,content,date,month,year,time
       div { class: "article" }
         div { class: "wrapper" }
@@ -44,4 +49,3 @@ html
       div { id: "footer-right" }
         a { href: "https://github.com/inq/agitpunkt" }
           - render partial/github.qh
-
