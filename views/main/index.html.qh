@@ -16,13 +16,8 @@ html
     div { id: "menu" }
       ul
         - foreach categories -> name,id,lvl
-          | <li class="
-          = lvl
-          | " data-id="
-          = id
-          | ">
-          = name
-          | </li>
+          li { class: lvl, data-id: id }
+            = name
     - foreach articles -> title,content,date,month,year,time
       div { class: "article" }
         div { class: "wrapper" }
