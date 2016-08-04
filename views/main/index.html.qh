@@ -1,46 +1,17 @@
-html
-  head
-    meta   { charset: "UTF-8" }
-    link   { href: "/static/q.css", rel: "stylesheet" }
-  body
-    div { id: "header" }
-      div { class: "wrapper" }
-        div { id: "signin-box" }
-          - render partial/login-box.qh
-        p
-          span { class: "red" }
-            | {
-          | inkyu.kr
-          span { class: "red" }
-            | }
-    div { id: "menu" }
-      ul
-        - foreach categories -> name,id,lvl
-          li { class: lvl, data-id: id }
-            = name
-    - foreach articles -> title,content,date,month,year,time
-      div { class: "article" }
-        div { class: "wrapper" }
-            div { class: "label" }
-              span { class: "date" }
-                = date
-              span { class: "month-year" }
-                span { class: "month" }
-                  = month
-                span { class: "year" }
-                  = year
-              span { class: "time" }
-                = time
-            div { class: "title" }
-              = title
-            div { class: "content" }
-              = content
-    div  { id: "footer" }
-      div { id: "footer-left" }
-        p { id: "compiled-at" }
-          = compiled
-        p { id: "author" }
-          | Inkyu Lee
-      div { id: "footer-right" }
-        a { href: "https://github.com/inq/agitpunkt" }
-          - render partial/github.qh
+- foreach articles -> title,content,date,month,year,time
+  div { class: "article" }
+    div { class: "wrapper" }
+        div { class: "label" }
+          span { class: "date" }
+            = date
+          span { class: "month-year" }
+            span { class: "month" }
+              = month
+            span { class: "year" }
+              = year
+          span { class: "time" }
+            = time
+        div { class: "title" }
+          = title
+        div { class: "content" }
+          = content
