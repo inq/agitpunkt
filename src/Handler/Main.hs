@@ -1,5 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
 module Handler.Main where
 
 import qualified Data.Bson                      as Bson
@@ -11,7 +10,7 @@ import qualified Core.Response                  as Res
 import qualified Core.Database                  as DB
 import qualified Core.Markdown                  as MD
 import qualified Models.Article                 as Article
-import qualified Core.Html                      as Html
+import Core.Html (parse)
 import Handler.Application
 import Handler.Base
 
@@ -20,8 +19,24 @@ index :: Res.Handler
 index [] db req = do
     temp <- DB.query db Article.find
     articles <- mapM read temp
-    let v = $(Html.parseFile "main/index.html.qh")
-    res <- layout v [] db req
+    res <- layout [parse| - foreach articles -> title,content,date,month,year,time
+      div { class: "article" }
+        div { class: "wrapper" }
+            div { class: "label" }
+              span { class: "date" }
+                = date
+              span { class: "month-year" }
+                span { class: "month" }
+                  = month
+                span { class: "year" }
+                  = year
+              span { class: "time" }
+                = time
+            div { class: "title" }
+              = title
+            div { class: "content" }
+              = content
+      |] [] db req
     return $ Res.success res []
   where
     read :: Bson.Document -> IO [BS.ByteString]

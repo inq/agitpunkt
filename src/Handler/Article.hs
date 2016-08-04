@@ -1,32 +1,43 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
 module Handler.Article where
 
 import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
-import qualified Core.Html                      as Html                
 import qualified Data.Time.Clock                as C
 import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
-import qualified Language.Haskell.TH            as TH
-import qualified Data.Time                      as T
-import qualified Data.ByteString.Char8          as BS
-import qualified Data.Time.Format               as TF
-
+import Core.Html (parse)
+import Handler.Application
 import Data.Map ((!))
 
 show :: Res.Handler
 -- ^ Test parsing URI parameters
 show [category, article, index] db req = do
-    return $ Res.success $(Html.parseFile "article/show.html.qh") []
+    return $ Res.success [parse|div
+      p
+        = category
+      p
+        = article
+      p
+        = index
+     |] []
 
-compiled :: BS.ByteString
-compiled = BS.concat ["compiled at ", $(TH.stringE =<< TH.runIO ((TF.formatTime TF.defaultTimeLocale "%Y-%m-%d %H:%M:%S") <$> T.getCurrentTime))]
+articleForm :: Res.Component
+articleForm [] db req =
+    return [parse|div { class: "content" }
+      div
+        form { action: "/article/new", method: "post" }
+          input { type: "text", name: "title" }
+          textarea { name: "content", id: "content-box" }
+          input { type: "submit", value: "Submit" }
+     |]
 
 new :: Res.Handler
 -- ^ Render the formm
-new [] db req = 
-    return $ Res.success $(Html.parseFile "article/new.html.qh") []
+new [] db req = do
+    view <- articleForm [] db req
+    res <- layout view [] db req
+    return $ Res.success res []
 
 create :: Res.Handler
 -- ^ Create a new article from the given POST data
@@ -34,7 +45,9 @@ create [] db req = do
     time <- C.getCurrentTime
     print req
     DB.query db (Article.save $ Article.Article Nothing title content time)
-    return $ Res.success $(Html.parseFile "article/new.html.qh") ["HELLO=WORLD"]
+    view <- articleForm [] db req
+    res <- layout view [] db req
+    return $ Res.success res ["HELLO=WORLD"]
   where
     title   = post ! "title"
     content = post ! "content"

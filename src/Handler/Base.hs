@@ -1,5 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
 module Handler.Base where
 
 import qualified Data.ByteString.Char8            as BS

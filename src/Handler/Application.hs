@@ -19,7 +19,7 @@ layout yield [] db req = do
     let (name, login) = case user of
           Just User.User {User.name = name} -> (name, True)
           Nothing -> ("anonymous", False)
-    return $ [parse|html
+    return [parse|html
         head
           meta   { charset: "UTF-8" }
           link   { href: "/static/q.css", rel: "stylesheet" }
