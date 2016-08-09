@@ -11,7 +11,7 @@ import qualified Models.User                      as User
 import Core.Html (parse)
 import Data.Map ((!))
 
-signupForm :: BS.ByteString
+signupForm :: IO [BS.ByteString]
 signupForm = [parse|form { action: "/auth/signup", method: "post" }
     | email
     input { type: "text", name: "email" }
@@ -26,7 +26,8 @@ new :: Res.Handler
 -- ^ Render the form
 new [] db req = do
     error "prevented!"
-    return $ Res.success signupForm []
+    form <- signupForm
+    return $ Res.success (BS.concat form) []
 
 destroy :: Res.Handler
 -- ^ Render the form
@@ -35,14 +36,15 @@ destroy [] db req =
 
 index :: Res.Handler
 -- ^ Render the signin form
-index [] db req =
-    return $ Res.success [parse|form { action: "/auth/signin", method: "post" }
+index [] db req = do
+    html <- [parse|form { action: "/auth/signin", method: "post" }
       | email
       input { type: "text", name: "email" }
       | password
       input { type: "password", name: "password" }
       input { type: "submit" }
-     |] []
+     |]
+    return $ Res.success (BS.concat html) []
 
 signin :: Res.Handler
 -- ^ Sign in and redirect to home
@@ -71,7 +73,8 @@ create [] db req = do
       , User.name = name
       , User.password = Just password
       , User.createdAt = Nothing } )
-    return $ Res.success signupForm ["HELLO=WORLD"]
+    html <- signupForm
+    return $ Res.success (BS.concat html) ["HELLO=WORLD"]
   where
     name = post ! "name"
     email = post ! "email"

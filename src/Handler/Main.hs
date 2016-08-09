@@ -19,7 +19,7 @@ index :: Res.Handler
 index [] db req = do
     temp <- DB.query db Article.find
     articles <- mapM read temp
-    res <- layout [parse| - foreach articles -> title,content,date,month,year,time
+    let res = [parse| - foreach articles -> title,content,date,month,year,time
       div { class: "article" }
         div { class: "wrapper" }
             div { class: "label" }
@@ -36,8 +36,9 @@ index [] db req = do
               = title
             div { class: "content" }
               = content
-      |] [] db req
-    return $ Res.success res []
+      |]
+    res' <- layout res [] db req
+    return $ Res.success (BS.concat res') []
   where
     read :: Bson.Document -> IO [BS.ByteString]
     read document = do
