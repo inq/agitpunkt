@@ -7,19 +7,18 @@ import qualified Data.ByteString.Char8          as BS
 import qualified Data.ByteString.Lazy           as LS
 import qualified Data.Time.Format               as TF
 import qualified Core.Response                  as Res
-import qualified Core.Database                  as DB
 import qualified Core.Markdown                  as MD
 import qualified Models.Article                 as Article
+import Core.Component (Handler, runDB)
 import Core.Html (parse)
 import Handler.Application
-import Handler.Base
 
-index :: Res.Handler
+index :: Handler
 -- ^ Render the main page
-index [] db req = do
-    temp <- DB.query db Article.find
+index = do
+    temp <- runDB Article.find
     articles <- mapM read temp
-    let res = [parse| - foreach articles -> title,content,date,month,year,time
+    res <- layout [parse| - foreach articles -> title,content,date,month,year,time
       div { class: "article" }
         div { class: "wrapper" }
             div { class: "label" }
@@ -37,10 +36,8 @@ index [] db req = do
             div { class: "content" }
               = content
       |]
-    res' <- layout res [] db req
-    return $ Res.success (BS.concat res') []
+    return $ Res.success (BS.concat res) []
   where
-    read :: Bson.Document -> IO [BS.ByteString]
     read document = do
         title <- Mongo.lookup "title" document
         content <- Mongo.lookup "content" document
