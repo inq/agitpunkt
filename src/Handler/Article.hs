@@ -1,41 +1,53 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
 module Handler.Article where
 
+import qualified Data.ByteString.Char8          as BS
 import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
-import qualified Core.Html                      as Html                
 import qualified Data.Time.Clock                as C
 import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
-import qualified Language.Haskell.TH            as TH
-import qualified Data.Time                      as T
-import qualified Data.ByteString.Char8          as BS
-import qualified Data.Time.Format               as TF
-
+import qualified Control.Monad.State            as MS
+import Core.Component (Handler, Component, runDB, getParams, postData')
+import Core.Html (parse)
+import Handler.Application
 import Data.Map ((!))
 
-show :: Res.Handler
+show :: Handler
 -- ^ Test parsing URI parameters
-show [category, article, index] db req = do
-    return $ Res.success $(Html.parseFile "article/show.html.qh") []
+show = do
+    [category, article, index] <- getParams
+    res <- [parse|div
+      p
+        = category
+      p
+        = article
+      p
+        = index
+     |]
+    return $ Res.success (BS.concat res) []
 
-compiled :: BS.ByteString
-compiled = BS.concat ["compiled at ", $(TH.stringE =<< TH.runIO ((TF.formatTime TF.defaultTimeLocale "%Y-%m-%d %H:%M:%S") <$> T.getCurrentTime))]
+articleForm :: Component
+articleForm = [parse|div { class: "content" }
+    div
+      form { action: "/article/new", method: "post" }
+        input { type: "text", name: "title" }
+        textarea { name: "content", id: "content-box" }
+        input { type: "submit", value: "Submit" }
+   |]
 
-new :: Res.Handler
+new :: Handler
 -- ^ Render the formm
-new [] db req = 
-    return $ Res.success $(Html.parseFile "article/new.html.qh") []
+new = do
+    res <- layout articleForm
+    return $ Res.success (BS.concat res) []
 
-create :: Res.Handler
+create :: Handler
 -- ^ Create a new article from the given POST data
-create [] db req = do
-    time <- C.getCurrentTime
-    print req
-    DB.query db (Article.save $ Article.Article Nothing title content time)
-    return $ Res.success $(Html.parseFile "article/new.html.qh") ["HELLO=WORLD"]
-  where
-    title   = post ! "title"
-    content = post ! "content"
-    post    = Req.post req
+create = do
+    time <- MS.liftIO C.getCurrentTime
+    title <- postData' "title"
+    content <- postData' "content"
+    runDB $ Article.save $ Article.Article Nothing title content time
+    res <- layout articleForm
+    return $ Res.success (BS.concat res) ["HELLO=WORLD"]
