@@ -2,16 +2,13 @@
 module Handler.Article where
 
 import qualified Data.ByteString.Char8          as BS
-import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
 import qualified Data.Time.Clock                as C
-import qualified Core.Database                  as DB
 import qualified Models.Article                 as Article
 import qualified Control.Monad.State            as MS
 import Core.Component (Handler, Component, runDB, getParams, postData')
 import Core.Html (parse)
 import Handler.Application
-import Data.Map ((!))
 
 show :: Handler
 -- ^ Test parsing URI parameters
@@ -25,7 +22,7 @@ show = do
       p
         = index
      |]
-    return $ Res.success (BS.concat res) []
+    return $ Res.success res []
 
 articleForm :: Component
 articleForm = [parse|div { class: "content" }
@@ -40,7 +37,7 @@ new :: Handler
 -- ^ Render the formm
 new = do
     res <- layout articleForm
-    return $ Res.success (BS.concat res) []
+    return $ Res.success res []
 
 create :: Handler
 -- ^ Create a new article from the given POST data
@@ -50,4 +47,4 @@ create = do
     content <- postData' "content"
     runDB $ Article.save $ Article.Article Nothing title content time
     res <- layout articleForm
-    return $ Res.success (BS.concat res) ["HELLO=WORLD"]
+    return $ Res.success res ["HELLO=WORLD"]

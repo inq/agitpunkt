@@ -37,11 +37,8 @@ loginbox = do
      |]
 
 layout :: Component -> Component
-layout yield' = do
+layout yield = do
     categories <- toStrList . convert . reverse <$> runDB Category.find
-    yield <- BS.concat <$> yield'
-    img <- BS.concat <$> github
-    lb <- BS.concat <$> loginbox
     [parse|html
         head
           meta   { charset: "UTF-8" }
@@ -50,7 +47,7 @@ layout yield' = do
           div { id: "header" }
             div { class: "wrapper" }
               div { id: "signin-box" }
-                = lb
+                ^ loginbox
               p
                 span { class: "red" }
                   | {
@@ -62,7 +59,7 @@ layout yield' = do
               - foreach categories -> name,id,lvl
                 li { class: lvl, data-id: id }
                   = name
-          = yield
+          ^ yield
           div  { id: "footer" }
             div { id: "footer-left" }
               p { id: "compiled-at" }
@@ -71,5 +68,5 @@ layout yield' = do
                 | Inkyu Lee
             div { id: "footer-right" }
               a { href: "https://github.com/inq/agitpunkt" }
-                = img
+                ^ github
      |]

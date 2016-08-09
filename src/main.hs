@@ -13,7 +13,7 @@ main = do
           p
             | oops 404!
      |]
-    let process = Launcher.run Handler.routeTree (BS.concat response404) databaseName socketFile
+    let process = Launcher.run Handler.routeTree response404 databaseName socketFile
     Launcher.daemonize pidFile stdOut stdErr process
   where
     databaseName = "manicure-test"

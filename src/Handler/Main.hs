@@ -36,7 +36,7 @@ index = do
             div { class: "content" }
               = content
       |]
-    return $ Res.success (BS.concat res) []
+    return $ Res.success res []
   where
     read document = do
         title <- Mongo.lookup "title" document

@@ -7,10 +7,10 @@ import qualified Data.Time.Clock                  as C
 import qualified Data.ByteString.Char8            as BS
 import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
-import Core.Component (Handler, runDB, runRedis, postData')
+import Core.Component (Component, Handler, runDB, runRedis, postData')
 import Core.Html (parse)
 
-signupForm :: IO [BS.ByteString]
+signupForm :: Component
 signupForm = [parse|form { action: "/auth/signup", method: "post" }
     | email
     input { type: "text", name: "email" }
@@ -25,8 +25,8 @@ new :: Handler
 -- ^ Render the form
 new = do
     error "prevented!"
-    form <- MS.liftIO signupForm
-    return $ Res.success (BS.concat form) []
+    form <- signupForm
+    return $ Res.success form []
 
 destroy :: Handler
 -- ^ Render the form
@@ -43,7 +43,7 @@ index = do
       input { type: "password", name: "password" }
       input { type: "submit" }
      |]
-    return $ Res.success (BS.concat html) []
+    return $ Res.success html []
 
 signin :: Handler
 -- ^ Sign in and redirect to home
@@ -63,7 +63,6 @@ create :: Handler
 -- ^ Create a new article from the given POST data
 create = do
     error "prevented!"
-    time <- MS.liftIO C.getCurrentTime
     name <- postData' "name"
     email <- postData' "email"
     password <- User.hashPassword <$> postData' "password"
@@ -73,5 +72,5 @@ create = do
       , User.name = name
       , User.password = Just password
       , User.createdAt = Nothing }
-    html <- MS.liftIO signupForm
-    return $ Res.success (BS.concat html) ["HELLO=WORLD"]
+    html <- signupForm
+    return $ Res.success html ["HELLO=WORLD"]
