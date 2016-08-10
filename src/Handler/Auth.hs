@@ -3,7 +3,6 @@ module Handler.Auth where
 
 import qualified Core.Response                    as Res
 import qualified Core.Session                     as Ses
-import qualified Data.Time.Clock                  as C
 import qualified Data.ByteString.Char8            as BS
 import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
