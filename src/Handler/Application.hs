@@ -2,9 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Data.ByteString.Char8          as BS
 import qualified Models.Category                as Category
 import qualified Models.User                    as User
+import Handler.Icons
 import Core.Component (Component, runDB, runRedis, getCookie)
 import Core.Html (parse)
 import Handler.Base
@@ -58,6 +58,7 @@ layout yield = do
             ul
               - foreach categories -> name,id,lvl
                 li { class: lvl, data-id: id }
+                  ^ document1
                   = name
           ^ yield
           div  { id: "footer" }

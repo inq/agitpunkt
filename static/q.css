@@ -29,7 +29,7 @@ a:link, a:visited {
     margin: 0;
     padding: 0 0 0 3.2em;
     color: #333;
-    background: 
+    background:
     linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
     linear-gradient(315deg, #cc8477 50%, #aa6255 0, #aa6255 50%),#cc8477;
     background-size: 2.2em 2.2em;
@@ -39,7 +39,7 @@ a:link, a:visited {
 }
 
 #menu li:first-child {
-    background: 
+    background:
     linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
     linear-gradient(315deg, #cc8477 50%, #333 0, #333 50%),#cc8477;
     background-size: 2.2em 2.2em;
@@ -49,7 +49,7 @@ a:link, a:visited {
 }
 
 #menu li.l2 {
-    background: 
+    background:
     linear-gradient(45deg, #eec099 65%, transparent 0, transparent 35%),
     linear-gradient(315deg, #eec099 50%, #bb9055 0, #bb9055 50%),#eec099;
     background-size: 2.2em 2.2em;
@@ -182,6 +182,13 @@ div#footer-right {
 
 #footer-right a {
     display: inline-block;
+}
+
+.menu-icon {
+    width: 1.2em;
+    height: 1.2em;
+    display: inline-block;
+    margin-right: 0.2em;
 }
 
 .github-icon {
