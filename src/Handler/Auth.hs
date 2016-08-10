@@ -8,6 +8,7 @@ import qualified Data.ByteString.Char8            as BS
 import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
 import Core.Component (Component, Handler, runDB, runRedis, postData')
+import Handler.Application
 import Core.Html (parse)
 
 signupForm :: Component
@@ -36,7 +37,7 @@ destroy =
 index :: Handler
 -- ^ Render the signin form
 index = do
-    html <- [parse|form { action: "/auth/signin", method: "post" }
+    html <- layout [parse|form { action: "/auth/signin", method: "post" }
       | email
       input { type: "text", name: "email" }
       | password
