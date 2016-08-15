@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Models.Category                as Category
+import qualified Models.Category                as C
 import qualified Models.User                    as User
 import Handler.Icons
 import Core.Component (Component, runDB, runRedis, getCookie)
@@ -38,7 +38,7 @@ loginbox = do
 
 layout :: Component -> Component
 layout yield = do
-    categories <- toStrList . convert . reverse <$> runDB Category.find
+    categories <- toStrList . convert . reverse <$> runDB C.find
     [parse|html
         head
           meta   { charset: "UTF-8" }
@@ -56,10 +56,8 @@ layout yield = do
                   | }
           div { id: "menu" }
             ul
-              - foreach categories -> name,id,lvl
-                li { class: lvl, data-id: id }
-                  ^ document1
-                  = name
+              - map categories -> category
+                ^ renderCategory category
           ^ yield
           div  { id: "footer" }
             div { id: "footer-left" }
@@ -71,3 +69,12 @@ layout yield = do
               a { href: "https://github.com/inq/agitpunkt" }
                 ^ github
      |]
+  where
+    renderCategory (Entry i l n) = do
+        [parse|li { class: lvl, data-id: id }
+           ^ document1
+           = n
+         |]
+      where
+        id = show i
+        lvl = "l" ++ show l

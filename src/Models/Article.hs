@@ -9,9 +9,11 @@ import qualified Data.Bson                      as Bson
 import Control.Monad.Trans (MonadIO)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Database.MongoDB ((=:))
+import Data.Bson ((!?))
+import Data.Map ((!))
 
 data Article = Article
-  { id        :: Maybe Bson.ObjectId
+  { _id       :: Maybe Bson.ObjectId
   , title     :: BS.ByteString
   , content   :: BS.ByteString
   , createdAt :: TC.UTCTime
@@ -27,7 +29,15 @@ save (Article _id' title' content' createdAt') = do
       ]
     return ()
 
-find :: (MonadIO m, MonadBaseControl IO m) => M.Action m [M.Document]
+find :: M.Action IO [Article]
 -- ^ Find articles
 find = do
-    (M.find $ M.select [] "articles") >>= M.rest
+    res <- (M.find $ M.select [] "articles") >>= M.rest
+    return $ map fromDocument res
+  where
+    fromDocument doc = Article
+      { _id = doc !? "_id"
+      , title = Bson.at "title" doc
+      , content = Bson.at "content" doc
+      , createdAt = Bson.at "createdAt" doc
+      }

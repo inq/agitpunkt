@@ -16,15 +16,21 @@ data RoseTree = Node
   , children :: [RoseTree]
   } deriving (Show)
 
-toStrList :: [RoseTree] -> [[BS.ByteString]]
+data Entry = Entry
+  { eId :: Bson.ObjectId
+  , eLevel :: Int
+  , eName :: BS.ByteString
+  }
+
+toStrList :: [RoseTree] -> [Entry]
 toStrList cs = concat $ map (toStrList' one) cs
   where
     one = 1 :: Int
     toStrList' l (Node i n cr) =
-      [n, BS.pack $ unMaybe i, BS.pack ("l" ++ show l)]
+      (Entry (unMaybe i) l n)
         : (concat $ map (toStrList' $ l + 1) cr)
-    unMaybe (Just x) = show x
-    unMaybe Nothing = ""
+    unMaybe (Just x) = x
+    unMaybe Nothing = error "No category id"
 
 convert :: [Ct.Category] -> [RoseTree]
 convert cs = map toRose roots

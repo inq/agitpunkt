@@ -8,18 +8,15 @@ import qualified Data.ByteString.Lazy           as LS
 import qualified Data.Time.Format               as TF
 import qualified Core.Response                  as Res
 import qualified Core.Markdown                  as MD
-import qualified Models.Article                 as Article
-import Core.Component (Handler, runDB)
+import qualified Models.Article                 as A
+import Core.Component (Handler, Component, runDB)
 import Core.Html (parse)
 import Handler.Application
 
-index :: Handler
--- ^ Render the main page
-index = do
-    temp <- runDB Article.find
-    articles <- mapM read temp
-    res <- layout [parse| - foreach articles -> title,content,date,month,year,time
-      div { class: "article" }
+renderArticle :: A.Article -> Component
+-- ^ Render the article
+renderArticle (A.Article i t c d) = do
+    [parse|div { class: "article" }
         div { class: "wrapper" }
             div { class: "label" }
               span { class: "date" }
@@ -32,30 +29,22 @@ index = do
               span { class: "time" }
                 = time
             div { class: "title" }
-              = title
+              = t
             div { class: "content" }
-              = content
+              = c
+     |]
+  where
+    date = TF.formatTime TF.defaultTimeLocale "%d" d
+    month = TF.formatTime TF.defaultTimeLocale "%b" d
+    year = TF.formatTime TF.defaultTimeLocale "%Y" d
+    time = TF.formatTime TF.defaultTimeLocale "%H:%M:%S" d
+
+
+index :: Handler
+-- ^ Render the main page
+index = do
+    articles <- runDB A.find
+    res <- layout [parse| - map articles -> article
+        ^ renderArticle article
       |]
     return $ Res.success res []
-  where
-    read document = do
-        title <- Mongo.lookup "title" document
-        content <- Mongo.lookup "content" document
-        createdAt <- Mongo.lookup "created_at" document
-        return
-          [ extract title
-          , convert content
-          , extractDate createdAt
-          , extractMonth createdAt
-          , extractYear createdAt
-          , extractTime createdAt
-          ]
-      where
-        convert content = case MD.convert $ LS.fromStrict $ extract content of
-            Just str -> LS.toStrict str
-            _ -> "parse error"
-        extract (Bson.String a) = a
-        extractDate (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%d" a
-        extractMonth (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%b" a
-        extractYear (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%Y" a
-        extractTime (Bson.UTC a) = BS.pack $ TF.formatTime TF.defaultTimeLocale "%H:%M:%S" a
