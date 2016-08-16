@@ -9,11 +9,13 @@ import Core.Component (Handler, Component, runDB)
 import Core.Html (parse)
 import Handler.Application
 
-renderArticle :: A.Article -> Component
--- ^ Render the article
-renderArticle (A.Article i t c d) = do
-    [parse|div { class: "article" }
-        div { class: "wrapper" }
+index :: Handler
+-- ^ Render the main page
+index = do
+    articles <- runDB A.find
+    res <- layout [parse|- map articles -> A.Article i t c d
+        div { class: "article" }
+          div { class: "wrapper" }
             div { class: "label" }
               span { class: "date" }
                 $ TF.formatTime TF.defaultTimeLocale "%d" d
@@ -28,13 +30,5 @@ renderArticle (A.Article i t c d) = do
               = t
             div { class: "content" }
               = c
-     |]
-
-index :: Handler
--- ^ Render the main page
-index = do
-    articles <- runDB A.find
-    res <- layout [parse|- map articles -> article
-        ^ renderArticle article
       |]
     return $ Res.success res []

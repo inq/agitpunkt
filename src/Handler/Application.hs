@@ -26,7 +26,7 @@ loginbox = do
     [parse|span { class: "signin-box" }
       - if l
         span { class: "name-box" }
-          $ n
+          = n
         a { href: "/auth/signout" }
           | Sign out
         a { href: "/article/new" }
@@ -62,7 +62,7 @@ layout yield = do
           div  { id: "footer" }
             div { id: "footer-left" }
               p { id: "compiled-at" }
-                $ compiled
+                = compiled
               p { id: "author" }
                 | Inkyu Lee
             div { id: "footer-right" }
@@ -73,7 +73,7 @@ layout yield = do
     renderCategory (Entry i l n) = do
         [parse|li { class: lvl, data-id: id }
            ^ document1
-           $ n
+           = n
          |]
       where
         id = show i
