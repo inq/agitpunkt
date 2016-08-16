@@ -2,8 +2,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Models.Category                as C
-import qualified Models.User                    as User
+import qualified Models.Category                  as C
+import qualified Models.User                      as User
 import Handler.Icons
 import Core.Component (Component, runDB, runRedis, getCookie)
 import Core.Html (parse)
@@ -17,21 +17,21 @@ github = [parse|svg { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 48 48",
 loginbox :: Component
 loginbox = do
     session_key <- getCookie "SESSION_KEY"
-    user <- case session_key of
+    u <- case session_key of
         Just key -> runRedis $ User.redisGet key
         Nothing -> return Nothing
-    let (name, login) = case user of
+    let (n, l) = case u of
           Just User.User {User.name = name} -> (name, True)
           Nothing -> ("anonymous", False)
     [parse|span { class: "signin-box" }
-      - if login
+      - if l
         span { class: "name-box" }
-          = name
+          $ n
         a { href: "/auth/signout" }
           | Sign out
         a { href: "/article/new" }
           | new article
-      - if not login
+      - if not l
         a { href: "/auth/signin" }
           | sign in
      |]
@@ -62,7 +62,7 @@ layout yield = do
           div  { id: "footer" }
             div { id: "footer-left" }
               p { id: "compiled-at" }
-                = compiled
+                $ compiled
               p { id: "author" }
                 | Inkyu Lee
             div { id: "footer-right" }
@@ -73,7 +73,7 @@ layout yield = do
     renderCategory (Entry i l n) = do
         [parse|li { class: lvl, data-id: id }
            ^ document1
-           = n
+           $ n
          |]
       where
         id = show i

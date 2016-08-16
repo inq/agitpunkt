@@ -6,6 +6,7 @@ import qualified Core.Session                     as Ses
 import qualified Data.ByteString.Char8            as BS
 import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
+import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Component, Handler, runDB, runRedis, postData')
 import Handler.Application
 import Core.Html (parse)

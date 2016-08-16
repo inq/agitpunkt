@@ -6,11 +6,8 @@ import qualified Data.ByteString.Char8          as BS
 import qualified Data.Time.Clock                as TC
 import qualified Database.MongoDB               as M
 import qualified Data.Bson                      as Bson
-import Control.Monad.Trans (MonadIO)
-import Control.Monad.Trans.Control (MonadBaseControl)
 import Database.MongoDB ((=:))
 import Data.Bson ((!?))
-import Data.Map ((!))
 
 data Article = Article
   { _id       :: Maybe Bson.ObjectId
@@ -39,5 +36,5 @@ find = do
       { _id = doc !? "_id"
       , title = Bson.at "title" doc
       , content = Bson.at "content" doc
-      , createdAt = Bson.at "createdAt" doc
+      , createdAt = Bson.at "created_at" doc
       }

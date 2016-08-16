@@ -4,6 +4,7 @@
 CAUTION: You cannot use this icons unless you have a paid license with Flaticon
 -}
 module Handler.Icons where
+import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Component)
 import Core.Html (parse)
 
