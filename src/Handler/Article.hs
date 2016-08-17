@@ -25,12 +25,12 @@ show = do
     return $ Res.success res []
 
 articleForm :: Component
-articleForm = [parse|div { class: "content" }
+articleForm = [parse|div { class="content" }
     div
-      form { action: "/article/new", method: "post" }
-        input { type: "text", name: "title" }
-        textarea { name: "content", id: "content-box" }
-        input { type: "submit", value: "Submit" }
+      form { action="/article/new", method="post" }
+        input { type="text", name="title" }
+        textarea { name="content", id="content-box" }
+        input { type="submit", value="Submit" }
    |]
 
 new :: Handler

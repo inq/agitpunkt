@@ -12,14 +12,14 @@ import Handler.Application
 import Core.Html (parse)
 
 signupForm :: Component
-signupForm = [parse|form { action: "/auth/signup", method: "post" }
+signupForm = [parse|form { action="/auth/signup", method="post" }
     | email
-    input { type: "text", name: "email" }
+    input { type="text", name="email" }
     | password
-    input { type: "password", name: "password" }
+    input { type="password", name="password" }
     | name
-    input { type: "name", name: "name" }
-    input { type: "submit" }
+    input { type="name", name="name" }
+    input { type="submit" }
    |]
 
 new :: Handler
@@ -37,12 +37,12 @@ destroy =
 index :: Handler
 -- ^ Render the signin form
 index = do
-    html <- layout [parse|form { action: "/auth/signin", method: "post" }
+    html <- layout [parse|form { action="/auth/signin", method="post" }
       | email
-      input { type: "text", name: "email" }
+      input { type="text", name="email" }
       | password
-      input { type: "password", name: "password" }
-      input { type: "submit" }
+      input { type="password", name="password" }
+      input { type="submit" }
      |]
     return $ Res.success html []
 
