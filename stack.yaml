@@ -1,7 +1,7 @@
-resolver: nightly-2016-07-07
+resolver: lts-7.1
 packages:
 - location: .
-- location: 
+- location:
     git: 'https://github.com/inq/bson.git'
     commit: '0063a3481684556195a24c7c8d6d34b49d3af85c'
   extra-dep: true
