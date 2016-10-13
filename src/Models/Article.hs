@@ -4,7 +4,7 @@ module Models.Article where
 
 import qualified Data.ByteString.Char8          as BS
 import qualified Data.Time.Clock                as TC
-import qualified Database.MongoDB               as M
+import qualified Database.MongoDB               as Mongo
 import qualified Data.Bson                      as Bson
 import Database.MongoDB ((=:))
 import Data.Bson ((!?))
@@ -16,20 +16,20 @@ data Article = Article
   , createdAt :: TC.UTCTime
   }
 
-save :: Article -> M.Action IO ()
+save :: Article -> Mongo.Action IO ()
 -- ^ Save the data into the DB
 save (Article _id' title' content' createdAt') = do
-    _ <- M.insert "articles" [
+    _ <- Mongo.insert "articles" [
         "title"      =: Bson.String title',
         "content"    =: Bson.String content',
         "created_at" =: createdAt'
       ]
     return ()
 
-find :: M.Action IO [Article]
+find :: Mongo.Action IO [Article]
 -- ^ Find articles
 find = do
-    res <- (M.find $ M.select [] "articles") >>= M.rest
+    res <- Mongo.find (Mongo.select [] "articles") >>= Mongo.rest
     return $ map fromDocument res
   where
     fromDocument doc = Article

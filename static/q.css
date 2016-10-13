@@ -18,45 +18,32 @@ a:link, a:visited {
     border-collapse: collapse;
 }
 
+#menu {
+    width: 100%;
+}
+
 #menu ul {
+    background:
+    linear-gradient(45deg, white 65%, transparent 0, transparent 35%),
+    linear-gradient(315deg, white 50%, #333 0, #333 50%),transparent;
+    background-size: 2.2em 2.2em;
+    background-repeat: no-repeat;
+    background-position: 5em 0;
+    display: block;
     padding: 0;
-    margin: -1px 0 0 0;
+    width: 1024px;
+    margin: 0 auto;
     list-style: none;
+    text-align: center;
 }
 
 #menu li {
+    display: inline-block;
     line-height: 2.2em;
     margin: 0;
     padding: 0 0 0 3.2em;
     color: #333;
-    background:
-    linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
-    linear-gradient(315deg, #cc8477 50%, #aa6255 0, #aa6255 50%),#cc8477;
-    background-size: 2.2em 2.2em;
-    background-repeat: no-repeat;
-    background-position: 0.3em 0;
-    border-top: 1px solid #aa6255;
-}
-
-#menu li:first-child {
-    background:
-    linear-gradient(45deg, #cc8477 65%, transparent 0, transparent 35%),
-    linear-gradient(315deg, #cc8477 50%, #333 0, #333 50%),#cc8477;
-    background-size: 2.2em 2.2em;
-    background-repeat: no-repeat;
-    background-position: 0.3em 0;
-    border-top: 1px solid #333;
-}
-
-#menu li.l2 {
-    background:
-    linear-gradient(45deg, #eec099 65%, transparent 0, transparent 35%),
-    linear-gradient(315deg, #eec099 50%, #bb9055 0, #bb9055 50%),#eec099;
-    background-size: 2.2em 2.2em;
-    background-repeat: no-repeat;
-    background-position: 0.6em 0;
-    border-top: 1px solid #bb9055;
-    padding: 0 0 0 3.5em;
+    width: 130px;
 }
 
 #speech {
@@ -259,12 +246,6 @@ div.label {
     color: #666666;
 }
 
-#menu {
-    width: 200px;
-    padding-left: calc(50% - 512px);
-    position: absolute;
-}
-
 .label > .time {
     display: none;
     font-size: 1em;
@@ -289,9 +270,8 @@ div.article {
 .article .wrapper {
     overflow: hidden;
     box-sizing: border-box;
-    padding: 1em 1em 3em calc(200px + 1em);
-    background-image:
-        linear-gradient(90deg, #f0eded 200px, transparent 0px);
+    margin-top: 2em;
+    margin-bottom: 3em;
 }
 
 .article .title {

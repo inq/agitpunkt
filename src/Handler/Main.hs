@@ -1,12 +1,13 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Main where
 
-import qualified Data.Time.Format                 as TF
-import qualified Core.Response                    as Res
-import qualified Models.Article                   as A
-import qualified Data.ByteString.UTF8             as UTF8
-import Core.Component (Handler, Component, runDB)
+import qualified Data.Time.Format as TF
+import qualified Core.Response as Res
+import qualified Models.Article as A
+import Data.ByteString.Lazy (toStrict, fromChunks)
+import Core.Component (Handler, runDB)
 import Core.Html (parse)
+import Core.Markdown (convert)
 import Handler.Application
 
 index :: Handler
@@ -29,6 +30,10 @@ index = do
             div { class="title" }
               = t
             div { class="content" }
-              = c
+              = unwrap c
       |]
     return $ Res.success res []
+  where
+    unwrap c = case convert $ fromChunks [c] of
+      Just s -> toStrict s
+      Nothing -> ""

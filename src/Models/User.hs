@@ -10,16 +10,10 @@ import qualified Database.Redis                   as R
 import qualified Data.Bson                        as Bson
 import qualified Data.Map                         as M
 import qualified Core.Model                       as Model
-import qualified Crypto.Hash.SHA256               as SHA256
-import qualified Data.ByteString.Unsafe           as BSU
 import qualified Data.ByteString.Internal         as BSI
-import qualified Data.Bits                        as B
-import qualified Foreign.Storable                 as FS
-import qualified Foreign.Ptr                      as FP
 import GHC.Generics (Generic)
 import Data.Bson ((!?))
 import Data.Map ((!))
-import Data.Bits ((.&.))
 
 import Database.MongoDB ((=:))
 
@@ -33,40 +27,20 @@ data User = User
 
 instance Model.Model User
 
-hashPassword :: BS.ByteString -> BS.ByteString
--- ^ Hash the given password
-hashPassword = toHex . SHA256.hash
-  where
-    toHex bs = BSI.unsafeCreate nl $ go 0
-      where
-        len = BS.length bs
-        nl = 2 * len
-        go i p
-          | i == len  = return ()
-          | otherwise = case BSU.unsafeIndex bs i of
-              w -> do
-                  FS.poke p (hexDigest $ w `B.shiftR` 4)
-                  FS.poke (p `FP.plusPtr` 1) (hexDigest $ w .&. 0xF)
-                  go (i + 1) (p `FP.plusPtr` 2)
-    hexDigest d
-        | d < 10 = d + 48
-        | otherwise = d + 87
-
 signIn :: BS.ByteString -> BS.ByteString -> Mongo.Action IO (Maybe User)
 -- ^ Try to signin
 signIn email' password' = do
-    res <- Mongo.find (Mongo.select ["email" =: email', "password" =: password'] "users") >>= MQ.rest
+    res <- Mongo.find (Mongo.select ["email" =: email', "password" =: password'] "users")
+        >>= MQ.rest
     case res of
-        [doc] -> do
-             return $ Just $ User
-                   { _id = (doc !? "_id")
-                   , email = (Bson.at "email" doc)
-                   , name = (Bson.at "name" doc)
-                   , password = Nothing
-                   , createdAt = Nothing
-                   }
-        _     -> do
-             return Nothing
+        [doc] -> return $ Just User
+            { _id = doc !? "_id"
+            , email = Bson.at "email" doc
+            , name = Bson.at "name" doc
+            , password = Nothing
+            , createdAt = Nothing
+            }
+        _     -> return Nothing
 
 upsert :: User -> Mongo.Action IO ()
 -- ^ Update or insert the User
@@ -88,8 +62,8 @@ fromMap :: M.Map BS.ByteString BS.ByteString -> User
 fromMap map' =
     User
       { _id = Nothing
-      , email = (map' ! "email")
-      , name = (map' ! "name")
+      , email = map' ! "email"
+      , name = map' ! "name"
       , password = Nothing
       , createdAt = Nothing
       }

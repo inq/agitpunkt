@@ -8,6 +8,7 @@ import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
 import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Component, Handler, runDB, runRedis, postData')
+import Core.Crypto (hashPassword)
 import Handler.Application
 import Core.Html (parse)
 
@@ -50,7 +51,7 @@ signin :: Handler
 -- ^ Sign in and redirect to home
 signin = do
     email <- postData' "email"
-    password <- User.hashPassword <$> postData' "password"
+    password <- hashPassword <$> postData' "password"
     user <- runDB $ User.signIn email password
     cookies <- case user of
         Just a -> do
@@ -66,7 +67,7 @@ create = do
     error "prevented!"
     name <- postData' "name"
     email <- postData' "email"
-    password <- User.hashPassword <$> postData' "password"
+    password <- hashPassword <$> postData' "password"
     runDB $ User.save $ User.User
       { User._id = Nothing
       , User.email = email

@@ -1,9 +1,8 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Models.Category                  as C
-import qualified Models.User                      as User
+import qualified Models.Category as Category
+import qualified Models.User as User
 import Handler.Icons
 import Core.Component (Component, runDB, runRedis, getCookie)
 import Core.Html (parse)
@@ -38,7 +37,7 @@ loginbox = do
 
 layout :: Component -> Component
 layout yield = do
-    categories <- toStrList . convert . reverse <$> runDB C.find
+    categories <- toStrList . convert . reverse <$> runDB Category.find
     [parse|html
         head
           meta { charset="UTF-8" }
