@@ -1,15 +1,15 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Auth where
 
-import qualified Core.Response                    as Res
-import qualified Core.Session                     as Ses
-import qualified Data.ByteString.Char8            as BS
-import qualified Models.User                      as User
-import qualified Control.Monad.State              as MS
+import qualified Core.Response as Res
+import qualified Core.Session as Ses
+import qualified Data.ByteString.Char8 as BS
+import qualified Models.User as User
+import qualified Control.Monad.State as MS
 import Core.Component (Component, Handler, runDB, runRedis, postData')
 import Core.Crypto (hashPassword)
-import Handler.Application
 import Core.Html (parse)
+import Handler.Application
 
 signupForm :: Component
 signupForm = [parse|div { class="wrapper" }
