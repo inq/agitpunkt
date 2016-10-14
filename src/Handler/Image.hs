@@ -12,7 +12,9 @@ index :: Handler
 index = do
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      | hey
+      form { action="/image/new", method="post", enctype="multipart/formdata" }
+        input { type="file", name="data" }
+        input { type="submit" }
   |]
   return $ Res.success html []
 
@@ -21,7 +23,7 @@ create :: Handler
 create = do
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      | hey
+      | uploaded!
   |]
   return $ Res.success html []
 
