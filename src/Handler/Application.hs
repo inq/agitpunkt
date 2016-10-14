@@ -1,10 +1,8 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Models.Category as Category
 import qualified Models.User as User
-import Handler.Icons
-import Core.Component (Component, runDB, runRedis, getCookie)
+import Core.Component (Component, runRedis, getCookie)
 import Core.Html (parse)
 import Handler.Base
 
@@ -37,7 +35,6 @@ loginbox = do
 
 layout :: Component -> Component
 layout yield = do
-    categories <- toStrList . convert . reverse <$> runDB Category.find
     [parse|html
         head
           meta { charset="UTF-8" }
@@ -55,10 +52,6 @@ layout yield = do
                   | }
           div { id="menu" }
             ul
-              - map categories -> Entry i l n
-                li { class$show l, data-id$show i }
-                  ^ document1
-                  = n
           ^ yield
           div  { id="footer" }
             div { id="footer-left" }

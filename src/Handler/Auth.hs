@@ -1,4 +1,4 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Auth where
 
 import qualified Core.Response                    as Res
@@ -6,14 +6,14 @@ import qualified Core.Session                     as Ses
 import qualified Data.ByteString.Char8            as BS
 import qualified Models.User                      as User
 import qualified Control.Monad.State              as MS
-import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Component, Handler, runDB, runRedis, postData')
 import Core.Crypto (hashPassword)
 import Handler.Application
 import Core.Html (parse)
 
 signupForm :: Component
-signupForm = [parse|form { action="/auth/signup", method="post" }
+signupForm = [parse|div { class="wrapper" }
+  form { action="/auth/signup", method="post" }
     | email
     input { type="text", name="email" }
     | password
@@ -21,7 +21,7 @@ signupForm = [parse|form { action="/auth/signup", method="post" }
     | name
     input { type="name", name="name" }
     input { type="submit" }
-   |]
+ |]
 
 new :: Handler
 -- ^ Render the form
@@ -38,14 +38,16 @@ destroy =
 index :: Handler
 -- ^ Render the signin form
 index = do
-    html <- layout [parse|form { action="/auth/signin", method="post" }
-      | email
-      input { type="text", name="email" }
-      | password
-      input { type="password", name="password" }
-      input { type="submit" }
-     |]
-    return $ Res.success html []
+  html <- layout [parse|div { class="article" }
+    div { class="wrapper" }
+      form { action="/auth/signin", method="post" }
+        | email
+        input { type="text", name="email" }
+        | password
+        input { type="password", name="password" }
+        input { type="submit" }
+  |]
+  return $ Res.success html []
 
 signin :: Handler
 -- ^ Sign in and redirect to home
