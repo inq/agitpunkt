@@ -3,7 +3,7 @@ module Handler.Application where
 
 import qualified Models.User as User
 import Core.Component (Component, runRedis, getCookie)
-import Core.Html (parse)
+import Misc.Html (parse)
 import Handler.Base
 
 github :: Component

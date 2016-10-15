@@ -6,7 +6,7 @@ import qualified Data.Time.Clock                  as C
 import qualified Models.Article                   as Article
 import qualified Control.Monad.State              as MS
 import Core.Component (Handler, Component, runDB, getParams, postData')
-import Core.Html (parse)
+import Misc.Html (parse)
 import Handler.Application
 
 show :: Handler

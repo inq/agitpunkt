@@ -7,8 +7,8 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Control.Monad.State as MS
 import Core.Component (Component, Handler, runDB, runRedis, postData')
-import Core.Crypto (hashPassword)
-import Core.Html (parse)
+import Misc.Crypto (hashPassword)
+import Misc.Html (parse)
 import Handler.Application
 
 signupForm :: Component

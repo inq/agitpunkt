@@ -2,8 +2,8 @@
 module Handler.Image where
 
 import qualified Core.Response as Res
-import Core.Component (Handler)
-import Core.Html (parse)
+import Core.Component (Handler, requestHeader, reqm, reqn)
+import Misc.Html (parse)
 import Handler.Application
 
 
@@ -12,7 +12,7 @@ index :: Handler
 index = do
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      form { action="/image/new", method="post", enctype="multipart/formdata" }
+      form { action="/image/new", method="post", enctype="multipart/form-data" }
         input { type="file", name="data" }
         input { type="submit" }
   |]
@@ -21,9 +21,14 @@ index = do
 create :: Handler
 -- ^ List the images
 create = do
+  res <- Prelude.show <$> requestHeader "Content-Type"
+  x <- reqm
+  y <- reqn
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      | uploaded!
+      = x
+    div { class="wrapper" }
+      = y
   |]
   return $ Res.success html []
 

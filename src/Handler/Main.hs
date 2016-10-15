@@ -6,8 +6,8 @@ import qualified Core.Response as Res
 import qualified Models.Article as A
 import Data.ByteString.Lazy (toStrict, fromChunks)
 import Core.Component (Handler, runDB)
-import Core.Html (parse)
-import Core.Markdown (convert)
+import Misc.Html (parse)
+import Misc.Markdown (convert)
 import Handler.Application
 
 index :: Handler
