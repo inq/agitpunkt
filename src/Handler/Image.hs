@@ -11,11 +11,16 @@ import Control.Monad.State (liftIO)
 index :: Handler
 -- ^ List the images
 index = do
+  images <- runDB $ Image.find
+
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
       form { action="/image/new", method="post", enctype="multipart/form-data" }
         input { type="file", name="data" }
         input { type="submit" }
+    - map images -> image
+      div { class="wrapper" }
+        img { src=Image.imgUrl image }
   |]
   return $ Res.success html []
 
