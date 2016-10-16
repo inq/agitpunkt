@@ -1,8 +1,8 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 import qualified Data.ByteString.Char8          as BS
 import qualified Core.Handler                   as Handler
 import qualified Core.Launcher                  as Launcher
-import Core.Html (parse)
+import Misc.Html (parse)
 
 main :: IO ()
 -- ^ The main function

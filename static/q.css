@@ -28,11 +28,12 @@ a:link, a:visited {
     linear-gradient(315deg, white 50%, #333 0, #333 50%),transparent;
     background-size: 2.2em 2.2em;
     background-repeat: no-repeat;
-    background-position: 5em 0;
+    background-position: 5.5em 0;
     display: block;
     padding: 0;
-    width: 1024px;
+    width: 800px;
     margin: 0 auto;
+    height: 0.75em;
     list-style: none;
     text-align: center;
 }
@@ -110,7 +111,7 @@ div#signin-box {
 
 div.wrapper {
     margin: 0 auto 0 auto;
-    max-width: 1024px;
+    max-width: 800px;
 }
 
 div#header {
@@ -137,7 +138,7 @@ div#footer {
     font-size: .9em;
     text-align: right;
     background-color: white;
-    max-width: 1024px;
+    max-width: 800px;
     padding: 0 calc(50% - 512px);
     margin: 20px 0;
     font-family: Consolas, Menlo, Courier, monospace;

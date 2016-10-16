@@ -1,11 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 module Models.Article where
 
-import qualified Data.ByteString.Char8          as BS
-import qualified Data.Time.Clock                as TC
-import qualified Database.MongoDB               as Mongo
-import qualified Data.Bson                      as Bson
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.Time.Clock as TC
+import qualified Database.MongoDB as Mongo
+import qualified Data.Bson as Bson
 import Database.MongoDB ((=:))
 import Data.Bson ((!?))
 

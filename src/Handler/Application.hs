@@ -1,12 +1,23 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Application where
 
-import qualified Models.Category as Category
+import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
-import Handler.Icons
-import Core.Component (Component, runDB, runRedis, getCookie)
-import Core.Html (parse)
+import Core.Component (Component, runRedis, getCookie)
+import Misc.Html (parse)
 import Handler.Base
+
+assertUser :: BS.ByteString -> Component
+assertUser email = do
+    session_key <- getCookie "SESSION_KEY"
+    u <- case session_key of
+      Just key -> runRedis $ User.redisGet key
+      Nothing -> return Nothing
+    case u of
+      Just User.User {User.email = email'}
+        | email == email' -> return "OK"
+      _ -> fail "Failed"
+
 
 github :: Component
 github = [parse|svg { xmlns="http://www.w3.org/2000/svg", viewBox="0 0 48 48", class="github-icon" }
@@ -37,7 +48,6 @@ loginbox = do
 
 layout :: Component -> Component
 layout yield = do
-    categories <- toStrList . convert . reverse <$> runDB Category.find
     [parse|html
         head
           meta { charset="UTF-8" }
@@ -55,10 +65,6 @@ layout yield = do
                   | }
           div { id="menu" }
             ul
-              - map categories -> Entry i l n
-                li { class$show l, data-id$show i }
-                  ^ document1
-                  = n
           ^ yield
           div  { id="footer" }
             div { id="footer-left" }

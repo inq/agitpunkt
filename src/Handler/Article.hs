@@ -1,13 +1,12 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Article where
 
 import qualified Core.Response                    as Res
 import qualified Data.Time.Clock                  as C
 import qualified Models.Article                   as Article
 import qualified Control.Monad.State              as MS
-import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Handler, Component, runDB, getParams, postData')
-import Core.Html (parse)
+import Misc.Html (parse)
 import Handler.Application
 
 show :: Handler

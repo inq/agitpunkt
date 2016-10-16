@@ -23,12 +23,12 @@ data Entry = Entry
   }
 
 toStrList :: [RoseTree] -> [Entry]
-toStrList cs = concat $ map (toStrList' one) cs
+toStrList = concatMap (toStrList' one)
   where
     one = 1 :: Int
     toStrList' l (Node i n cr) =
       (Entry (unMaybe i) l n)
-        : (concat $ map (toStrList' $ l + 1) cr)
+        : (concatMap (toStrList' $ l + 1) cr)
     unMaybe (Just x) = x
     unMaybe Nothing = error "No category id"
 
