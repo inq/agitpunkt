@@ -5,9 +5,11 @@ module Models.Image where
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Time.Clock as TC
 import qualified Data.Bson as Bson
+import qualified Database.MongoDB as Mongo
+import Control.Monad.State (liftIO)
 import System.Directory (createDirectoryIfMissing)
 import Core.Request.Content (Context(..))
-import Data.Bson (genObjectId)
+import Data.Bson ((=:), genObjectId)
 import Data.Time.Format (formatTime, defaultTimeLocale)
 import Data.Ratio ((%))
 import Control.Arrow ((&&&), (***))
@@ -22,33 +24,39 @@ import Codec.Picture
 
 data Image = Image
   { _id       :: Maybe Bson.ObjectId
-  , filename  :: BS.ByteString
-  , content   :: BS.ByteString
+  , origFile  :: BS.ByteString
   , createdAt :: TC.UTCTime
   }
 
 getDirectory :: TC.UTCTime -> String
 getDirectory = formatTime defaultTimeLocale "%y%m%d"
 
-save :: Context -> IO ()
-save (MkFile _ _ d) = do
-  current <- TC.getCurrentTime
-  objId <- genObjectId
+save :: Context -> Mongo.Action IO ()
+save (MkFile (Just fname) _ d) = do
+  current <- liftIO TC.getCurrentTime
+  objId <- liftIO genObjectId
 
   let parentDir = "data/" ++ getDirectory current
       imgDir = parentDir ++ "/" ++ show objId
-  createDirectoryIfMissing False parentDir
-  createDirectoryIfMissing False imgDir
+  liftIO $ createDirectoryIfMissing False parentDir
+  liftIO $ createDirectoryIfMissing False imgDir
 
   case decodeImage d of
     Right i -> do
       let img = convertRGB8 i
       let fact = 1024 % imageWidth img
-      if fact > 1
-        then saveJpgImage 100 (imgDir ++ "/1024.jpg") $ ImageRGB8 img
-        else saveJpgImage 100 (imgDir ++ "/1024.jpg") $ ImageRGB8 $ resize fact img
+      liftIO $ saveJpgImage 100 (imgDir ++ "/1024.jpg") $ if fact > 1
+        then ImageRGB8 img
+        else ImageRGB8 $ resize fact img
     _ -> return ()
-  BS.writeFile (imgDir ++ "/orig.jpg") d
+  liftIO $ BS.writeFile (imgDir ++ "/orig.jpg") d
+
+  _ <- Mongo.insert "images"
+    [ "_id" =: Just objId
+    , "origFile" =: fname
+    , "createdAt" =: current
+    ]
+  return ()
 save _ = return ()
 
 

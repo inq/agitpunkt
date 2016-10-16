@@ -3,7 +3,7 @@ module Handler.Image where
 
 import qualified Core.Response as Res
 import qualified Models.Image as Image
-import Core.Component (Handler, requestHeader, postData)
+import Core.Component (Handler, requestHeader, postData, runDB)
 import Misc.Html (parse)
 import Handler.Application
 import Control.Monad.State (liftIO)
@@ -20,18 +20,17 @@ index = do
   return $ Res.success html []
 
 create :: Handler
--- ^ List the images
+-- ^ Create the image
 create = do
   res <- Prelude.show <$> requestHeader "Content-Type"
   d <- postData "data"
-  liftIO $ case d of
-    Just x -> Image.save x
+  case d of
+    Just x -> runDB $ Image.save x
     _ -> return ()
-  let file = Prelude.show d
 
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      $ file
+      | Uploaded
   |]
   return $ Res.success html []
 
