@@ -1,10 +1,23 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Application where
 
+import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import Core.Component (Component, runRedis, getCookie)
 import Misc.Html (parse)
 import Handler.Base
+
+assertUser :: BS.ByteString -> Component
+assertUser email = do
+    session_key <- getCookie "SESSION_KEY"
+    u <- case session_key of
+      Just key -> runRedis $ User.redisGet key
+      Nothing -> return Nothing
+    case u of
+      Just User.User {User.email = email'}
+        | email == email' -> return "OK"
+      _ -> fail "Failed"
+
 
 github :: Component
 github = [parse|svg { xmlns="http://www.w3.org/2000/svg", viewBox="0 0 48 48", class="github-icon" }
