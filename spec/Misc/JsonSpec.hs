@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Misc.JsonSpec where
 
-import qualified Data.Map.Strict                as M
+import qualified Data.Map.Strict as M
 import Misc.Json
 import SpecHelper
 

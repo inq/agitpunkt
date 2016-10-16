@@ -7,6 +7,18 @@ a:link, a:visited {
     text-decoration: none;
 }
 
+input.editbox {
+    font-size: 1.2em;
+    width: 100%;
+    display: block;
+}
+
+textarea.content {
+    width: 100%;
+    height: 600px;
+    display: block;
+}
+
 .code-snippet {
     background-color: #f1f0f0;
     margin: 10px 0;

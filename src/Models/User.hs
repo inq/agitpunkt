@@ -2,15 +2,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Models.User where
 
-import qualified Data.ByteString.Char8            as BS
-import qualified Data.Time.Clock                  as TC
-import qualified Database.MongoDB                 as Mongo
-import qualified Database.MongoDB.Query           as MQ
-import qualified Database.Redis                   as R
-import qualified Data.Bson                        as Bson
-import qualified Data.Map                         as M
-import qualified Core.Model                       as Model
-import qualified Data.ByteString.Internal         as BSI
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.Time.Clock as TC
+import qualified Database.MongoDB as Mongo
+import qualified Database.MongoDB.Query as MQ
+import qualified Database.Redis as R
+import qualified Data.Bson as Bson
+import qualified Data.Map as M
+import qualified Core.Model as Model
+import qualified Data.ByteString.Internal as BSI
 import GHC.Generics (Generic)
 import Data.Bson ((!?))
 import Data.Map ((!))
