@@ -2,10 +2,11 @@
 module Handler.Image where
 
 import qualified Core.Response as Res
-import Core.Component (Handler, requestHeader, reqm, reqn)
+import qualified Models.Image as Image
+import Core.Component (Handler, requestHeader, postData)
 import Misc.Html (parse)
 import Handler.Application
-
+import Control.Monad.State (liftIO)
 
 index :: Handler
 -- ^ List the images
@@ -22,13 +23,15 @@ create :: Handler
 -- ^ List the images
 create = do
   res <- Prelude.show <$> requestHeader "Content-Type"
-  x <- reqm
-  y <- reqn
+  d <- postData "data"
+  liftIO $ case d of
+    Just x -> Image.save x
+    _ -> return ()
+  let file = Prelude.show d
+
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
-      = x
-    div { class="wrapper" }
-      = y
+      $ file
   |]
   return $ Res.success html []
 

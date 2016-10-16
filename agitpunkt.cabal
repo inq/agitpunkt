@@ -27,6 +27,8 @@ executable agitpunkt
   ghc-options:       -fllvm -O2 -dynamic
   main-is:           main.hs
   build-depends:     manicure
+                   , directory
+                   , JuicyPixels
                    , template-haskell
                    , utf8-string
                    , base
@@ -49,6 +51,7 @@ executable agitpunkt
                    , Handler.Application
                    , Models.Article
                    , Models.User
+                   , Models.Image
                    , Models.Category
   hs-source-dirs:    src
   default-language:  Haskell2010
