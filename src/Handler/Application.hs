@@ -3,21 +3,26 @@ module Handler.Application where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
-import Core.Component (Component, runRedis, getCookie)
+import Core.Component (Component, FlexComp, runRedis, getCookie)
+import Control.Monad (unless)
 import Misc.Html (parse)
 import Handler.Base
 
-assertUser :: BS.ByteString -> Component
-assertUser email = do
+isUser :: BS.ByteString -> FlexComp Bool
+isUser email = do
     session_key <- getCookie "SESSION_KEY"
     u <- case session_key of
       Just key -> runRedis $ User.redisGet key
       Nothing -> return Nothing
-    case u of
+    return $ case u of
       Just User.User {User.email = email'}
-        | email == email' -> return "OK"
-      _ -> fail "Failed"
+        | email == email' -> True
+      _ -> False
 
+assertUser :: BS.ByteString -> FlexComp ()
+assertUser email = do
+  res <- isUser email
+  unless res $ fail "Assertion failed"
 
 github :: Component
 github = [parse|svg { xmlns="http://www.w3.org/2000/svg", viewBox="0 0 48 48", class="github-icon" }
@@ -31,7 +36,7 @@ loginbox = do
         Just key -> runRedis $ User.redisGet key
         Nothing -> return Nothing
     let (n, l) = case u of
-          Just User.User {User.name = name} -> (name, True)
+          Just User.User {User.name = name'} -> (name', True)
           Nothing -> ("anonymous", False)
     [parse|span { class="signin-box" }
       - if l
@@ -47,7 +52,7 @@ loginbox = do
      |]
 
 layout :: Component -> Component
-layout yield = do
+layout yield =
     [parse|html
         head
           meta { charset="UTF-8" }

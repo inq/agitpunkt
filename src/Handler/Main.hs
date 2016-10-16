@@ -13,7 +13,8 @@ import Handler.Application
 index :: Handler
 -- ^ Render the main page
 index = do
-    articles <- runDB A.find
+    isAdmin <- isUser "gofiri@gmail.com"
+    articles <- runDB A.findAll
     res <- layout [parse|- map articles -> A.Article i t c d
       div { class="article" }
         div { class="wrapper" }
@@ -31,9 +32,15 @@ index = do
             = t
           div { class="content" }
             = unwrap c
+            - if isAdmin
+              p
+                a { href $ articleUri i }
+                  | Edit
      |]
     return $ Res.success res []
   where
+    articleUri (Just id') = "/article/edit/" ++ show id'
+    articleUri _ = "Unreachable"
     unwrap c = case convert $ fromChunks [c] of
       Just s -> toStrict s
       Nothing -> ""

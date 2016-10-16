@@ -10,8 +10,8 @@ import Handler.Application
 index :: Handler
 -- ^ List the images
 index = do
-  _ <- assertUser "gofiri@gmail.com"
-  images <- runDB $ Image.find
+  assertUser "gofiri@gmail.com"
+  images <- runDB Image.find
 
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
