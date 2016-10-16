@@ -20,7 +20,7 @@ test-suite spec
                    , hspec
                    , containers
                    , attoparsec
-  other-modules:     Core.JsonSpec
+  other-modules:     Misc.JsonSpec
                    , SpecHelper
   default-language:  Haskell2010
 executable agitpunkt
