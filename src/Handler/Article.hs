@@ -7,9 +7,58 @@ import qualified Models.Article as Article
 import qualified Control.Monad.State as MS
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Bson as Bson
-import Core.Component (Handler, Component, runDB, getParams, postData')
-import Misc.Html (parse)
+import qualified Misc.Markdown as Markdown
+import Data.ByteString.Lazy ( toStrict, fromChunks )
+import Data.Time.Format ( defaultTimeLocale, formatTime )
+import Core.Component ( Handler, runDB, getParams, postData' )
+import Misc.Html ( parse )
 import Handler.Application
+
+doPage :: Int -> Handler
+-- ^ The actual main page renderer
+doPage p = do
+    isAdmin <- isUser "gofiri@gmail.com"
+    articles <- runDB $ Article.list 5 p
+    res <- layout [parse|- map articles -> Article.Article i t c d
+      div { class="article" }
+        div { class="wrapper" }
+          div { class="label" }
+            span { class="date" }
+              $ formatTime defaultTimeLocale "%d" d
+            span { class="month-year" }
+              span { class="month" }
+                $ formatTime defaultTimeLocale "%b" d
+              span { class="year" }
+                $ formatTime defaultTimeLocale "%Y" d
+            span { class="time" }
+              $ formatTime defaultTimeLocale "%H:%M:%S" d
+          div { class="title" }
+            = t
+          div { class="content" }
+            = unwrap c
+            - if isAdmin
+              p
+                a { href $ articleUri i }
+                  | Edit
+     |]
+    return $ Res.success res []
+  where
+    articleUri (Just id') = "/article/edit/" ++ Prelude.show id'
+    articleUri _ = "Unreachable"
+    unwrap c = case Markdown.convert $ fromChunks [c] of
+      Just s -> toStrict s
+      Nothing -> ""
+
+main :: Handler
+-- ^ The main page
+main = doPage 0
+
+page :: Handler
+-- ^ Main page with page argument
+page = do
+    [num] <- getParams
+    doPage $ read $ BS.unpack num
+
 
 show :: Handler
 -- ^ Test parsing URI parameters

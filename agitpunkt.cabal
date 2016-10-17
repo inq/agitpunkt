@@ -46,7 +46,6 @@ executable agitpunkt
                    , Handler.Article
                    , Handler.Base
                    , Handler.Auth
-                   , Handler.Main
                    , Handler.Icons
                    , Handler.Application
                    , Models.Article

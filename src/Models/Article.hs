@@ -33,10 +33,16 @@ save (Article _id' title' content' createdAt') = do
       ]
     return ()
 
-findAll :: Mongo.Action IO [Article]
--- ^ Find articles
-findAll = do
-    res <- Mongo.find (Mongo.select [] "articles") { Mongo.sort = ["_id" =: (-1 :: Int32)] } >>= Mongo.rest
+list :: Int -> Int -> Mongo.Action IO [Article]
+-- ^ List articles
+list pagesize page = do
+    res <- Mongo.find
+      ( Mongo.select [] "articles" )
+      { Mongo.sort = ["_id" =: (-1 :: Int32)]
+      , Mongo.limit = fromIntegral pagesize
+      , Mongo.skip = fromIntegral (pagesize * page)
+      }
+      >>= Mongo.rest
     return $ fromDocument <$> res
   where
     fromDocument doc = Article
