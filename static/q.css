@@ -7,6 +7,27 @@ a:link, a:visited {
     text-decoration: none;
 }
 
+img.content-img {
+    max-width: 780px;
+    margin: 10px;
+}
+
+div.pager {
+    padding-top: 1em;
+}
+
+div.pager a {
+    font-family: Jura;
+    color: #000000;
+    padding-right: 0.5em;
+    font-size: 2em;
+}
+
+div.pager a.current {
+    font-size: 3em;
+    color: #996666;
+}
+
 input.editbox {
     font-size: 1.2em;
     width: 100%;

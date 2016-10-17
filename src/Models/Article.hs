@@ -1,6 +1,13 @@
 {-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Models.Article where
+module Models.Article
+  ( Article(..)
+  , count
+  , save
+  , list
+  , update
+  , find
+  ) where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Time.Clock as TC
@@ -23,6 +30,10 @@ data Article = Article
 
 instance Model Article
 
+count :: Mongo.Action IO Int
+-- ^ Query count of the article
+count = Mongo.count ( Mongo.select [] "articles" )
+
 save :: Article -> Mongo.Action IO ()
 -- ^ Save the data into the DB
 save (Article _id' title' content' createdAt') = do
@@ -33,10 +44,16 @@ save (Article _id' title' content' createdAt') = do
       ]
     return ()
 
-findAll :: Mongo.Action IO [Article]
--- ^ Find articles
-findAll = do
-    res <- Mongo.find (Mongo.select [] "articles") { Mongo.sort = ["_id" =: (-1 :: Int32)] } >>= Mongo.rest
+list :: Int -> Int -> Mongo.Action IO [Article]
+-- ^ List articles
+list pagesize page = do
+    res <- Mongo.find
+      ( Mongo.select [] "articles" )
+      { Mongo.sort = ["_id" =: (-1 :: Int32)]
+      , Mongo.limit = fromIntegral pagesize
+      , Mongo.skip = fromIntegral (pagesize * page)
+      }
+      >>= Mongo.rest
     return $ fromDocument <$> res
   where
     fromDocument doc = Article
