@@ -7,6 +7,11 @@ a:link, a:visited {
     text-decoration: none;
 }
 
+img.content-img {
+    max-width: 780px;
+    margin: 10px;
+}
+
 div.pager {
     padding-top: 1em;
 }
