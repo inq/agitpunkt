@@ -1,5 +1,13 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
-module Handler.Article where
+module Handler.Article
+  ( index
+  , page
+  , view
+  , edit
+  , new
+  , create
+  , update
+  ) where
 
 import qualified Core.Response as Res
 import qualified Data.Time.Clock as C
@@ -43,15 +51,15 @@ doPage p = do
      |]
     return $ Res.success res []
   where
-    articleUri (Just id') = "/article/edit/" ++ Prelude.show id'
+    articleUri (Just id') = "/article/edit/" ++ show id'
     articleUri _ = "Unreachable"
     unwrap c = case Markdown.convert $ fromChunks [c] of
       Just s -> toStrict s
       Nothing -> ""
 
-main :: Handler
+index :: Handler
 -- ^ The main page
-main = doPage 0
+index = doPage 0
 
 page :: Handler
 -- ^ Main page with page argument
@@ -60,9 +68,9 @@ page = do
     doPage $ read $ BS.unpack num
 
 
-show :: Handler
+view :: Handler
 -- ^ Test parsing URI parameters
-show = do
+view = do
     [category, article, index] <- getParams
     res <- [parse|div
       p
@@ -80,9 +88,9 @@ edit = do
     [bsid] <- getParams
     let id' = read $ BS.unpack bsid :: Bson.ObjectId
     Just article <- runDB $ Article.find id'
-    let createdAt = Prelude.show $ Article.created_at article
+    let createdAt = show $ Article.created_at article
         uri = case Article._id article of
-          Just o -> BS.concat [ "/article/edit/", BS.pack $ Prelude.show o ]
+          Just o -> BS.concat [ "/article/edit/", BS.pack $ show o ]
           _ -> "Unreachable"
     res <- layout [parse|div { class="article" }
       div { class="wrapper" }
@@ -112,7 +120,7 @@ update = do
 new :: Handler
 -- ^ Render the formm
 new = do
-    createdAt <- MS.liftIO $ Prelude.show <$> C.getCurrentTime
+    createdAt <- MS.liftIO $ show <$> C.getCurrentTime
     res <- layout [parse|div { class="content" }
       div { class="wrapper" }
         form { action="/article/new", method="post" }

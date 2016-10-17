@@ -1,10 +1,14 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
-module Handler.Image where
+module Handler.Image
+  ( index
+  , create
+  , view
+  ) where
 
 import qualified Core.Response as Res
 import qualified Models.Image as Image
-import Core.Component (Handler, postData, runDB)
-import Misc.Html (parse)
+import Core.Component ( Handler, postData, runDB )
+import Misc.Html ( parse )
 import Handler.Application
 
 index :: Handler
@@ -39,9 +43,9 @@ create = do
   |]
   return $ Res.success html []
 
-show :: Handler
--- ^ List the images
-show = do
+view :: Handler
+-- ^ Show the image
+view = do
   _ <- assertUser "gofiri@gmail.com"
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
