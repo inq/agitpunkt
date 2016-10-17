@@ -16,6 +16,7 @@ import qualified Control.Monad.State as MS
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Bson as Bson
 import qualified Misc.Markdown as Markdown
+import qualified Config
 import Data.ByteString.Lazy ( toStrict, fromChunks )
 import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Core.Component ( Handler, runDB, getParams, postData' )
@@ -25,8 +26,8 @@ import Handler.Application
 doPage :: Int -> Handler
 -- ^ The actual main page renderer
 doPage p = do
-    isAdmin <- isUser "gofiri@gmail.com"
-    articles <- runDB $ Article.list 5 p
+    isAdmin <- isUser Config.adminUser
+    articles <- runDB $ Article.list Config.articlePerPage p
     res <- layout [parse|- map articles -> Article.Article i t c d
       div { class="article" }
         div { class="wrapper" }

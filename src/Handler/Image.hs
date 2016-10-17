@@ -7,6 +7,7 @@ module Handler.Image
 
 import qualified Core.Response as Res
 import qualified Models.Image as Image
+import qualified Config
 import Core.Component ( Handler, postData, runDB )
 import Misc.Html ( parse )
 import Handler.Application
@@ -14,7 +15,7 @@ import Handler.Application
 index :: Handler
 -- ^ List the images
 index = do
-  assertUser "gofiri@gmail.com"
+  assertUser Config.adminUser
   images <- runDB Image.find
 
   html <- layout [parse|div { class="article" }
@@ -31,7 +32,7 @@ index = do
 create :: Handler
 -- ^ Create the image
 create = do
-  _ <- assertUser "gofiri@gmail.com"
+  _ <- assertUser Config.adminUser
   d <- postData "data"
   case d of
     Just x -> runDB $ Image.save x
@@ -46,7 +47,7 @@ create = do
 view :: Handler
 -- ^ Show the image
 view = do
-  _ <- assertUser "gofiri@gmail.com"
+  _ <- assertUser Config.adminUser
   html <- layout [parse|div { class="article" }
     div { class="wrapper" }
       | hey
