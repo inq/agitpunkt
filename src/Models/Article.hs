@@ -1,6 +1,13 @@
 {-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 {-# LANGUAGE DeriveGeneric #-}
-module Models.Article where
+module Models.Article
+  ( Article(..)
+  , count
+  , save
+  , list
+  , update
+  , find
+  ) where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Time.Clock as TC
@@ -22,6 +29,10 @@ data Article = Article
   deriving (Show, Generic)
 
 instance Model Article
+
+count :: Mongo.Action IO Int
+-- ^ Query count of the article
+count = Mongo.count ( Mongo.select [] "articles" )
 
 save :: Article -> Mongo.Action IO ()
 -- ^ Save the data into the DB

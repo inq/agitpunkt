@@ -27,28 +27,31 @@ doPage :: Int -> Handler
 -- ^ The actual main page renderer
 doPage p = do
     isAdmin <- isUser Config.adminUser
+    total <- runDB Article.count
     articles <- runDB $ Article.list Config.articlePerPage p
-    res <- layout [parse|- map articles -> Article.Article i t c d
-      div { class="article" }
-        div { class="wrapper" }
-          div { class="label" }
-            span { class="date" }
-              $ formatTime defaultTimeLocale "%d" d
-            span { class="month-year" }
-              span { class="month" }
-                $ formatTime defaultTimeLocale "%b" d
-              span { class="year" }
-                $ formatTime defaultTimeLocale "%Y" d
-            span { class="time" }
-              $ formatTime defaultTimeLocale "%H:%M:%S" d
-          div { class="title" }
-            = t
-          div { class="content" }
-            = unwrap c
-            - if isAdmin
-              p
-                a { href $ articleUri i }
-                  | Edit
+    res <- layout [parse|div
+      - map articles -> Article.Article i t c d
+        div { class="article" }
+          div { class="wrapper" }
+            div { class="label" }
+              span { class="date" }
+                $ formatTime defaultTimeLocale "%d" d
+              span { class="month-year" }
+                span { class="month" }
+                  $ formatTime defaultTimeLocale "%b" d
+                span { class="year" }
+                  $ formatTime defaultTimeLocale "%Y" d
+              span { class="time" }
+                $ formatTime defaultTimeLocale "%H:%M:%S" d
+            div { class="title" }
+              = t
+            div { class="content" }
+              = unwrap c
+              - if isAdmin
+                p
+                  a { href $ articleUri i }
+                    | Edit
+      ^ pager p total
      |]
     return $ Res.success res []
   where

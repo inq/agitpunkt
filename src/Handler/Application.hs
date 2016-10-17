@@ -3,10 +3,26 @@ module Handler.Application where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
+import qualified Config
 import Core.Component (Component, FlexComp, runRedis, getCookie)
 import Control.Monad (unless)
 import Misc.Html (parse)
 import Handler.Base
+
+pager :: Int -> Int -> Component
+pager current total = do
+    [parse|div { class="wrapper pager" }
+      - map pages -> page
+        a { href=buildUri page, class=buildClass page }
+          $ show page
+    |]
+  where
+    buildClass p = if p == current
+      then BS.pack "current"
+      else BS.pack "non-current"
+    buildUri p = BS.pack ("/page/" ++ show p)
+    pages = [0..(totalPage - 1)]
+    totalPage = quot (total + Config.articlePerPage - 1) Config.articlePerPage
 
 isUser :: BS.ByteString -> FlexComp Bool
 isUser email = do
