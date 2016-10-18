@@ -41,7 +41,6 @@ textarea.content {
 }
 
 .code-snippet {
-    background-color: #f1f0f0;
     margin: 10px 0;
     width: 100%;
     box-sizing: border-box;
@@ -97,7 +96,7 @@ textarea.content {
     padding-right: .6em;
     width: 2em;
     text-align: right;
-    background-color: #e1e0e0;
+    border-right: 2px solid #9999aa;
 }
 
 .code-snippet .td-content {
@@ -115,15 +114,13 @@ body {
 }
 
 blockquote {
-    background-color: #f1f0f0;
-    border-left: 12px solid #e5e4e4;
     margin: 10px 0;
     padding: .5em 10px;
     quotes: "\201C""\201D""\2018""\2019";
 }
 
 blockquote:before {
-    color: #b2b0b0;
+    color: #9999aa;
     content: open-quote;
     font-size: 6em;
     line-height: .1em;
