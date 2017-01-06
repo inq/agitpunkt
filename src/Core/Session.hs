@@ -22,15 +22,15 @@ initStore :: IO SessionStore
 -- ^ Initialize the session store.
 initStore = atomically $ newTMVar (M.fromList [])
 
-insert :: SessionStore -> BS.ByteString -> User.User -> STM ()
+store :: BS.ByteString -> User.User -> SessionStore -> IO ()
 -- ^ Insert a new session.
-insert store key value = do
+store key value store = atomically $ do
   map <- takeTMVar store
   putTMVar store $ M.insert key value map
 
-get :: SessionStore -> BS.ByteString -> STM (Maybe User.User)
+query :: BS.ByteString -> SessionStore -> IO (Maybe User.User)
 -- ^ Find the user and return it.
-get store key = do
+query key store = atomically $ do
   map <- readTMVar store
   return $ M.lookup key map
 

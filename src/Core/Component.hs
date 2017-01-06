@@ -46,6 +46,10 @@ runRedis a = do
     n <- conn <$> get
     liftIO $ DB.runRedis n a
 
+getSessionStore :: StateT ResState IO (SessionStore)
+-- ^ Pass the session store
+getSessionStore = sessions <$> get
+
 getCookie :: BS.ByteString -> StateT ResState IO (Maybe BS.ByteString)
 -- ^ Read cookie from the state
 getCookie key = M.lookup key . Req.extractCookie . req <$> get

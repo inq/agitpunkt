@@ -4,7 +4,9 @@ module Handler.Application where
 import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Config
-import Core.Component (Component, FlexComp, runRedis, getCookie)
+import Core.Session (query)
+import Core.Component (Component, FlexComp, runRedis, getCookie, getSessionStore)
+import Control.Monad.State (liftIO)
 import Control.Monad (unless)
 import Misc.Html (parse)
 import Handler.Base
@@ -28,7 +30,10 @@ isUser :: BS.ByteString -> FlexComp Bool
 isUser email = do
     session_key <- getCookie "SESSION_KEY"
     u <- case session_key of
-      Just key -> runRedis $ User.redisGet key
+      Just key -> do
+        -- TODO: Need to be shorten.
+        ss <- getSessionStore
+        liftIO $ query key ss
       Nothing -> return Nothing
     return $ case u of
       Just User.User {User.email = email'}
@@ -49,7 +54,10 @@ loginbox :: Component
 loginbox = do
     session_key <- getCookie "SESSION_KEY"
     u <- case session_key of
-        Just key -> runRedis $ User.redisGet key
+        Just key -> do
+          -- TODO: Need to be shorten.
+          ss <- getSessionStore
+          liftIO $ query key ss
         Nothing -> return Nothing
     let (n, l) = case u of
           Just User.User {User.name = name'} -> (name', True)
