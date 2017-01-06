@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Misc.JsonSpec where
 
-import qualified Data.Map.Strict as M
+import qualified Data.Map.Strict                as M
 import Misc.Json
 import SpecHelper
 
+
 spec :: Spec
 spec =
-  describe "Misc.JsonSpec" $
+  describe "Core.JsonSpec" $
     context "Simple Text" $ do
       it "parses simple string" $
         parse " \"Sample String\" " `shouldBe`

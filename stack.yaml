@@ -1,4 +1,4 @@
-resolver: lts-7.3
+resolver: lts-7.14
 packages:
 - location: .
 - location:
@@ -8,8 +8,6 @@ packages:
 - location:
     git: 'https://github.com/inq/mongodb.git'
     commit: 'bc25d6d749676e2e2c6077fbd8bc21eb91113965'
-  extra-dep: true
-- location: ./deps/manicure
   extra-dep: true
 extra-deps: []
 flags: {}

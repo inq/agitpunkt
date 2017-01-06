@@ -1,3 +1,0 @@
-[submodule "deps/manicure"]
-	path = deps/manicure
-	url = https://github.com/inq/manicure.git
