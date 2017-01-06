@@ -10,7 +10,29 @@ import qualified Foreign.Storable                 as FS
 import qualified Data.ByteString.Unsafe           as BSU
 import qualified Data.ByteString.Internal         as BSI
 import qualified Data.Bits                        as B
+import qualified Models.User as User
+import qualified  Data.Map as M
+import Control.Monad.STM (STM)
+import Control.Concurrent.STM.TMVar (TMVar, newTMVar, takeTMVar, putTMVar, readTMVar)
 import Data.Bits ((.&.))
+
+type SessionStore = (TMVar (M.Map BS.ByteString User.User))
+
+initStore :: STM SessionStore
+-- ^ Initialize the session store.
+initStore = newTMVar (fromList [])
+
+insert :: SessionStore -> BS.ByteString -> User.User -> STM ()
+-- ^ Insert a new session.
+insert store key value = do
+  map <- takeTMVar store
+  putTMVar store $ M.insert key value map
+
+get :: SessionStore -> BS.ByteString -> STM (Maybe User.User)
+-- ^ Find the user and return it.
+get store key = do
+  map <- readTMVar store
+  return $ M.lookup key map
 
 generateKey :: IO BS.ByteString
 -- ^ Generate a session key
@@ -28,7 +50,7 @@ generateKey = do
         go i p
           | i == len  = return ()
           | otherwise = case BSU.unsafeIndex bs i of
-              w -> do 
+              w -> do
                   FS.poke p (hexDigest $ w `B.shiftR` 4)
                   FS.poke (p `FP.plusPtr` 1) (hexDigest $ w .&. 0xF)
                   go (i + 1) (p `FP.plusPtr` 2)

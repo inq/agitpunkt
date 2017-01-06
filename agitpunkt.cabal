@@ -42,7 +42,6 @@ library
                    , Core.Route
                    , Core.Http
                    , Core.Database
-                   , Core.Session
                    , Core.Model
                    , Core.Launcher
                    , Misc.ByteString
@@ -87,6 +86,7 @@ executable agitpunkt
                    , utf8-string
                    , http-types
                    , unix
+                   , stm
                    , base
                    , network
                    , bytestring
@@ -102,6 +102,7 @@ executable agitpunkt
                    , lens
                    , monad-control
   other-modules:     Core.Handler
+                   , Core.Session
                    , Handler.Article
                    , Handler.Base
                    , Handler.Auth
