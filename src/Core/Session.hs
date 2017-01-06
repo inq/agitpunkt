@@ -58,6 +58,3 @@ generateKey = do
 mkSession :: IO BS.ByteString
 -- ^ Make a new session data
 mkSession = generateKey
-
-readSession :: DB.Connection -> BS.ByteString -> IO BS.ByteString
-readSession = DB.redisGet
