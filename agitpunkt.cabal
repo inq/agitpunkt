@@ -43,7 +43,6 @@ library
                    , Core.Http
                    , Core.Database
                    , Core.Model
-                   , Core.Launcher
                    , Misc.ByteString
                    , Misc.Html
                    , Misc.Markdown
@@ -64,6 +63,7 @@ library
                    , unix
                    , mtl
                    , text
+                   , stm
                    , transformers
                    , containers
                    , time
@@ -103,6 +103,7 @@ executable agitpunkt
                    , monad-control
   other-modules:     Core.Handler
                    , Core.Session
+                   , Core.Launcher
                    , Handler.Article
                    , Handler.Base
                    , Handler.Auth

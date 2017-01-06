@@ -9,15 +9,17 @@ import qualified Database.MongoDB as Mongo
 import qualified Database.Redis as R
 import qualified Data.Map as M
 import qualified Core.Request.Content as Content
+import Core.Session (SessionStore)
 import Control.Monad.State (StateT, runStateT, get, liftIO)
 import Data.List (find)
 
 -- * Data types
 
 data ResState = ResState
-  { conn    :: DB.Connection
-  , params  :: [BS.ByteString]
-  , req     :: Req.Request
+  { conn     :: DB.Connection
+  , params   :: [BS.ByteString]
+  , req      :: Req.Request
+  , sessions :: SessionStore
   }
 
 -- * Type Aliases
@@ -29,8 +31,8 @@ type FlexComp a = StateT ResState IO a
 -- * Handler
 
 runHandler :: Handler -> [BS.ByteString] -> DB.Connection -> Req.Request
-   -> IO (Res.Response, ResState)
-runHandler c p n r = runStateT c (ResState n p r)
+  -> SessionStore -> IO (Res.Response, ResState)
+runHandler c p n r s = runStateT c (ResState n p r s)
 
 runDB :: Mongo.Action IO a -> StateT ResState IO a
 -- ^ Run the DB action

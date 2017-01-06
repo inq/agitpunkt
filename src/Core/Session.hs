@@ -12,15 +12,15 @@ import qualified Data.ByteString.Internal         as BSI
 import qualified Data.Bits                        as B
 import qualified Models.User as User
 import qualified  Data.Map as M
-import Control.Monad.STM (STM)
+import Control.Monad.STM (STM, atomically)
 import Control.Concurrent.STM.TMVar (TMVar, newTMVar, takeTMVar, putTMVar, readTMVar)
 import Data.Bits ((.&.))
 
 type SessionStore = (TMVar (M.Map BS.ByteString User.User))
 
-initStore :: STM SessionStore
+initStore :: IO SessionStore
 -- ^ Initialize the session store.
-initStore = newTMVar (fromList [])
+initStore = atomically $ newTMVar (M.fromList [])
 
 insert :: SessionStore -> BS.ByteString -> User.User -> STM ()
 -- ^ Insert a new session.
