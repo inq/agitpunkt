@@ -70,7 +70,7 @@ mkContent contType cont = case fromJust contType of
       Left _ -> M.empty
       Right b -> case P.parse (parseMultipart b) cont of
         AL.Done _ res -> res
-        AL.Fail _ _ _ -> M.empty
+        AL.Fail{} -> M.empty
 
 lookup :: BS.ByteString -> Content -> Maybe Context
 lookup = M.lookup

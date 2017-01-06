@@ -15,9 +15,9 @@ test-suite spec
   main-is:           Spec.hs
   type:              exitcode-stdio-1.0
   build-depends:     base
+                   , agitpunkt
                    , hspec
                    , bytestring
-                   , manicure
                    , hspec
                    , containers
                    , attoparsec
@@ -47,10 +47,10 @@ library
                    , Core.Launcher
                    , Misc.ByteString
                    , Misc.Html
+                   , Misc.Markdown
                    , Misc.Crypto
                    , Misc.Json
                    , Misc.Parser
-                   , Misc.Markdown
   other-modules:     Misc.Html.Meta
                    , Misc.Html.Node
   build-depends:     base

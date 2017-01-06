@@ -10,7 +10,7 @@ import Misc.Html (parse)
 import Handler.Base
 
 pager :: Int -> Int -> Component
-pager current total = do
+pager current total =
     [parse|div { class="wrapper pager" }
       - map pages -> page
         a { href=buildUri page, class=buildClass page }

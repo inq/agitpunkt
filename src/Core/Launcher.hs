@@ -87,7 +87,7 @@ acceptBody routeTree response404 fd db = do
             Com.runHandler handler params db request
         Nothing -> do
             putStrLn "nothing"
-            return $ (Res.error 404 response404, Com.ResState db [] request)
+            return (Res.error 404 response404, Com.ResState db [] request)
     print response
     NSB.sendAll fd $ Res.render response
-    NS.sClose fd
+    NS.close fd

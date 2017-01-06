@@ -38,7 +38,7 @@ render (Response _ 303 _cookies url) =
       [ "HTTP/1.0 303 See Other\r\n" ] ++
       cookieToString _cookies ++
       [ "Location: ", url, "\r\n\r\n"]
-render r@(Response _ _ _ _) =
+render r@Response{} =
     BS.concat ("HTTP/1.0 500 Internal Error\r\n" : renderContent r)
 
 defaultVersion :: Http.Version

@@ -8,6 +8,7 @@ import qualified Data.Time                        as T
 import qualified Data.Map.Strict                  as M
 import qualified Models.Category                  as Ct
 import qualified Data.Bson                        as Bson
+import Data.Maybe (fromMaybe)
 import Data.Map.Strict ((!))
 
 data RoseTree = Node
@@ -27,8 +28,7 @@ toStrList = concatMap (toStrList' one)
   where
     one = 1 :: Int
     toStrList' l (Node i n cr) =
-      (Entry (unMaybe i) l n)
-        : (concatMap (toStrList' $ l + 1) cr)
+      Entry (unMaybe i) l n : concatMap (toStrList' $ l + 1) cr
     unMaybe (Just x) = x
     unMaybe Nothing = error "No category id"
 
@@ -37,9 +37,7 @@ convert cs = map toRose roots
   where
     toRose (Ct.Category i n _) = Node i n cr
       where
-        cr = map toRose $ case M.lookup i parentMap of
-            Just x -> x
-            Nothing -> []
+        cr = map toRose (fromMaybe [] (M.lookup i parentMap))
     roots = parentMap ! Nothing
     parentMap = parentMap' M.empty cs
     parentMap' m (c@(Ct.Category _ _ p) : res) = parentMap' m' res

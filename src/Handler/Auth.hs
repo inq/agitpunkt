@@ -70,7 +70,7 @@ create = do
     name <- postData' "name"
     email <- postData' "email"
     password <- hashPassword <$> postData' "password"
-    runDB $ User.save $ User.User
+    runDB $ User.save User.User
       { User._id = Nothing
       , User.email = email
       , User.name = name

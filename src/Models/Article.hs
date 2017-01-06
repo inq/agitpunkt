@@ -21,10 +21,10 @@ import Data.Bson ((!?))
 import Data.Int (Int32)
 
 data Article = Article
-  { _id        :: Maybe Bson.ObjectId
-  , title      :: BS.ByteString
-  , content    :: BS.ByteString
-  , created_at :: TC.UTCTime
+  { _id       :: Maybe Bson.ObjectId
+  , title     :: BS.ByteString
+  , content   :: BS.ByteString
+  , createdAt :: TC.UTCTime
   }
   deriving (Show, Generic)
 
@@ -60,7 +60,7 @@ list pagesize page = do
       { _id = doc !? "_id"
       , title = Bson.at "title" doc
       , content = Bson.at "content" doc
-      , created_at = Bson.at "created_at" doc
+      , createdAt = Bson.at "created_at" doc
       }
 
 update :: Article -> Mongo.Action IO ()
@@ -78,5 +78,5 @@ find oid = do
       { _id = doc !? "_id"
       , title = Bson.at "title" doc
       , content = Bson.at "content" doc
-      , created_at = Bson.at "created_at" doc
+      , createdAt = Bson.at "created_at" doc
       }

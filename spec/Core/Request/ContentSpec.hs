@@ -9,8 +9,8 @@ import SpecHelper
 
 spec :: Spec
 spec =
-  describe "Core.Request.ContentSpec" $ do
-    context "Simple parsing" $ do
+  describe "Core.Request.ContentSpec" $
+    context "Simple parsing" $
       it "parses multipart data" $ do
         let contDisp = BS.concat
               [ "--------BOUNDARY\r\n"

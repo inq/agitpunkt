@@ -51,7 +51,7 @@ parseToken = do
       '\n' -> fail "newline reached"
       '}' -> fail "braket reached"
       ',' -> fail "comma reached"
-      _ -> TRef . UTF8.toString <$> (P.noneOf1 ",}\n ")
+      _ -> TRef . UTF8.toString <$> P.noneOf1 ",}\n "
     P.spaces
     return res
 

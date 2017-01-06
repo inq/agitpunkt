@@ -92,7 +92,7 @@ edit = do
     [bsid] <- getParams
     let id' = read $ BS.unpack bsid :: Bson.ObjectId
     Just article <- runDB $ Article.find id'
-    let createdAt = show $ Article.created_at article
+    let createdAt = show $ Article.createdAt article
         uri = case Article._id article of
           Just o -> BS.concat [ "/article/edit/", BS.pack $ show o ]
           _ -> "Unreachable"

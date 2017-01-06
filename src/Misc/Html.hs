@@ -41,7 +41,7 @@ buildTree :: [(Int, Node)] -> (Int, [Node], [(Int, Node)])
 buildTree ((indent, node) : rest)
     | indent < next = buildTree $ (indent, replace node res) : remaining
     | indent > next = (indent, [node], rest)
-    | otherwise  = (indent, (node) : res, remaining)
+    | otherwise  = (indent, node : res, remaining)
   where
     (next, res, remaining) = buildTree rest
     replace (NMap vals val _) = NMap vals val
