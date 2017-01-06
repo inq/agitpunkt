@@ -6,7 +6,6 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.Time.Clock as TC
 import qualified Database.MongoDB as Mongo
 import qualified Database.MongoDB.Query as MQ
-import qualified Database.Redis as R
 import qualified Data.Bson as Bson
 import qualified Data.Map as M
 import qualified Core.Model as Model
@@ -18,10 +17,10 @@ import Data.Map ((!))
 import Database.MongoDB ((=:))
 
 data User = User
-  { _id        :: Maybe Bson.ObjectId
-  , email      :: BS.ByteString
-  , name       :: BS.ByteString
-  , password   :: Maybe BS.ByteString
+  { _id       :: Maybe Bson.ObjectId
+  , email     :: BS.ByteString
+  , name      :: BS.ByteString
+  , password  :: Maybe BS.ByteString
   , createdAt :: Maybe TC.UTCTime
   } deriving (Show, Generic)
 
@@ -48,15 +47,6 @@ upsert user@User{_id=_id} = do
     Mongo.upsert (MQ.Select ["_id" =: _id] "users") $ Model.toDocument user
     return ()
 
-redisHash :: BS.ByteString -> User -> R.Redis (Either R.Reply R.Status)
--- ^ Save the data into the Redis
-redisHash key (User _ email' name' _password' _createdAt') = R.hmset key values
-  where
-    values =
-      [ ("name" :: BSI.ByteString, name')
-      , ("email" :: BSI.ByteString, email')
-      ]
-
 fromMap :: M.Map BS.ByteString BS.ByteString -> User
 -- ^ Construct an user from the given map
 fromMap map' =
@@ -67,15 +57,6 @@ fromMap map' =
       , password = Nothing
       , createdAt = Nothing
       }
-
-redisGet :: BS.ByteString -> R.Redis (Maybe User)
--- ^ Find a user by session key
-redisGet key = do
-    res <- R.hgetall key
-    return $ case res of
-        Left  _    -> Nothing
-        Right []   -> Nothing
-        Right list -> Just $ fromMap (M.fromList list)
 
 save :: User -> Mongo.Action IO ()
 -- ^ Save the data into the DB

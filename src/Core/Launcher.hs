@@ -18,6 +18,7 @@ import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
 import qualified Core.Component                 as Com
 import qualified Control.Monad                  as M
+import Core.Session (SessionStore, initStore)
 
 daemonize :: String -> String -> String -> IO () -> IO ()
 -- ^ Daemonize the given function
@@ -57,26 +58,27 @@ run :: Route.RouteTree -> BS.ByteString -> BS.ByteString -> String -> IO ()
 run routeTree response404 databaseName socketFile = N.withSocketsDo $ do
     removeExistingSocket socketFile
     db <- DB.connect databaseName
+    ss <- initStore
     socketFd <- NS.socket NS.AF_UNIX NS.Stream 0
     NS.bind socketFd $ NS.SockAddrUnix socketFile
     NS.listen socketFd 10
     PF.setFileMode socketFile PF.stdFileMode
-    acceptSocket routeTree response404 socketFd db
+    acceptSocket routeTree response404 socketFd db ss
   where
     removeExistingSocket _socketFile = do
       exists <- D.doesFileExist _socketFile
       M.when exists $ D.removeFile _socketFile
 
-acceptSocket :: Route.RouteTree -> BS.ByteString -> NS.Socket -> DB.Connection -> IO ()
+acceptSocket :: Route.RouteTree -> BS.ByteString -> NS.Socket -> DB.Connection -> SessionStore -> IO ()
 -- ^ Accept a new socket with a new process
-acceptSocket routeTree response404 socketFd db = do
+acceptSocket routeTree response404 socketFd db ss = do
     (fd, _) <- NS.accept socketFd
-    _ <- CC.forkIO $ acceptBody routeTree response404 fd db
-    acceptSocket routeTree response404 socketFd db
+    _ <- CC.forkIO $ acceptBody routeTree response404 fd db ss
+    acceptSocket routeTree response404 socketFd db ss
 
-acceptBody :: Route.RouteTree -> BS.ByteString -> NS.Socket -> DB.Connection -> IO ()
+acceptBody :: Route.RouteTree -> BS.ByteString -> NS.Socket -> DB.Connection -> SessionStore -> IO ()
 -- ^ Process the connection
-acceptBody routeTree response404 fd db = do
+acceptBody routeTree response404 fd db ss = do
     req' <- NSL.getContents fd
     let request = Req.parse req' fd
     let uri = Req.uri request
@@ -84,10 +86,10 @@ acceptBody routeTree response404 fd db = do
     (response, state) <- case Route.match uri method routeTree of
         Just (handler, params) -> do
             putStrLn "handler"
-            Com.runHandler handler params db request
+            Com.runHandler handler params db request ss
         Nothing -> do
             putStrLn "nothing"
-            return (Res.error 404 response404, Com.ResState db [] request)
+            return (Res.error 404 response404, Com.ResState db [] request ss)
     print response
     NSB.sendAll fd $ Res.render response
     NS.close fd

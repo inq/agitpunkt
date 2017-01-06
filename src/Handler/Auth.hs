@@ -6,7 +6,9 @@ import qualified Core.Session as Ses
 import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Control.Monad.State as MS
-import Core.Component (Component, Handler, runDB, runRedis, postData')
+import Core.Session (store)
+import Core.Component (Component, Handler, runDB, getSessionStore, postData')
+import Control.Monad.State (liftIO)
 import Misc.Crypto (hashPassword)
 import Misc.Html (parse)
 import Handler.Application
@@ -57,8 +59,10 @@ signin = do
     user <- runDB $ User.signIn email password
     cookies <- case user of
         Just a -> do
+            -- TODO: Need to be shorten.
             key <- MS.liftIO Ses.generateKey
-            _ <- runRedis $ User.redisHash key a
+            ss <- getSessionStore
+            liftIO $ store key a ss
             return [BS.concat ["SESSION_KEY=", key]]
         Nothing -> return []
     return $ Res.redirect "/" cookies

@@ -42,9 +42,7 @@ library
                    , Core.Route
                    , Core.Http
                    , Core.Database
-                   , Core.Session
                    , Core.Model
-                   , Core.Launcher
                    , Misc.ByteString
                    , Misc.Html
                    , Misc.Markdown
@@ -65,12 +63,12 @@ library
                    , unix
                    , mtl
                    , text
+                   , stm
                    , transformers
                    , containers
                    , time
                    , mongoDB
                    , bson
-                   , hedis
                    , cryptohash
                    , wreq
                    , lens
@@ -87,13 +85,13 @@ executable agitpunkt
                    , utf8-string
                    , http-types
                    , unix
+                   , stm
                    , base
                    , network
                    , bytestring
                    , attoparsec
                    , cryptohash
                    , containers
-                   , hedis
                    , bson
                    , mongoDB
                    , time
@@ -102,6 +100,8 @@ executable agitpunkt
                    , lens
                    , monad-control
   other-modules:     Core.Handler
+                   , Core.Session
+                   , Core.Launcher
                    , Handler.Article
                    , Handler.Base
                    , Handler.Auth
