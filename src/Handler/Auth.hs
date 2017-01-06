@@ -7,7 +7,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Control.Monad.State as MS
 import Core.Session (store)
-import Core.Component (Component, Handler, runDB, runRedis, getSessionStore, postData')
+import Core.Component (Component, Handler, runDB, getSessionStore, postData')
 import Control.Monad.State (liftIO)
 import Misc.Crypto (hashPassword)
 import Misc.Html (parse)

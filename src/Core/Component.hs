@@ -6,7 +6,6 @@ import qualified Core.Database as DB
 import qualified Core.Request as Req
 import qualified Core.Response as Res
 import qualified Database.MongoDB as Mongo
-import qualified Database.Redis as R
 import qualified Data.Map as M
 import qualified Core.Request.Content as Content
 import Core.Session (SessionStore)
@@ -39,12 +38,6 @@ runDB :: Mongo.Action IO a -> StateT ResState IO a
 runDB a = do
     n <- conn <$> get
     liftIO $ DB.query n a
-
-runRedis :: R.Redis a -> StateT ResState IO a
--- ^ Run the Redis action
-runRedis a = do
-    n <- conn <$> get
-    liftIO $ DB.runRedis n a
 
 getSessionStore :: StateT ResState IO (SessionStore)
 -- ^ Pass the session store

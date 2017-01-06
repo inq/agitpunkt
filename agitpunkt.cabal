@@ -69,7 +69,6 @@ library
                    , time
                    , mongoDB
                    , bson
-                   , hedis
                    , cryptohash
                    , wreq
                    , lens
@@ -93,7 +92,6 @@ executable agitpunkt
                    , attoparsec
                    , cryptohash
                    , containers
-                   , hedis
                    , bson
                    , mongoDB
                    , time

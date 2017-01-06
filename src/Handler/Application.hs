@@ -5,7 +5,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Config
 import Core.Session (query)
-import Core.Component (Component, FlexComp, runRedis, getCookie, getSessionStore)
+import Core.Component (Component, FlexComp, getCookie, getSessionStore)
 import Control.Monad.State (liftIO)
 import Control.Monad (unless)
 import Misc.Html (parse)
