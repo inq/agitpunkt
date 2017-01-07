@@ -9,6 +9,39 @@ category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
 
+executable agitpunkt
+  ghc-options:       -fllvm -O2 -dynamic
+  main-is:           main.hs
+  other-modules:     Handler.Article
+                   , Core.Handler
+                   , Handler.Base
+                   , Handler.Auth
+                   , Handler.Icons
+                   , Handler.Image
+                   , Handler.Application
+  build-depends:     agitpunkt
+                   , JuicyPixels
+                   , template-haskell
+                   , utf8-string
+                   , http-types
+                   , unix
+                   , stm
+                   , base
+                   , network
+                   , bytestring
+                   , attoparsec
+                   , cryptohash
+                   , containers
+                   , bson
+                   , mongoDB
+                   , time
+                   , mtl
+                   , wreq
+                   , lens
+                   , monad-control
+  hs-source-dirs:    app
+  default-language:  Haskell2010
+
 test-suite spec
   ghc-options:       -fllvm -ddump-deriv
   hs-source-dirs:    spec
@@ -49,7 +82,14 @@ library
                    , Misc.Crypto
                    , Misc.Json
                    , Misc.Parser
-  other-modules:     Misc.Html.Meta
+                   , Core.Launcher
+                   , Models.Article
+                   , Models.User
+                   , Models.Image
+                   , Models.Category
+                   , Config
+                   , Core.Session
+                   , Misc.Html.Meta
                    , Misc.Html.Node
   build-depends:     base
                    , network
@@ -63,6 +103,7 @@ library
                    , unix
                    , mtl
                    , text
+                   , JuicyPixels
                    , stm
                    , transformers
                    , containers
@@ -75,42 +116,3 @@ library
   hs-source-dirs:    src
   default-language:  Haskell2010
 
-executable agitpunkt
-  ghc-options:       -fllvm -O2 -dynamic
-  main-is:           main.hs
-  build-depends:     agitpunkt
-                   , directory
-                   , JuicyPixels
-                   , template-haskell
-                   , utf8-string
-                   , http-types
-                   , unix
-                   , stm
-                   , base
-                   , network
-                   , bytestring
-                   , attoparsec
-                   , cryptohash
-                   , containers
-                   , bson
-                   , mongoDB
-                   , time
-                   , mtl
-                   , wreq
-                   , lens
-                   , monad-control
-  other-modules:     Core.Handler
-                   , Core.Session
-                   , Core.Launcher
-                   , Handler.Article
-                   , Handler.Base
-                   , Handler.Auth
-                   , Handler.Icons
-                   , Handler.Application
-                   , Models.Article
-                   , Models.User
-                   , Models.Image
-                   , Models.Category
-                   , Config
-  hs-source-dirs:    src
-  default-language:  Haskell2010
