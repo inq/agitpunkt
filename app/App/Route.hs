@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeSynonymInstances, OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances, FlexibleContexts     #-}
 
-module Core.Route where
+module App.Route where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map.Strict as M
@@ -11,7 +11,7 @@ import Language.Haskell.TH.Quote (QuasiQuoter(..), quoteExp)
 import Language.Haskell.TH.Syntax
   ( qRunIO, qAddDependentFile, mkName, Q, Lift(lift), Exp(VarE) )
 import Core.Request (Method)
-import Core.Component (Handler)
+import App.Component (Handler)
 
 -- * Data types
 

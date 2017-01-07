@@ -10,12 +10,18 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable agitpunkt
-  ghc-options:       -fllvm -O2 -dynamic
+  ghc-options:     -Wall -Werror -fllvm -O3 -dynamic
   main-is:           main.hs
   other-modules:     Handler.Article
-                   , Core.Handler
-                   , Core.Route
-                   , Core.Launcher
+                   , App.Handler
+                   , App.Component
+                   , App.Route
+                   , App.Launcher
+                   , App.Session
+                   , Models.Article
+                   , Models.User
+                   , Models.Image
+                   , Models.Category
                    , Handler.Base
                    , Handler.Auth
                    , Handler.Icons
@@ -23,26 +29,21 @@ executable agitpunkt
                    , Handler.Application
                    , Config
   build-depends:     agitpunkt
+                   , base
+                   , bytestring
+                   , containers
+                   , template-haskell
+                   , time
+                   , bson
+                   , mtl
+                   , unix
                    , directory
                    , JuicyPixels
-                   , template-haskell
-                   , utf8-string
-                   , http-types
-                   , unix
-                   , stm
-                   , base
+-- TODO: move down
                    , network
-                   , bytestring
-                   , attoparsec
-                   , cryptohash
-                   , containers
-                   , bson
-                   , mongoDB
-                   , time
-                   , mtl
-                   , wreq
-                   , lens
-                   , monad-control
+                   , stm
+-- TODO: deprecate
+                   , mongoDB                   
   hs-source-dirs:    app
   default-language:  Haskell2010
 
@@ -51,11 +52,10 @@ test-suite spec
   hs-source-dirs:    spec
   main-is:           Spec.hs
   type:              exitcode-stdio-1.0
-  build-depends:     base
-                   , agitpunkt
+  build-depends:     agitpunkt
                    , hspec
+                   , base
                    , bytestring
-                   , hspec
                    , containers
                    , attoparsec
                    , utf8-string
@@ -69,13 +69,12 @@ test-suite spec
                    , SpecHelper
   default-language:  Haskell2010
 
-library 
-  ghc-options:       -fllvm -auto-all
+library
+  ghc-options:     -Wall -Werror -fllvm -O3 -auto-all
   exposed-modules:   Core.Request
                    , Core.Request.Content
                    , Core.Request.ContentDisposition
                    , Core.Response
-                   , Core.Component
                    , Core.Http
                    , Core.Database
                    , Core.Model
@@ -85,33 +84,23 @@ library
                    , Misc.Crypto
                    , Misc.Json
                    , Misc.Parser
-                   , Models.Article
-                   , Models.User
-                   , Models.Image
-                   , Models.Category
-                   , Core.Session
                    , Misc.Html.Meta
                    , Misc.Html.Node
   build-depends:     base
-                   , network
+                   , attoparsec
                    , bytestring
-                   , directory
+                   , cryptohash
+                   , containers
+                   , mtl
                    , utf8-string
                    , http-types
-                   , template-haskell
-                   , monad-control
-                   , attoparsec
-                   , unix
-                   , mtl
-                   , text
-                   , JuicyPixels
-                   , stm
-                   , transformers
-                   , containers
                    , time
+                   , template-haskell
+                   , network
+
+-- TODO: deprecate
                    , mongoDB
-                   , bson
-                   , cryptohash
+                   , monad-control
                    , wreq
                    , lens
   hs-source-dirs:    src

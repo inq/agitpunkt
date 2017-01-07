@@ -1,13 +1,20 @@
-module Misc.Crypto (hashPassword) where
+module Misc.Crypto (hashPassword, generateKey) where
 
-import qualified Data.ByteString.Char8 as BS
 import qualified Crypto.Hash.SHA256 as SHA256
+import qualified Data.ByteString.Char8 as BS
+import Data.Time.Clock.POSIX (getPOSIXTime)
 import Foreign.Ptr (plusPtr)
 import Foreign.Storable (poke)
 import Data.ByteString.Unsafe (unsafeIndex)
 import Data.ByteString.Internal (unsafeCreate)
 import Data.Bits (shiftR, (.&.))
 
+
+generateKey :: IO BS.ByteString
+-- ^ Generate a session key
+generateKey = do
+    t <- getPOSIXTime
+    return $ hashPassword $ BS.pack $ show t
 
 hashPassword :: BS.ByteString -> BS.ByteString
 -- ^ Hash the given password

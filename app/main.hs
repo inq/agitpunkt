@@ -1,7 +1,6 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
-import qualified Data.ByteString.Char8          as BS
-import qualified Core.Handler                   as Handler
-import qualified Core.Launcher                  as Launcher
+import App.Handler (routeTree)
+import App.Launcher (daemonize, run)
 import Misc.Html (parse)
 
 main :: IO ()
@@ -13,8 +12,8 @@ main = do
           p
             | oops 404!
      |]
-    let process = Launcher.run Handler.routeTree response404 databaseName socketFile
-    Launcher.daemonize pidFile stdOut stdErr process
+    let process = run routeTree response404 databaseName socketFile
+    daemonize pidFile stdOut stdErr process
   where
     databaseName = "manicure-test"
     socketFile = "tmp/sockets/manicure.sock"

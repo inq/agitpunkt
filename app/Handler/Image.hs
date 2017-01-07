@@ -8,7 +8,7 @@ module Handler.Image
 import qualified Core.Response as Res
 import qualified Models.Image as Image
 import qualified Config
-import Core.Component ( Handler, postData, runDB )
+import App.Component ( Handler, postData, runDB )
 import Misc.Html ( parse )
 import Handler.Application
 
