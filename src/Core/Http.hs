@@ -10,7 +10,6 @@ data Version = Version {
   minor :: {-# UNPACK #-} !Int
 } deriving (Show)
 
-
 fetch :: BS.ByteString -> IO BS.ByteString
 fetch url = do
     response <- Wreq.get $ BS.unpack url

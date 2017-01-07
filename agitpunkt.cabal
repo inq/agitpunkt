@@ -14,12 +14,16 @@ executable agitpunkt
   main-is:           main.hs
   other-modules:     Handler.Article
                    , Core.Handler
+                   , Core.Route
+                   , Core.Launcher
                    , Handler.Base
                    , Handler.Auth
                    , Handler.Icons
                    , Handler.Image
                    , Handler.Application
+                   , Config
   build-depends:     agitpunkt
+                   , directory
                    , JuicyPixels
                    , template-haskell
                    , utf8-string
@@ -72,7 +76,6 @@ library
                    , Core.Request.ContentDisposition
                    , Core.Response
                    , Core.Component
-                   , Core.Route
                    , Core.Http
                    , Core.Database
                    , Core.Model
@@ -82,19 +85,17 @@ library
                    , Misc.Crypto
                    , Misc.Json
                    , Misc.Parser
-                   , Core.Launcher
                    , Models.Article
                    , Models.User
                    , Models.Image
                    , Models.Category
-                   , Config
                    , Core.Session
                    , Misc.Html.Meta
                    , Misc.Html.Node
   build-depends:     base
                    , network
-                   , directory
                    , bytestring
+                   , directory
                    , utf8-string
                    , http-types
                    , template-haskell
