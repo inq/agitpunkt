@@ -1,10 +1,10 @@
 module Misc.File
+  -- ^ Wrapper module for the file operations
   ( remapFds
   , setStdFileMode
   , writePid
   , removeIfExists
   ) where
--- ^ Wrapper module for the file operations
 
 import Control.Monad (void)
 import System.Posix.Process (getProcessID)
@@ -50,7 +50,6 @@ remapFds outFile errFile = do
 
 writePid :: FilePath -> IO ()
 -- ^ Write pid file
--- TODO: handle exceptions
 writePid _pidFile = do
   fd <- createFile _pidFile stdFileMode
   pid <- getProcessID

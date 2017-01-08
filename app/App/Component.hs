@@ -39,7 +39,7 @@ runDB a = do
     n <- conn <$> get
     liftIO $ DB.query n a
 
-getSessionStore :: StateT ResState IO (SessionStore)
+getSessionStore :: StateT ResState IO SessionStore
 -- ^ Pass the session store
 getSessionStore = sessions <$> get
 
