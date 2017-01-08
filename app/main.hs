@@ -1,6 +1,7 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 import App.Handler (routeTree)
-import App.Launcher (daemonize, run)
+import App.Launcher (run)
+import Misc.Daemon (daemonize)
 import Misc.Html (parse)
 
 main :: IO ()

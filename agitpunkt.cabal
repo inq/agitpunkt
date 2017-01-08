@@ -36,10 +36,9 @@ executable agitpunkt
                    , time
                    , bson
                    , mtl
-                   , unix
+-- TODO: move down
                    , directory
                    , JuicyPixels
--- TODO: move down
                    , network
                    , stm
 -- TODO: deprecate
@@ -78,6 +77,8 @@ library
                    , Core.Http
                    , Core.Database
                    , Core.Model
+                   , Misc.Daemon
+                   , Misc.File
                    , Misc.ByteString
                    , Misc.Html
                    , Misc.Markdown
@@ -97,7 +98,8 @@ library
                    , time
                    , template-haskell
                    , network
-
+                   , unix
+                   , directory
 -- TODO: deprecate
                    , mongoDB
                    , monad-control
