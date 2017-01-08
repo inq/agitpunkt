@@ -4,8 +4,8 @@ module Handler.Application where
 import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Config
-import Core.Session (query)
-import Core.Component (Component, FlexComp, getCookie, getSessionStore)
+import App.Session (querySession)
+import App.Component (Component, FlexComp, getCookie, getSessionStore)
 import Control.Monad.State (liftIO)
 import Control.Monad (unless)
 import Misc.Html (parse)
@@ -33,7 +33,7 @@ isUser email = do
       Just key -> do
         -- TODO: Need to be shorten.
         ss <- getSessionStore
-        liftIO $ query key ss
+        liftIO $ querySession key ss
       Nothing -> return Nothing
     return $ case u of
       Just User.User {User.email = email'}
@@ -57,7 +57,7 @@ loginbox = do
         Just key -> do
           -- TODO: Need to be shorten.
           ss <- getSessionStore
-          liftIO $ query key ss
+          liftIO $ querySession key ss
         Nothing -> return Nothing
     let (n, l) = case u of
           Just User.User {User.name = name'} -> (name', True)

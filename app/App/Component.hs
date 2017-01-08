@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Core.Component where
+module App.Component where
 
 import qualified Data.ByteString.Char8 as BS
 import qualified Core.Database as DB
@@ -8,7 +8,7 @@ import qualified Core.Response as Res
 import qualified Database.MongoDB as Mongo
 import qualified Data.Map as M
 import qualified Core.Request.Content as Content
-import Core.Session (SessionStore)
+import App.Session (SessionStore)
 import Control.Monad.State (StateT, runStateT, get, liftIO)
 import Data.List (find)
 
@@ -39,7 +39,7 @@ runDB a = do
     n <- conn <$> get
     liftIO $ DB.query n a
 
-getSessionStore :: StateT ResState IO (SessionStore)
+getSessionStore :: StateT ResState IO SessionStore
 -- ^ Pass the session store
 getSessionStore = sessions <$> get
 

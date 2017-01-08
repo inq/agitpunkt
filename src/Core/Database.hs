@@ -34,4 +34,4 @@ close = M.close
 find :: (MonadIO m, MonadBaseControl IO m)  => M.Action m [M.Document]
 -- ^ ** Find articles
 find =
-    (M.find $ M.select [] "users") >>= M.rest
+    M.find (M.select [] "users") >>= M.rest

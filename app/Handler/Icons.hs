@@ -6,7 +6,7 @@ CAUTION: You cannot use this icons unless you have a paid license with Flaticon
 module Handler.Icons where
 import qualified Data.ByteString.UTF8             as UTF8
 import Core.Component (Component)
-import Core.Html (parse)
+import Misc.Html (parse)
 
 airplane :: Component
 airplane = [parse|svg { xmlns="http://www.w3.org/2000/svg", viewBox="0 0 300 300", class="menu-icon" }

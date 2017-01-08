@@ -9,7 +9,6 @@ import qualified Database.MongoDB.Query as MQ
 import qualified Data.Bson as Bson
 import qualified Data.Map as M
 import qualified Core.Model as Model
-import qualified Data.ByteString.Internal as BSI
 import GHC.Generics (Generic)
 import Data.Bson ((!?))
 import Data.Map ((!))

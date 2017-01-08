@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
 module Handler.Article
-  ( index
+  ( indexH
   , page
   , view
   , edit
@@ -19,7 +19,7 @@ import qualified Misc.Markdown as Markdown
 import qualified Config
 import Data.ByteString.Lazy ( toStrict, fromChunks )
 import Data.Time.Format ( defaultTimeLocale, formatTime )
-import Core.Component ( Handler, runDB, getParams, postData' )
+import App.Component ( Handler, runDB, getParams, postData' )
 import Misc.Html ( parse )
 import Handler.Application
 
@@ -61,9 +61,9 @@ doPage p = do
       Just s -> toStrict s
       Nothing -> ""
 
-index :: Handler
+indexH :: Handler
 -- ^ The main page
-index = doPage 0
+indexH = doPage 0
 
 page :: Handler
 -- ^ Main page with page argument
