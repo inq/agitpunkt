@@ -6,7 +6,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Models.User as User
 import qualified Control.Monad.State as MS
 import App.Session (storeSession)
-import App.Component (Component, Handler, runDB, getSessionStore, postData')
+import App.Component (Component, Handler, getSessionStore, getUserStore, postData')
 import Control.Monad.State (liftIO)
 import Misc.Crypto (hashPassword, generateKey)
 import Misc.Html (parse)
@@ -23,12 +23,6 @@ signupForm = [parse|div { class="wrapper" }
     input { type="name", name="name" }
     input { type="submit" }
  |]
-
-new :: Handler
--- ^ Render the form
-new = error "prevented!"
---    form <- signupForm
---    return $ Res.success form []
 
 destroy :: Handler
 -- ^ Render the form
@@ -54,7 +48,8 @@ signin :: Handler
 signin = do
     email <- postData' "email"
     password <- hashPassword <$> postData' "password"
-    user <- runDB $ User.signIn email password
+    us <- getUserStore
+    user <- liftIO $ User.signIn us email password
     cookies <- case user of
         Just a -> do
             -- TODO: Need to be shorten.
@@ -64,18 +59,3 @@ signin = do
             return [BS.concat ["SESSION_KEY=", key]]
         Nothing -> return []
     return $ Res.redirect "/" cookies
-
-create :: Handler
--- ^ Create a new article from the given POST data
-create = error "prevented!"
---    name <- postData' "name"
---    email <- postData' "email"
---    password <- hashPassword <$> postData' "password"
---    runDB $ User.save User.User
---      { User._id = Nothing
---      , User.email = email
---      , User.name = name
---      , User.password = Just password
---      , User.createdAt = Nothing }
---    html <- signupForm
---    return $ Res.success html ["HELLO=WORLD"]

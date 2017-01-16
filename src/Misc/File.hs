@@ -4,9 +4,10 @@ module Misc.File
   , setStdFileMode
   , writePid
   , removeIfExists
+  , removeSockIfExists
   ) where
 
-import Control.Monad (void)
+import Control.Monad (void, when)
 import System.Posix.Process (getProcessID)
 import System.Posix.Files (stdFileMode, setFileMode)
 import System.Directory (doesFileExist, removeFile)
@@ -24,7 +25,7 @@ setStdFileMode :: FilePath -> IO ()
 setStdFileMode theFile = setFileMode theFile stdFileMode
 
 removeIfExists :: FilePath -> IO (Maybe String)
--- ^ Remove the file and return True if the file exists
+-- ^ Remove the file and return the content if the file exists
 removeIfExists theFile = do
   exists <- doesFileExist theFile
   if exists
@@ -34,6 +35,12 @@ removeIfExists theFile = do
       return $ Just content
     else
       return Nothing
+
+removeSockIfExists :: FilePath -> IO ()
+-- ^ Remove the file if the file exists
+removeSockIfExists theFile = do
+  exists <- doesFileExist theFile
+  when exists $ removeFile theFile
 
 remapFds :: FilePath -> FilePath -> IO ()
 -- ^ Remap stdout & stderr to the specified fds

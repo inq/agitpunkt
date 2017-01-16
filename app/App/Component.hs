@@ -8,6 +8,7 @@ import qualified Core.Response as Res
 import qualified Database.MongoDB as Mongo
 import qualified Data.Map as M
 import qualified Core.Request.Content as Content
+import Models.User (UserStore)
 import App.Session (SessionStore)
 import Control.Monad.State (StateT, runStateT, get, liftIO)
 import Data.List (find)
@@ -19,6 +20,7 @@ data ResState = ResState
   , params   :: [BS.ByteString]
   , req      :: Req.Request
   , sessions :: SessionStore
+  , users    :: UserStore
   }
 
 -- * Type Aliases
@@ -30,14 +32,19 @@ type FlexComp a = StateT ResState IO a
 -- * Handler
 
 runHandler :: Handler -> [BS.ByteString] -> DB.Connection -> Req.Request
-  -> SessionStore -> IO (Res.Response, ResState)
-runHandler c p n r s = runStateT c (ResState n p r s)
+  -> SessionStore -> UserStore -> IO (Res.Response, ResState)
+runHandler c p n r s u = runStateT c (ResState n p r s u)
 
 runDB :: Mongo.Action IO a -> StateT ResState IO a
 -- ^ Run the DB action
 runDB a = do
     n <- conn <$> get
     liftIO $ DB.query n a
+
+-- | TODO: Clean up
+getUserStore :: StateT ResState IO UserStore
+-- ^ Pass the user store
+getUserStore = users <$> get
 
 getSessionStore :: StateT ResState IO SessionStore
 -- ^ Pass the session store
