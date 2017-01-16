@@ -3,62 +3,55 @@
 module Models.User where
 
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.Time.Clock as TC
-import qualified Database.MongoDB as Mongo
-import qualified Database.MongoDB.Query as MQ
-import qualified Data.Bson as Bson
 import qualified Data.Map as M
-import qualified Core.Model as Model
-import GHC.Generics (Generic)
-import Data.Bson ((!?))
-import Data.Map ((!))
+import qualified Misc.Parser as P
+import Control.Monad.STM (atomically)
+import Control.Concurrent.STM.TMVar (TMVar, newTMVar, readTMVar)
 
-import Database.MongoDB ((=:))
+-- * Data types
 
 data User = User
-  { _id       :: Maybe Bson.ObjectId
+  { _id       :: Int
   , email     :: BS.ByteString
   , name      :: BS.ByteString
-  , password  :: Maybe BS.ByteString
-  , createdAt :: Maybe TC.UTCTime
-  } deriving (Show, Generic)
+  , password  :: BS.ByteString
+  } deriving (Show)
 
-instance Model.Model User
+type UserStore = (TMVar (M.Map BS.ByteString User))
 
-signIn :: BS.ByteString -> BS.ByteString -> Mongo.Action IO (Maybe User)
+parse :: BS.ByteString -> Maybe (M.Map BS.ByteString User)
+-- ^ Parse the given bytestring
+parse str = case P.parseOnly parseUserList str of
+  Right val -> Just val
+  _ -> Nothing
+
+parseUserList :: P.Parser (M.Map BS.ByteString User)
+-- ^ The actual parser
+parseUserList = do
+  users <- P.many1 parseUser
+  return $ M.fromList $ map (\u -> (email u, u)) users
+ where
+  parseUser = do
+    _id' <- P.decimal <* P.char '\t'
+    email' <- P.noneOf1 "\t" <* P.char '\t'
+    name' <- P.noneOf1 "\t" <* P.char '\t'
+    password' <- P.noneOf1 "\n" <* P.many (P.char '\n')
+    return $ User _id' email' name' password'
+
+loadUserStore :: FilePath -> IO (Maybe UserStore)
+-- ^ Read the TSV file
+loadUserStore fileName = do
+  res <- BS.readFile fileName
+  case parse res of
+    Just store -> Just <$> (atomically $ newTMVar store)
+    _ -> return Nothing
+
+signIn :: UserStore -> BS.ByteString -> BS.ByteString -> IO (Maybe User)
 -- ^ Try to signin
-signIn email' password' = do
-    res <- Mongo.find (Mongo.select ["email" =: email', "password" =: password'] "users")
-        >>= MQ.rest
-    case res of
-        [doc] -> return $ Just User
-            { _id = doc !? "_id"
-            , email = Bson.at "email" doc
-            , name = Bson.at "name" doc
-            , password = Nothing
-            , createdAt = Nothing
-            }
-        _     -> return Nothing
-
-upsert :: User -> Mongo.Action IO ()
--- ^ Update or insert the User
-upsert user@User{_id=_id} = do
-    Mongo.upsert (MQ.Select ["_id" =: _id] "users") $ Model.toDocument user
-    return ()
-
-fromMap :: M.Map BS.ByteString BS.ByteString -> User
--- ^ Construct an user from the given map
-fromMap map' =
-    User
-      { _id = Nothing
-      , email = map' ! "email"
-      , name = map' ! "name"
-      , password = Nothing
-      , createdAt = Nothing
-      }
-
-save :: User -> Mongo.Action IO ()
--- ^ Save the data into the DB
-save user = do
-    _ <- Mongo.insert "users" $ Model.toDocument user
-    return ()
+signIn store' email' password' = do
+  map' <- atomically $ readTMVar store'
+  return $ case M.lookup email' map' of
+    Just user -> if (password user) == password'
+      then Just user
+      else Nothing
+    _ -> Nothing

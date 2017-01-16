@@ -12,6 +12,9 @@ import Prelude hiding (takeWhile)
 
 type Parser = AC.Parser
 
+decimal :: Parser Int
+decimal = AC.decimal
+
 quoted :: Parser BS.ByteString
 quoted =
   char '"' *> (BS.concat <$> cont) <* char '"'
