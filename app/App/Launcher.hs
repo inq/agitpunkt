@@ -13,20 +13,21 @@ import Network.Socket
   )
 import Network.Socket.ByteString (sendAll)
 import Control.Concurrent (forkIO)
-import Misc.File (removeIfExists, setStdFileMode)
+import Misc.File (removeSockIfExists, setStdFileMode)
 import Network (withSocketsDo)
 import App.Component (ResState(..), runHandler)
 import App.Route (RouteTree, match)
 import App.Session (SessionStore, initStore)
-import Models.User (UserStore, loadUserStore)
+import Models.User (UserStore, loadUserStore, putUserStore)
 
 run :: RouteTree -> BS.ByteString -> BS.ByteString -> String -> IO ()
 -- ^ Run the given RouteTree
 run rt response404 databaseName socketFile = withSocketsDo $ do
-    _ <- removeIfExists socketFile -- TODO: handle exceptions
+    _ <- removeSockIfExists socketFile -- TODO: handle exceptions
     db <- DB.connect databaseName
     ss <- initStore
     Just us <- loadUserStore "config/users.tsv"
+    putUserStore us
     socketFd <- socket AF_UNIX Stream 0
     bind socketFd $ SockAddrUnix socketFile
     listen socketFd 10

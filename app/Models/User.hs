@@ -38,6 +38,12 @@ parseUserList = do
     password' <- P.noneOf1 "\n" <* P.many (P.char '\n')
     return $ User _id' email' name' password'
 
+putUserStore :: UserStore -> IO ()
+-- ^ Try to signin
+putUserStore store' = do
+  map' <- atomically $ readTMVar store'
+  putStrLn $ show map'
+
 loadUserStore :: FilePath -> IO (Maybe UserStore)
 -- ^ Read the TSV file
 loadUserStore fileName = do
