@@ -31,6 +31,7 @@ instance GModel GN.U1 where
     gFields _ = []
     gToJson _ = Json.JSArray []
     gToDocument _ = []
+
 instance (GModel a, GModel b) => GModel (a :*: b) where
 -- ^ Products
     gFields ~(a :*: b) = gFields a ++ gFields b
