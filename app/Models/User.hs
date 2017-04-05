@@ -5,8 +5,7 @@ module Models.User where
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map as M
 import qualified Misc.Parser as P
-import Control.Monad.STM (atomically)
-import Control.Concurrent.STM.TMVar (TMVar, newTMVar, readTMVar)
+import GHC.Conc.Sync (atomically, TVar, newTVar, readTVar)
 
 -- * Data types
 
@@ -17,7 +16,7 @@ data User = User
   , password  :: BS.ByteString
   } deriving (Show)
 
-type UserStore = (TMVar (M.Map BS.ByteString User))
+type UserStore = (TVar (M.Map BS.ByteString User))
 
 parse :: BS.ByteString -> Maybe (M.Map BS.ByteString User)
 -- ^ Parse the given bytestring
@@ -41,7 +40,7 @@ parseUserList = do
 putUserStore :: UserStore -> IO ()
 -- ^ Try to signin
 putUserStore store' = do
-  map' <- atomically $ readTMVar store'
+  map' <- atomically $ readTVar store'
   putStrLn $ show map'
 
 loadUserStore :: FilePath -> IO (Maybe UserStore)
@@ -49,13 +48,13 @@ loadUserStore :: FilePath -> IO (Maybe UserStore)
 loadUserStore fileName = do
   res <- BS.readFile fileName
   case parse res of
-    Just store -> Just <$> (atomically $ newTMVar store)
+    Just store -> Just <$> (atomically $ newTVar store)
     _ -> return Nothing
 
 signIn :: UserStore -> BS.ByteString -> BS.ByteString -> IO (Maybe User)
 -- ^ Try to signin
 signIn store' email' password' = do
-  map' <- atomically $ readTMVar store'
+  map' <- atomically $ readTVar store'
   return $ case M.lookup email' map' of
     Just user -> if (password user) == password'
       then Just user
