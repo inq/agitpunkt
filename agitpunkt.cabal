@@ -40,7 +40,6 @@ executable agitpunkt
                    , directory
                    , JuicyPixels
                    , network
-                   , stm
 -- TODO: deprecate
                    , mongoDB                   
   hs-source-dirs:    app
