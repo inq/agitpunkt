@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Core.Request.ContentDispositionSpec where
 
-import qualified Misc.Parser as P
-import Core.Request.ContentDisposition
-import SpecHelper
+import           Core.Request.ContentDisposition
+import qualified Misc.Parser                     as P
+import           SpecHelper
 
 spec :: Spec
 spec =

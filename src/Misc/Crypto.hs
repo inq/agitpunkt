@@ -1,36 +1,21 @@
-module Misc.Crypto (hashPassword, generateKey) where
+module Misc.Crypto
+  ( hashPassword
+  , generateKey
+  ) where
 
-import qualified Crypto.Hash.SHA256 as SHA256
-import qualified Data.ByteString.Char8 as BS
-import Data.Time.Clock.POSIX (getPOSIXTime)
-import Foreign.Ptr (plusPtr)
-import Foreign.Storable (poke)
-import Data.ByteString.Unsafe (unsafeIndex)
-import Data.ByteString.Internal (unsafeCreate)
-import Data.Bits (shiftR, (.&.))
+import           Data.Digest.Pure.SHA    (sha256, showDigest)
+import           Data.Text               (Text)
+import qualified Data.Text               as Text
+import           Data.Text.Lazy          (fromStrict)
+import           Data.Text.Lazy.Encoding (encodeUtf8)
+import           Data.Time.Clock.POSIX   (getPOSIXTime)
 
-
-generateKey :: IO BS.ByteString
+generateKey :: IO Text
 -- ^ Generate a session key
 generateKey = do
-    t <- getPOSIXTime
-    return $ hashPassword $ BS.pack $ show t
+  t <- getPOSIXTime
+  return $ hashPassword $ Text.pack $ show t
 
-hashPassword :: BS.ByteString -> BS.ByteString
+hashPassword :: Text -> Text
 -- ^ Hash the given password
-hashPassword = toHex . SHA256.hash
-  where
-    toHex bs = unsafeCreate nl $ go 0
-      where
-        len = BS.length bs
-        nl = 2 * len
-        go i p
-          | i == len  = return ()
-          | otherwise = case unsafeIndex bs i of
-            w -> do
-              poke p (hexDigest $ w `shiftR` 4)
-              poke (p `plusPtr` 1) (hexDigest $ w .&. 0xF)
-              go (i + 1) (p `plusPtr` 2)
-    hexDigest d
-      | d < 10 = d + 48
-      | otherwise = d + 87
+hashPassword = Text.pack . showDigest . sha256 . encodeUtf8 . fromStrict

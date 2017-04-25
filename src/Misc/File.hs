@@ -7,18 +7,14 @@ module Misc.File
   , removeSockIfExists
   ) where
 
-import Control.Monad (void, when)
-import System.Posix.Process (getProcessID)
-import System.Posix.Files (stdFileMode, setFileMode)
-import System.Directory (doesFileExist, removeFile)
-import System.Posix.IO
-  ( OpenMode(ReadOnly, ReadWrite)
-  , openFd, closeFd, dupTo
-  , fdWrite
-  , createFile
-  , stdInput, stdOutput, stdError
-  , defaultFileFlags,
-  )
+import           Control.Monad        (void, when)
+import           System.Directory     (doesFileExist, removeFile)
+import           System.Posix.Files   (setFileMode, stdFileMode)
+import           System.Posix.IO      (OpenMode (ReadOnly, ReadWrite), closeFd,
+                                       createFile, defaultFileFlags, dupTo,
+                                       fdWrite, openFd, stdError, stdInput,
+                                       stdOutput)
+import           System.Posix.Process (getProcessID)
 
 setStdFileMode :: FilePath -> IO ()
 -- ^ Grant the file permission 666
@@ -33,8 +29,7 @@ removeIfExists theFile = do
       content <- readFile theFile
       removeFile theFile
       return $ Just content
-    else
-      return Nothing
+    else return Nothing
 
 removeSockIfExists :: FilePath -> IO ()
 -- ^ Remove the file if the file exists

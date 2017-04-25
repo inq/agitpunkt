@@ -1,24 +1,27 @@
-{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+
 module Handler.Image
   ( index
   , create
   , view
   ) where
 
-import qualified Core.Response as Res
-import qualified Models.Image as Image
+import           App.Component       (Handler, postData, runDB)
 import qualified Config
-import App.Component ( Handler, postData, runDB )
-import Misc.Html ( parse )
-import Handler.Application
+import qualified Core.Response       as Res
+import           Handler.Application
+import           Misc.Html           (parse)
+import qualified Models.Image        as Image
 
 index :: Handler
 -- ^ List the images
 index = do
   assertUser Config.adminUser
   images <- runDB Image.find
-
-  html <- layout [parse|div { class="article" }
+  html <-
+    layout
+      [parse|div { class="article" }
     div { class="wrapper" }
       form { action="/image/new", method="post", enctype="multipart/form-data" }
         input { type="file", name="data" }
@@ -36,9 +39,10 @@ create = do
   d <- postData "data"
   case d of
     Just x -> runDB $ Image.save x
-    _ -> return ()
-
-  html <- layout [parse|div { class="article" }
+    _      -> return ()
+  html <-
+    layout
+      [parse|div { class="article" }
     div { class="wrapper" }
       | Uploaded
   |]
@@ -48,7 +52,9 @@ view :: Handler
 -- ^ Show the image
 view = do
   _ <- assertUser Config.adminUser
-  html <- layout [parse|div { class="article" }
+  html <-
+    layout
+      [parse|div { class="article" }
     div { class="wrapper" }
       | hey
   |]

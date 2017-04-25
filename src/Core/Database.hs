@@ -7,7 +7,7 @@ module Core.Database
     ) where
 
 import qualified Database.MongoDB as M
-import qualified Data.ByteString.Char8 as BS
+import Data.Text (Text)
 import Database.MongoDB ((=:))
 import Control.Monad.Trans (MonadIO)
 import Control.Monad.Trans.Control (MonadBaseControl)
@@ -16,7 +16,7 @@ data Connection = Connection
   {-# UNPACK #-} !M.Pipe
   {-# UNPACK #-} !M.Database
 
-connect :: BS.ByteString -> IO Connection
+connect :: Text -> IO Connection
 -- ^ Open the new DB connection
 connect db = do
     mongo <- M.connect $ M.host "127.0.0.1"

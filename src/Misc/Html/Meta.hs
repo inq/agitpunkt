@@ -7,11 +7,11 @@ module Misc.Html.Meta
   , convert
   ) where
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.Text as Text
 import Language.Haskell.TH.Syntax
   ( Lift, Lit(StringL), Exp(LitE, AppE, VarE), Pat(VarP, ConP), lift, mkName)
-import qualified Data.ByteString.UTF8 as UTF8
 import Misc.Html.Node
+
 
 -- * Data types
 
@@ -27,7 +27,7 @@ data MetaNode
 
 instance Lift MetaNode where
   lift (MStr es) =
-    [| return $ UTF8.fromString $(return $
+    [| return $ Text.pack $(return $
          (foldl AppE (conv $ head es)) (map conv $ tail es))
      |]
   lift (MBts es) =
@@ -39,7 +39,7 @@ instance Lift MetaNode where
          (foldl AppE (conv $ head as) (map conv $ tail as)))
      |]
   lift (MMap vs v nodes) =
-    [| BS.concat <$> (sequence $ concatMap
+    [| Text.concat <$> (sequence $ concatMap
         (\($(return $ mkP v)) -> $(lift nodes))
          $(return $ VarE $ mkName vs))
      |]
@@ -52,7 +52,7 @@ instance Lift MetaNode where
               (foldl AppE
                 ((VarE . mkName . head) attrs)
                 (map (VarE . mkName) (tail attrs)))) of
-           True -> BS.concat <$> sequence $(lift nodes)
+           True -> Text.concat <$> sequence $(lift nodes)
            _ -> return ""
      |]
 

@@ -30,12 +30,12 @@ executable agitpunkt
                    , Config
   build-depends:     agitpunkt
                    , base
-                   , bytestring
                    , containers
                    , template-haskell
                    , time
                    , bson
                    , mtl
+                   , text
 -- TODO: move down
                    , directory
                    , JuicyPixels
@@ -53,12 +53,11 @@ test-suite spec
   build-depends:     agitpunkt
                    , hspec
                    , base
-                   , bytestring
                    , containers
                    , attoparsec
                    , utf8-string
                    , template-haskell
-  other-modules:     Misc.ByteStringSpec
+  other-modules:     Misc.TextUtilSpec
                    , Misc.JsonSpec
                    , Misc.MarkdownSpec
                    , Misc.HtmlSpec
@@ -78,7 +77,7 @@ library
                    , Core.Model
                    , Misc.Daemon
                    , Misc.File
-                   , Misc.ByteString
+                   , Misc.TextUtil
                    , Misc.Html
                    , Misc.Markdown
                    , Misc.Crypto
@@ -88,8 +87,7 @@ library
                    , Misc.Html.Node
   build-depends:     base
                    , attoparsec
-                   , bytestring
-                   , cryptohash
+                   , SHA
                    , containers
                    , mtl
                    , utf8-string
@@ -99,6 +97,7 @@ library
                    , network
                    , unix
                    , directory
+                   , text
 -- TODO: deprecate
                    , mongoDB
                    , monad-control

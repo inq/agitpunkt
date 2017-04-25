@@ -1,28 +1,34 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module App.Launcher where
 
-import qualified Network.Socket.ByteString.Lazy as LazySocket
-import qualified Network.Socket                 as NS
-import qualified Data.ByteString.Char8          as BS
+import           App.Component                  (ResState (..), runHandler)
+import           App.Route                      (RouteTree, match)
+import           App.Session                    (SessionStore, initStore)
+import           Control.Concurrent             (forkIO)
 import qualified Core.Database                  as DB
-import qualified Core.Request as Req
-import qualified Core.Response as Res
-import Network.Socket
-  ( Family(AF_UNIX), SocketType(Stream), SockAddr(SockAddrUnix), Socket
-  , socket, bind, listen
-  )
-import Network.Socket.ByteString (sendAll)
-import Control.Concurrent (forkIO)
-import Misc.File (removeSockIfExists, setStdFileMode)
-import Network (withSocketsDo)
-import App.Component (ResState(..), runHandler)
-import App.Route (RouteTree, match)
-import App.Session (SessionStore, initStore)
-import Models.User (UserStore, loadUserStore, putUserStore)
+import qualified Core.Request                   as Req
+import qualified Core.Response                  as Res
+import           Data.Text                      (Text)
+import           Data.Text.Encoding             (encodeUtf8)
+import           Data.Text.Lazy.Encoding        (decodeUtf8)
+import           Misc.File                      (removeSockIfExists,
+                                                 setStdFileMode)
+import           Models.User                    (UserStore, loadUserStore,
+                                                 putUserStore)
+import           Network                        (withSocketsDo)
+import           Network.Socket                 (Family (AF_UNIX),
+                                                 SockAddr (SockAddrUnix),
+                                                 Socket, SocketType (Stream),
+                                                 bind, listen, socket)
+import qualified Network.Socket                 as NS
+import           Network.Socket.ByteString      (sendAll)
+import qualified Network.Socket.ByteString.Lazy as LazySocket
 
-run :: RouteTree -> BS.ByteString -> BS.ByteString -> String -> IO ()
+run :: RouteTree -> Text -> Text -> String -> IO ()
 -- ^ Run the given RouteTree
-run rt response404 databaseName socketFile = withSocketsDo $ do
+run rt response404 databaseName socketFile =
+  withSocketsDo $ do
     _ <- removeSockIfExists socketFile -- TODO: handle exceptions
     db <- DB.connect databaseName
     ss <- initStore
@@ -34,29 +40,43 @@ run rt response404 databaseName socketFile = withSocketsDo $ do
     setStdFileMode socketFile
     acceptSocket rt response404 socketFd db ss us
 
-acceptSocket :: RouteTree -> BS.ByteString -> Socket
-  -> DB.Connection -> SessionStore -> UserStore -> IO ()
+acceptSocket
+  :: RouteTree
+  -> Text
+  -> Socket
+  -> DB.Connection
+  -> SessionStore
+  -> UserStore
+  -> IO ()
 -- ^ Accept a new socket with a new process
 acceptSocket rt response404 socketFd db ss us = do
-    (fd, _) <- NS.accept socketFd
-    _ <- forkIO $ acceptBody rt response404 fd db ss us
-    acceptSocket rt response404 socketFd db ss us
+  (fd, _) <- NS.accept socketFd
+  _ <- forkIO $ acceptBody rt response404 fd db ss us
+  acceptSocket rt response404 socketFd db ss us
 
-acceptBody :: RouteTree -> BS.ByteString -> Socket
-  -> DB.Connection -> SessionStore -> UserStore -> IO ()
+acceptBody
+  :: RouteTree
+  -> Text
+  -> Socket
+  -> DB.Connection
+  -> SessionStore
+  -> UserStore
+  -> IO ()
 -- ^ Process the connection
+--   TODO: Use ByteString
 acceptBody rt response404 fd db ss us = do
-    req' <- LazySocket.getContents fd
-    let request = Req.parse req' fd
-    let uri = Req.uri request
-    let method = Req.method request
-    (response, _state) <- case match uri method rt of
-        Just (handler, paramRes) -> do
-            putStrLn "handler"
-            runHandler handler paramRes db request ss us
-        Nothing -> do
-            putStrLn "nothing"
-            return (Res.error 404 response404, ResState db [] request ss us)
-    print response
-    sendAll fd $ Res.render response
-    NS.close fd
+  req' <- decodeUtf8 <$> LazySocket.getContents fd
+  let request = Req.parse req' fd
+  let uri = Req.uri request
+  let method = Req.method request
+  (response, _state) <-
+    case match uri method rt of
+      Just (handler, paramRes) -> do
+        putStrLn "handler"
+        runHandler handler paramRes db request ss us
+      Nothing -> do
+        putStrLn "nothing"
+        return (Res.error 404 response404, ResState db [] request ss us)
+  print response
+  sendAll fd $ encodeUtf8 (Res.render response)
+  NS.close fd

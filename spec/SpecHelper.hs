@@ -1,7 +1,5 @@
-module SpecHelper (
-    module Test.Hspec  
+module SpecHelper
+  ( module Test.Hspec
   ) where
 
-import Test.Hspec
-
-
+import           Test.Hspec

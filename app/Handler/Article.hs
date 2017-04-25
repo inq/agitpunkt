@@ -1,4 +1,6 @@
-{-# LANGUAGE QuasiQuotes, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+
 module Handler.Article
   ( indexH
   , page
@@ -9,27 +11,29 @@ module Handler.Article
   , update
   ) where
 
-import qualified Core.Response as Res
-import qualified Data.Time.Clock as C
-import qualified Models.Article as Article
-import qualified Control.Monad.State as MS
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.Bson as Bson
-import qualified Misc.Markdown as Markdown
+import           App.Component       (Handler, getParams, postData', runDB)
 import qualified Config
-import Data.ByteString.Lazy ( toStrict, fromChunks )
-import Data.Time.Format ( defaultTimeLocale, formatTime )
-import App.Component ( Handler, runDB, getParams, postData' )
-import Misc.Html ( parse )
-import Handler.Application
+import qualified Control.Monad.State as MS
+import qualified Core.Response       as Res
+import qualified Data.Bson           as Bson
+import qualified Data.Text           as Text
+import           Data.Text.Lazy      (fromChunks, toStrict)
+import qualified Data.Time.Clock     as C
+import           Data.Time.Format    (defaultTimeLocale, formatTime)
+import           Handler.Application
+import           Misc.Html           (parse)
+import qualified Misc.Markdown       as Markdown
+import qualified Models.Article      as Article
 
 doPage :: Int -> Handler
 -- ^ The actual main page renderer
 doPage p = do
-    isAdmin <- isUser Config.adminUser
-    total <- runDB Article.count
-    articles <- runDB $ Article.list Config.articlePerPage p
-    res <- layout [parse|div
+  isAdmin <- isUser Config.adminUser
+  total <- runDB Article.count
+  articles <- runDB $ Article.list Config.articlePerPage p
+  res <-
+    layout
+      [parse|div
       - map articles -> Article.Article i t c d
         div { class="article" }
           div { class="wrapper" }
@@ -53,13 +57,14 @@ doPage p = do
                     | Edit
       ^ pager p total
      |]
-    return $ Res.success res []
+  return $ Res.success res []
   where
     articleUri (Just id') = "/article/edit/" ++ show id'
-    articleUri _ = "Unreachable"
-    unwrap c = case Markdown.convert $ fromChunks [c] of
-      Just s -> toStrict s
-      Nothing -> ""
+    articleUri _          = "Unreachable"
+    unwrap c =
+      case Markdown.convert $ fromChunks [c] of
+        Just s  -> toStrict s
+        Nothing -> ""
 
 indexH :: Handler
 -- ^ The main page
@@ -68,15 +73,15 @@ indexH = doPage 0
 page :: Handler
 -- ^ Main page with page argument
 page = do
-    [num] <- getParams
-    doPage $ read $ BS.unpack num
-
+  [num] <- getParams
+  doPage $ read $ Text.unpack num
 
 view :: Handler
 -- ^ Test parsing URI parameters
 view = do
-    [category, article, index] <- getParams
-    res <- [parse|div
+  [category, article, index] <- getParams
+  res <-
+    [parse|div
       p
         = category
       p
@@ -84,19 +89,22 @@ view = do
       p
         = index
      |]
-    return $ Res.success res []
+  return $ Res.success res []
 
 edit :: Handler
 -- ^ Edit form
 edit = do
-    [bsid] <- getParams
-    let id' = read $ BS.unpack bsid :: Bson.ObjectId
-    Just article <- runDB $ Article.find id'
-    let createdAt = show $ Article.createdAt article
-        uri = case Article._id article of
-          Just o -> BS.concat [ "/article/edit/", BS.pack $ show o ]
-          _ -> "Unreachable"
-    res <- layout [parse|div { class="article" }
+  [bsid] <- getParams
+  let id' = read $ Text.unpack bsid :: Bson.ObjectId
+  Just article <- runDB $ Article.find id'
+  let createdAt = show $ Article.createdAt article
+      uri =
+        case Article._id article of
+          Just o -> Text.concat ["/article/edit/", Text.pack $ show o]
+          _      -> "Unreachable"
+  res <-
+    layout
+      [parse|div { class="article" }
       div { class="wrapper" }
         form { action=uri, method="post" }
           input { class="editbox", type="text", name="title", value=Article.title article }
@@ -105,27 +113,28 @@ edit = do
             = Article.content article
           input { type="submit", value="Submit" }
      |]
-    return $ Res.success res []
+  return $ Res.success res []
 
 update :: Handler
 -- ^ Update
 update = do
-    [bsid] <- getParams
-    let id' = read $ BS.unpack bsid
-    title <- postData' "title"
-    content <- postData' "content"
-    createdAt <- postData' "created_at"
-
-    let article = Article.Article (Just id') title content (read $ BS.unpack createdAt)
-    runDB $ Article.update article
-    return $ Res.redirect "/" []
-
+  [bsid] <- getParams
+  let id' = read $ Text.unpack bsid
+  title <- postData' "title"
+  content <- postData' "content"
+  createdAt <- postData' "created_at"
+  let article =
+        Article.Article (Just id') title content (read $ Text.unpack createdAt)
+  runDB $ Article.update article
+  return $ Res.redirect "/" []
 
 new :: Handler
 -- ^ Render the formm
 new = do
-    createdAt <- MS.liftIO $ show <$> C.getCurrentTime
-    res <- layout [parse|div { class="content" }
+  createdAt <- MS.liftIO $ show <$> C.getCurrentTime
+  res <-
+    layout
+      [parse|div { class="content" }
       div { class="wrapper" }
         form { action="/article/new", method="post" }
           input { class="editbox", type="text", name="title" }
@@ -133,13 +142,15 @@ new = do
           textarea { class="content", name="content", id="content-box" }
           input { type="submit", value="Submit" }
      |]
-    return $ Res.success res []
+  return $ Res.success res []
 
 create :: Handler
 -- ^ Create a new article from the given POST data
 create = do
-    title <- postData' "title"
-    content <- postData' "content"
-    createdAt <- postData' "created_at"
-    runDB $ Article.save $ Article.Article Nothing title content (read $ BS.unpack createdAt)
-    return $ Res.redirect "/" []
+  title <- postData' "title"
+  content <- postData' "content"
+  createdAt <- postData' "created_at"
+  runDB $
+    Article.save $
+    Article.Article Nothing title content (read $ Text.unpack createdAt)
+  return $ Res.redirect "/" []

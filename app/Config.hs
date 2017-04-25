@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Config where
 
-import qualified Data.ByteString.Char8 as BS
+import           Data.Text (Text)
 
-adminUser :: BS.ByteString
+adminUser :: Text
 adminUser = "gofiri@gmail.com"
 
 articlePerPage :: Int
