@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module App.Launcher where
 
@@ -29,16 +30,19 @@ run :: RouteTree -> Text -> Text -> String -> IO ()
 -- ^ Run the given RouteTree
 run rt response404 databaseName socketFile =
   withSocketsDo $ do
-    _ <- removeSockIfExists socketFile -- TODO: handle exceptions
+    removeSockIfExists socketFile
     db <- DB.connect databaseName
     ss <- initStore
-    Just us <- loadUserStore "config/users.tsv"
-    putUserStore us
-    socketFd <- socket AF_UNIX Stream 0
-    bind socketFd $ SockAddrUnix socketFile
-    listen socketFd 10
-    setStdFileMode socketFile
-    acceptSocket rt response404 socketFd db ss us
+    loadUserStore "config/users.tsv" >>= \case
+      Just user_store -> do
+        putUserStore user_store
+        socketFd <- socket AF_UNIX Stream 0
+        bind socketFd $ SockAddrUnix socketFile
+        listen socketFd 10
+        setStdFileMode socketFile
+        acceptSocket rt response404 socketFd db ss user_store
+      Nothing -> do
+        putStrLn "FATAL: Cannot load user store."
 
 acceptSocket
   :: RouteTree
