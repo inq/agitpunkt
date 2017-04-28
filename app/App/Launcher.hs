@@ -1,5 +1,5 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
 
 module App.Launcher where
 
@@ -11,7 +11,6 @@ import qualified Core.Database                  as DB
 import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
 import           Data.Text                      (Text)
-import           Data.Text.Encoding             (encodeUtf8)
 import           Data.Text.Lazy.Encoding        (decodeUtf8)
 import           Misc.File                      (removeSockIfExists,
                                                  setStdFileMode)
@@ -82,5 +81,5 @@ acceptBody rt response404 fd db ss us = do
         putStrLn "nothing"
         return (Res.error 404 response404, ResState db [] request ss us)
   print response
-  sendAll fd $ encodeUtf8 (Res.render response)
+  sendAll fd $ Res.render response
   NS.close fd
