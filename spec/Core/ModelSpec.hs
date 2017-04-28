@@ -5,17 +5,17 @@ module Core.ModelSpec where
 
 import           Core.Database         ((=:))
 import           Core.Model
-import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map.Strict       as M
 import qualified GHC.Generics          as GN
 import qualified Misc.Json             as Json
+import           Data.Text (Text)
 import           SpecHelper
 
 data Post = Post
-  { postId   :: Maybe BS.ByteString
+  { postId   :: Maybe Text
   , count    :: Integer
-  , email    :: BS.ByteString
-  , password :: BS.ByteString
+  , email    :: Text
+  , password :: Text
   } deriving (GN.Generic)
 
 instance Model Post
@@ -31,7 +31,7 @@ spec =
            [ ("count", Json.JSInt 3)
            , ("email", Json.JSString "hello@world.com")
            , ("password", Json.JSString "SHA256")
-           , ("postId", Json.JSString "Hello")
+           , ("post_id", Json.JSString "Hello")
            ])
     it "parses json without postId" $
       gToJson (GN.from dataWithoutPostId) `shouldBe`
@@ -43,16 +43,16 @@ spec =
            ])
     it "parses bson with postId" $
       gToDocument (GN.from dataWithPostId) `shouldBe`
-      [ "postId" =: ("Hello" :: BS.ByteString)
+      [ "post_id" =: ("Hello" :: Text)
       , "count" =: (3 :: Int)
-      , "email" =: ("hello@world.com" :: BS.ByteString)
-      , "password" =: ("SHA256" :: BS.ByteString)
+      , "email" =: ("hello@world.com" :: Text)
+      , "password" =: ("SHA256" :: Text)
       ]
     it "parses bson without postId" $
       gToDocument (GN.from dataWithoutPostId) `shouldBe`
       [ "count" =: (2 :: Int)
-      , "email" =: ("admin@hello.com" :: BS.ByteString)
-      , "password" =: ("MD5" :: BS.ByteString)
+      , "email" =: ("admin@hello.com" :: Text)
+      , "password" =: ("MD5" :: Text)
       ]
   where
     dataWithPostId = Post (Just "Hello") 3 "hello@world.com" "SHA256"

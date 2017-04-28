@@ -3,12 +3,12 @@
 
 module Models.User where
 
-import qualified Data.Map      as M
-import           Data.Text     (Text)
-import qualified Data.Text.IO  as TextIO
-import           GHC.Conc.Sync (TVar, atomically, newTVar, readTVar)
-import qualified Misc.Parser   as P
-import Control.Exception (catch)
+import           Control.Exception (catch)
+import qualified Data.Map          as M
+import           Data.Text         (Text)
+import qualified Data.Text.IO      as TextIO
+import           GHC.Conc.Sync     (TVar, atomically, newTVar, readTVar)
+import qualified Misc.Parser       as P
 
 -- * Data types
 data User = User
@@ -54,7 +54,7 @@ loadUserStore :: FilePath -> IO (Maybe UserStore)
 -- ^ Read the TSV file
 loadUserStore fileName = do
   users <- (parse <$> TextIO.readFile fileName) `catch` catchError
-  ((atomically . newTVar) `mapM` users)
+  (atomically . newTVar) `mapM` users
 
 signIn :: UserStore -> Text -> Text -> IO (Maybe User)
 -- ^ Try to signin
