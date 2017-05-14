@@ -54,7 +54,7 @@ acceptSocket
 -- ^ Accept a new socket with a new process
 acceptSocket rt response404 socketFd db ss us = do
   (fd, _) <- NS.accept socketFd
-  _ <- forkIO $ acceptBody rt response404 fd db ss us
+  _thread_id <- forkIO $ acceptBody rt response404 fd db ss us
   acceptSocket rt response404 socketFd db ss us
 
 acceptBody
