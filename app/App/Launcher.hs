@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module App.Launcher where
@@ -10,7 +11,6 @@ import qualified Core.Database                  as DB
 import qualified Core.Request                   as Req
 import qualified Core.Response                  as Res
 import           Data.Text                      (Text)
-import           Data.Text.Encoding             (encodeUtf8)
 import           Data.Text.Lazy.Encoding        (decodeUtf8)
 import           Misc.File                      (removeSockIfExists,
                                                  setStdFileMode)
@@ -29,16 +29,19 @@ run :: RouteTree -> Text -> Text -> String -> IO ()
 -- ^ Run the given RouteTree
 run rt response404 databaseName socketFile =
   withSocketsDo $ do
-    _ <- removeSockIfExists socketFile -- TODO: handle exceptions
+    removeSockIfExists socketFile
     db <- DB.connect databaseName
     ss <- initStore
-    Just us <- loadUserStore "config/users.tsv"
-    putUserStore us
-    socketFd <- socket AF_UNIX Stream 0
-    bind socketFd $ SockAddrUnix socketFile
-    listen socketFd 10
-    setStdFileMode socketFile
-    acceptSocket rt response404 socketFd db ss us
+    loadUserStore "config/users.tsv" >>= \case
+      Just user_store -> do
+        putUserStore user_store
+        socketFd <- socket AF_UNIX Stream 0
+        bind socketFd $ SockAddrUnix socketFile
+        listen socketFd 10
+        setStdFileMode socketFile
+        acceptSocket rt response404 socketFd db ss user_store
+      Nothing -> do
+        putStrLn "FATAL: Cannot load user store."
 
 acceptSocket
   :: RouteTree
@@ -78,5 +81,5 @@ acceptBody rt response404 fd db ss us = do
         putStrLn "nothing"
         return (Res.error 404 response404, ResState db [] request ss us)
   print response
-  sendAll fd $ encodeUtf8 (Res.render response)
+  sendAll fd $ Res.render response
   NS.close fd

@@ -3,8 +3,8 @@
 
 module Misc.HtmlSpec where
 
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.ByteString.UTF8  as UTF8
+import qualified Data.Text as Text
+import           Data.Text (Text)
 import           Misc.Html
 import           SpecHelper
 
@@ -25,8 +25,7 @@ spec =
             | hi
          |]
         res `shouldBe`
-          UTF8.fromString
-            "<html><div class=\"hello\" id=\"hihi\">hi</div></html>"
+          "<html><div class=\"hello\" id=\"hihi\">hi</div></html>"
     context "UTF-8 Text" $ do
       it "parses simple utf-8" $ do
         res <-
@@ -34,13 +33,13 @@ spec =
           div
             | HU
          |]
-        res `shouldBe` UTF8.fromString "<html><div>HU</div></html>"
+        res `shouldBe` Text.pack "<html><div>HU</div></html>"
     context "Monadic Context" $ do
       it "parses monad combination" $ do
         let inner =
               [parse|p
            | inner
-         |] :: IO BS.ByteString
+         |] :: IO Text
         res <-
           [parse|html
           div
@@ -48,14 +47,14 @@ spec =
             | outer
          |]
         res `shouldBe`
-          UTF8.fromString "<html><div><p>inner</p>outer</div></html>"
+          Text.pack "<html><div><p>inner</p>outer</div></html>"
       it "parses monad combinating function" $ do
         let inner v =
               [parse|p
            | inner
            = v
          |]
-        let arg = "center" :: BS.ByteString
+        let arg = "center" :: Text
         res <-
           [parse|html
           div
@@ -63,7 +62,7 @@ spec =
             | outer
          |]
         res `shouldBe`
-          UTF8.fromString "<html><div><p>innercenter</p>outer</div></html>"
+          Text.pack "<html><div><p>innercenter</p>outer</div></html>"
     context "Simple Text" $ do
       it "parses simple tag" $ do
         res <-
@@ -73,7 +72,7 @@ spec =
          |]
         res `shouldBe` "<html><div>Hello</div></html>"
       it "parses simple variable" $ do
-        let theValue = "VALUE" :: BS.ByteString
+        let theValue = "VALUE" :: Text
         res <-
           [parse|html
           div
@@ -81,7 +80,7 @@ spec =
          |]
         res `shouldBe` "<html><div>VALUE</div></html>"
       it "parses simple function" $ do
-        let theFunc x = BS.concat ["---", x, "---"]
+        let theFunc x = Text.concat ["---", x, "---"]
         let theVal = "HELLO"
         res <-
           [parse|html
@@ -90,7 +89,7 @@ spec =
          |]
         res `shouldBe` "<html><div>---HELLO---</div></html>"
       it "parses simple function with string" $ do
-        let theFunc x = BS.concat ["---", x, "---"]
+        let theFunc x = Text.concat ["---", x, "---"]
         res <-
           [parse|html
           div
@@ -105,7 +104,7 @@ spec =
          |]
         res `shouldBe` "<html><div>Hello</div></html>"
       it "processes simple map statement" $ do
-        let people = ["A", "B"] :: [BS.ByteString]
+        let people = ["A", "B"] :: [Text]
         res <-
           [parse|div
           - map people -> name

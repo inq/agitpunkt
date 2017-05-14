@@ -18,6 +18,6 @@ main = do
   run routeTree response404 databaseName socketFile
   where
     databaseName = "manicure-test"
-    socketFile = "tmp/sockets/manicure.sock"--    pidFile = "tmp/pids/manicure.pid"
+    socketFile = "tmp/sockets/manicure.sock" --    pidFile = "tmp/pids/manicure.pid"
 --    stdOut = "tmp/logs/stdout"
 --    stdErr = "tmp/logs/stderr"
