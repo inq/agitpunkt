@@ -71,6 +71,9 @@ takeTill' = A.takeTill
 takeWhile :: (Char -> Bool) -> Parser Text
 takeWhile = AL.takeWhile
 
+takeWhile1 :: (Char -> Bool) -> Parser Text
+takeWhile1 = AL.takeWhile1
+
 skipWhile :: (Char -> Bool) -> Parser ()
 skipWhile = AL.skipWhile
 
@@ -100,7 +103,7 @@ noneOf :: String -> Parser Text
 noneOf = takeWhile . AL.notInClass
 
 noneOf1 :: String -> Parser Text
-noneOf1 = takeWhile . AL.notInClass
+noneOf1 = takeWhile1 . AL.notInClass
 
 try :: Parser a -> Parser a
 try = A.try

@@ -10,14 +10,14 @@ spec =
   describe "Core.MarkdownSpec" $ do
     context "Simple Text" $ do
       it "parses simple string" $ do
-        parse "#### Hello\r\n\r\n" `shouldBe` Just (Markdown [H4 "Hello"])
-        parse "! hi-hihi; /img/img.png\r\n\r\n" `shouldBe`
+        parse "#### Hello" `shouldBe` Just (Markdown [H4 "Hello"])
+        parse "! hi-hihi; /img/img.png\r\n" `shouldBe`
           Just (Markdown [Img "hi-hihi" "/img/img.png"])
         parse "Hello\r\n\r\nHihi\r\n" `shouldBe`
           Just (Markdown [Paragraph "Hello", Paragraph "Hihi"])
       it "parses simple enippet" $
-        parse "Hello\r\n```rust\r\nHELLO\r\n```\r\n" `shouldBe`
-        Just (Markdown [Paragraph "Hello", Snippet "rust" ["HELLO"]])
+        parse "Hello\r\n```rust\r\nHELLO\r\nWorld\r\n```\r\n" `shouldBe`
+        Just (Markdown [Paragraph "Hello", Snippet "rust" ["HELLO", "World"]])
     context "To Html" $ do
       it "generate h4 string" $
         toHtml (Markdown [Paragraph "HI"]) `shouldBe` "<p>HI</p>"

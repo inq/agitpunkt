@@ -75,7 +75,7 @@ acceptBody rt response404 fd db ss us = do
   (response, _state) <-
     case match uri method rt of
       Just (handler, paramRes) -> do
-        putStrLn "handler"
+        putStrLn "handler1"
         runHandler handler paramRes db request ss us
       Nothing -> do
         putStrLn "nothing"

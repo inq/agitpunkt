@@ -38,19 +38,18 @@ parse str =
 parseItem :: P.Parser Item
 -- ^ The subparser
 parseItem =
-  (parseHeader <|> parseSnippet <|> parseQuote <|> parseImage <|> parseParagraph) <*
-  P.many1 (P.string "\r\n")
+  parseHeader <|> parseSnippet <|> parseQuote <|> parseImage <|> parseParagraph
   where
     parseEnd = do
       _ <- P.try (P.string "```")
       return []
     parseLine =
       parseEnd <|>
-      (((:) . L.fromStrict) <$> (P.noneOf "\r" <* P.string "\r\n") <*> parseLine)
+      (((:) . L.fromStrict) <$> (P.noneOf "\r\n" <* P.string "\r\n") <*> parseLine)
     parseSnippet = do
       open <-
         L.fromStrict <$>
-        P.try (P.string "```" *> P.noneOf1 "\r" <* P.string "\r\n")
+        P.try (P.string "```" *> P.noneOf1 "\r\n" <* P.string "\r\n")
       res <- parseLine
       return $ Snippet open res
     parseImage = do
@@ -82,7 +81,8 @@ parseItem =
 parseMarkdown :: P.Parser Markdown
 -- ^ The actual parser
 parseMarkdown = do
-  items <- P.many1 parseItem
+  items <- P.sepBy parseItem (P.many1 (P.string "\r\n"))
+
   return $ Markdown items
 
 toHtml :: Markdown -> L.Text
