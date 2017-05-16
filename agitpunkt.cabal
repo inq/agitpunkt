@@ -10,7 +10,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable agitpunkt
-  ghc-options:     -Wall -Werror -fllvm -O3 -dynamic
+  ghc-options:     -Wall -fllvm -dynamic
   main-is:           main.hs
   other-modules:     Handler.Article
                    , App.Handler
@@ -31,16 +31,15 @@ executable agitpunkt
   build-depends:     agitpunkt
                    , base
                    , containers
+                   , bytestring
                    , template-haskell
                    , time
                    , bson
                    , mtl
                    , text
--- TODO: move down
                    , directory
                    , JuicyPixels
                    , network
--- TODO: deprecate
                    , mongoDB                   
   hs-source-dirs:    app
   default-language:  Haskell2010
@@ -56,6 +55,7 @@ test-suite spec
                    , containers
                    , attoparsec
                    , text
+                   , bytestring
                    , template-haskell
   other-modules:     Misc.TextUtilSpec
                    , Misc.JsonSpec
@@ -69,7 +69,7 @@ test-suite spec
   default-language:  Haskell2010
 
 library
-  ghc-options:     -Wall -Werror -fllvm -O3 -auto-all
+  ghc-options:     -Wall -fllvm -auto-all
   exposed-modules:   Core.Request
                    , Core.Request.Content
                    , Core.Request.ContentDisposition
@@ -86,6 +86,8 @@ library
                    , Misc.Crypto
                    , Misc.Json
                    , Misc.Parser
+                   , Misc.Parser.ByteString
+                   , Misc.Parser.LazyByteString
                    , Misc.Html.Meta
                    , Misc.Html.Node
   build-depends:     base

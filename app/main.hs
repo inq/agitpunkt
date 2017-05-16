@@ -18,7 +18,6 @@ main = do
   run routeTree response404 databaseName socketFile
   where
     databaseName = "agitpunkt"
-    socketFile = "tmp/sockets/agitpunkt.sock"
---    pidFile = "tmp/pids/agitpunkt.pid"
+    socketFile = "tmp/sockets/agitpunkt.sock" --    pidFile = "tmp/pids/agitpunkt.pid"
 --    stdOut = "tmp/logs/stdout"
 --    stdErr = "tmp/logs/stderr"

@@ -8,10 +8,9 @@ import           App.Route                      (RouteTree, match)
 import           App.Session                    (SessionStore, initStore)
 import           Control.Concurrent             (forkIO)
 import qualified Core.Database                  as DB
-import qualified Core.Request                   as Req
+import qualified Core.Request                   as Request
 import qualified Core.Response                  as Res
 import           Data.Text                      (Text)
-import           Data.Text.Lazy.Encoding        (decodeUtf8)
 import           Misc.File                      (removeSockIfExists,
                                                  setStdFileMode)
 import           Models.User                    (UserStore, loadUserStore,
@@ -68,17 +67,14 @@ acceptBody
 -- ^ Process the connection
 --   TODO: Use ByteString
 acceptBody rt response404 fd db ss us = do
-  req' <- decodeUtf8 <$> LazySocket.getContents fd
-  let request = Req.parse req' fd
-  let uri = Req.uri request
-  let method = Req.method request
+  buffer <- LazySocket.getContents fd
+  let request = Request.parse buffer fd
+  let uri = Request.uri request
+  let method = Request.method request
   (response, _state) <-
     case match uri method rt of
-      Just (handler, paramRes) -> do
-        putStrLn "handler1"
-        runHandler handler paramRes db request ss us
-      Nothing -> do
-        putStrLn "nothing"
+      Just (handler, paramRes) -> runHandler handler paramRes db request ss us
+      Nothing ->
         return (Res.error 404 response404, ResState db [] request ss us)
   print response
   sendAll fd $ Res.render response

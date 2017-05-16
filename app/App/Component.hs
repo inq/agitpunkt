@@ -67,12 +67,12 @@ getParams = params <$> get
 
 postData :: Text -> StateT ResState IO (Maybe Content.Context)
 -- ^ Read Post variable
-postData key = Content.lookup key . Req.content . req <$> get
+postData key = M.lookup key . Req.content . req <$> get
 
 postData' :: Text -> StateT ResState IO Text
 -- ^ Read Post variable
 postData' key = do
-  res <- Content.lookup key . Req.content . req <$> get
+  res <- M.lookup key . Req.content . req <$> get
   return $
     case res of
       Just (Content.MkText bs) -> bs

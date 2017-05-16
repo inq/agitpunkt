@@ -14,11 +14,10 @@ import           Control.Monad.State  (liftIO)
 import           Core.Request.Content (Context (..))
 import           Data.Bson            (genObjectId, (!?), (=:))
 import qualified Data.Bson            as Bson
+import qualified Data.ByteString      as BS
 import           Data.Ratio           ((%))
 import           Data.Text            (Text, pack)
 import qualified Data.Text            as Text
-import           Data.Text.Encoding   (encodeUtf8)
-import qualified Data.Text.IO         as TextIO
 import qualified Data.Time.Clock      as TC
 import           Data.Time.Format     (defaultTimeLocale, formatTime)
 import qualified Database.MongoDB     as Mongo
@@ -66,7 +65,7 @@ save (MkFile (Just fname) _ d) = do
       imgDir = parentDir ++ "/" ++ show objId
   liftIO $ createDirectoryIfMissing False parentDir
   liftIO $ createDirectoryIfMissing False imgDir
-  case decodeImage (encodeUtf8 d) of
+  case decodeImage d of
     Right i -> do
       let img = convertRGB8 i
       let fact = 1024 % imageWidth img
@@ -76,7 +75,7 @@ save (MkFile (Just fname) _ d) = do
           then ImageRGB8 img
           else ImageRGB8 $ resize fact img
     _ -> return ()
-  liftIO $ TextIO.writeFile (imgDir ++ "/orig.jpg") d
+  liftIO $ BS.writeFile (imgDir ++ "/orig.jpg") d
   _ <-
     Mongo.insert
       "images"

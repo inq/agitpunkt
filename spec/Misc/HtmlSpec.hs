@@ -3,8 +3,8 @@
 
 module Misc.HtmlSpec where
 
-import qualified Data.Text as Text
-import           Data.Text (Text)
+import           Data.Text  (Text)
+import qualified Data.Text  as Text
 import           Misc.Html
 import           SpecHelper
 
@@ -24,8 +24,7 @@ spec =
           div { class= 'hello', id= "hihi" }
             | hi
          |]
-        res `shouldBe`
-          "<html><div class=\"hello\" id=\"hihi\">hi</div></html>"
+        res `shouldBe` "<html><div class=\"hello\" id=\"hihi\">hi</div></html>"
     context "UTF-8 Text" $ do
       it "parses simple utf-8" $ do
         res <-
@@ -46,8 +45,7 @@ spec =
             ^ inner
             | outer
          |]
-        res `shouldBe`
-          Text.pack "<html><div><p>inner</p>outer</div></html>"
+        res `shouldBe` Text.pack "<html><div><p>inner</p>outer</div></html>"
       it "parses monad combinating function" $ do
         let inner v =
               [parse|p

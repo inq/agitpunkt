@@ -3,12 +3,12 @@
 
 module Core.ModelSpec where
 
-import           Core.Database         ((=:))
+import           Core.Database   ((=:))
 import           Core.Model
-import qualified Data.Map.Strict       as M
-import qualified GHC.Generics          as GN
-import qualified Misc.Json             as Json
-import           Data.Text (Text)
+import qualified Data.Map.Strict as M
+import           Data.Text       (Text)
+import qualified GHC.Generics    as GN
+import qualified Misc.Json       as Json
 import           SpecHelper
 
 data Post = Post

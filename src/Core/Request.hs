@@ -5,22 +5,22 @@
 module Core.Request where
 
 import           Control.Applicative        (many)
-import           Control.Monad              (when)
 import qualified Core.Http                  as Http
 import           Core.Request.Content       (Content, mkContent)
-import qualified Data.Attoparsec.Text.Lazy  as AL
+import qualified Misc.Parser.LazyByteString as LazyBSParser
+import qualified Data.ByteString.Lazy       as LazyBS
+import qualified Data.ByteString.Char8      as BS
+import           Data.ByteString            (ByteString)
 import qualified Data.Char                  as C
 import qualified Data.Map                   as M
 import           Data.Text                  (Text)
 import qualified Data.Text                  as Text
 import           Data.Text.Encoding         (decodeUtf8)
-import qualified Data.Text.Lazy             as L
 import qualified Data.Text.Read             as TextRead
 import           Language.Haskell.TH.Syntax (Lift, lift)
-import qualified Misc.Parser                as P
-import           Misc.TextUtil              (QueryString, splitAndDecode)
+import qualified Misc.Parser.ByteString     as BSParser
+import           Misc.TextUtil              (QueryString, splitAndDecode, splitAndDecodeB)
 import           Network.Socket             (Socket)
-import           Network.Socket.ByteString  (recv)
 
 -- * Data types
 data Request = Request
@@ -60,28 +60,7 @@ type RequestHeaders = [Header]
 
 type Header = (Text, Text)
 
-type Lines = ([Text], Text)
-
-receiveHeader :: Socket -> IO Lines
--- ^ Receive header from the socket
---   TODO: Bytestring must be used.
-receiveHeader fd = do
-  buf <- decodeUtf8 <$> recv fd 4096
-  when (Text.length buf == 0) $ error "Disconnected"
-  receiveHeader' [] buf
-  where
-    receiveHeader' res buffer = do
-      let (line, remaining) = Text.breakOn "\r\n" buffer
-      let remaining' = Text.drop 2 remaining
-      if Text.length line == 0
-        then return (res, remaining')
-        else if Text.length remaining' == 0
-               then do
-                 buf <- decodeUtf8 <$> recv fd 4096
-                 if Text.length buf == 0
-                   then error "Disconnected"
-                   else receiveHeader' res $ Text.append remaining' buf
-               else receiveHeader' (line : res) remaining'
+type Lines = ([BS.ByteString], BS.ByteString)
 
 extractCookie :: Request -> M.Map Text Text
 -- ^ Extract cookie from the request header
@@ -91,13 +70,13 @@ extractCookie req = findCookie $ headers req
     findCookie (_:t)                   = findCookie t
     findCookie []                      = M.empty
 
-parse :: L.Text -> Socket -> Request
+parse :: LazyBS.ByteString -> Socket -> Request
 -- ^ Read and parse the data from socket to make the Request data
-parse ipt = parseHead _head res content'
+parse ipt = parseHead head' res content'
   where
     content' =
       mkContent (M.lookup "Content-Type" $ M.fromList res) $
-      L.take contentLength pdata
+        LazyBS.take contentLength pdata
     contentLength =
       case M.lookup "Content-Length" $ M.fromList res of
         Just len ->
@@ -105,17 +84,21 @@ parse ipt = parseHead _head res content'
             Right num -> fromIntegral $ fst num
             Left _    -> error "parse error"
         Nothing -> 0
-    (_head, res, pdata) =
-      case P.parse request ipt of
-        AL.Done remaining (h, r) -> (h, r, remaining)
-        _                        -> error "parse error"
-    request =
-      (,) <$> (P.takeTill P.isEndOfLine <* P.endOfLine) <*>
-      (many header <* P.endOfLine)
-    header =
-      (,) <$>
-      (P.takeWhile P.isToken <* P.char ':' <* P.skipWhile P.isHorizontalSpace) <*>
-      (P.takeTill P.isEndOfLine <* P.endOfLine)
+    (head', res, pdata) =
+      case LazyBSParser.parse request ipt of
+        LazyBSParser.Done remaining (h, r) -> (h, r, remaining)
+        _                                  -> error "parse error"
+    request = (,)
+      <$> (LazyBSParser.takeTill BSParser.isEndOfLine
+           <* BSParser.endOfLine)
+      <*> (many header
+           <* BSParser.endOfLine)
+    header = (,)
+      <$> (decodeUtf8 <$> LazyBSParser.takeWhile BSParser.isToken
+           <* BSParser.char ':'
+           <* LazyBSParser.skipWhile BSParser.isHorizontalSpace)
+      <*> (decodeUtf8 <$> LazyBSParser.takeTill BSParser.isEndOfLine
+           <* BSParser.endOfLine)
 
 splitLines :: Text -> [Text]
 -- ^ Split the lines from the HTTP header
@@ -126,26 +109,26 @@ splitLines str =
     Just _ -> [Text.drop 2 str]
     Nothing -> [""]
 
-parseHead :: Text -> RequestHeaders -> Content -> Socket -> Request
+parseHead :: ByteString -> RequestHeaders -> Content -> Socket -> Request
 -- ^ Parse the first line of the HTTP header
-parseHead str _headers content' =
-  Request _method _version _uri _headers content' queryString
+parseHead str headers' content' =
+  Request method' version' (decodeUtf8 uri') headers' content' queryString
   where
-    _method =
-      case Text.index str 0 of
+    method' =
+      case BS.index str 0 of
         'G' -> GET
         'D' -> DELETE
         'C' -> CONNECT
         _ ->
-          case Text.index str 1 of
+          case BS.index str 1 of
             'O' -> POST
             'U' -> PUT
             'A' -> PATCH
             'P' -> OPTIONS
             'E' -> HEAD
             _   -> TRACE
-    _length = Text.length str
-    uriLong = Text.drop (offset _method) $ Text.take (_length - 9) str
+    length' = BS.length str
+    uriLong = BS.drop (offset method') $ BS.take (length' - 9) str
       where
         offset :: Method -> Int
         offset GET     = 4
@@ -155,13 +138,13 @@ parseHead str _headers content' =
         offset OPTIONS = 7
         offset CONNECT = 7
         offset _       = 6
-    (_uri, queryStringRaw) = Text.break (== '?') uriLong
+    (uri', queryStringRaw) = BS.break (== '?') uriLong
     queryStringTail
-      | Text.null queryStringRaw = ""
-      | Text.head queryStringRaw == '?' = Text.tail queryStringRaw
+      | BS.null queryStringRaw = ""
+      | BS.head queryStringRaw == '?' = BS.tail queryStringRaw
       | otherwise = ""
-    queryString = splitAndDecode '&' queryStringTail
-    _version =
+    queryString = splitAndDecodeB '&' queryStringTail
+    version' =
       Http.Version
-        (C.digitToInt $ Text.index str (_length - 3))
-        (C.digitToInt $ Text.index str (_length - 1))
+        (C.digitToInt $ BS.index str (length' - 3))
+        (C.digitToInt $ BS.index str (length' - 1))
