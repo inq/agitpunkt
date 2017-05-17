@@ -18,7 +18,7 @@ index :: Handler
 -- ^ List the images
 index = do
   assertUser Config.adminUser
-  images <- runDB Image.find
+  images <- runDB $ Image.find 10
   html <-
     layout
       [parse|div { class="article" }
@@ -40,13 +40,7 @@ create = do
   case d of
     Just x -> runDB $ Image.save x
     _      -> return ()
-  html <-
-    layout
-      [parse|div { class="article" }
-    div { class="wrapper" }
-      | Uploaded
-  |]
-  return $ Res.success html []
+  index
 
 view :: Handler
 -- ^ Show the image
