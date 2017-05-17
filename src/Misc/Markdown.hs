@@ -110,9 +110,9 @@ toStr (Snippet _ strs) =
       L.concat
         [ "<tr><td class='td-line-num' data-line-num='"
         , L.fromStrict $ Text.pack $ show line
-        , "'/><td class='td-content'><pre>"
+        , "'/><td class='td-content'>"
         , str
-        , "</pre></td></tr>"
+        , "</td></tr>"
         ] :
       contents (line + 1) strs'
     contents _ [] = []
