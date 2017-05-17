@@ -8,8 +8,9 @@ a:link, a:visited {
 }
 
 img.content-img {
-    max-width: 780px;
-    margin: 10px;
+    max-width: 730px;
+    display: block;
+    margin: 5px auto;
 }
 
 div.pager {
@@ -86,6 +87,10 @@ textarea.content {
     vertical-align: middle;
 }
 
+.code-snippet {
+    table-layout: fixed;
+}
+
 .code-snippet .td-line-num:before {
     content: attr(data-line-num);
     color: #999999;
@@ -102,13 +107,14 @@ textarea.content {
 .code-snippet .td-content {
     white-space: pre;
     padding-left: .6em;
+    word-wrap: break-word;
 }
 
 body {
     margin: 0;
     padding: 0;
     font: menu;
-    min-height: 1000px;
+    min-height: 900px;
 
     background-color: #ffffff;
 }
@@ -245,6 +251,8 @@ div.label {
     background-color: white;
     width: 6em;
     vertical-align: top;
+    margin-left: 35px;
+    margin-right: 35px;
 }
 
 .label > .date {
@@ -303,6 +311,10 @@ div.article {
     box-sizing: border-box;
     margin-top: 2em;
     margin-bottom: 3em;
+}
+
+.article p {
+    margin-left: 35px;
 }
 
 .article .title {

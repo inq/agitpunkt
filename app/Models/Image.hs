@@ -3,11 +3,11 @@
 
 module Models.Image where
 
-import           Codec.Picture        (DynamicImage (..), PixelRGB8 (PixelRGB8),
-                                       PixelRGBA8 (PixelRGBA8),
-                                       convertRGB8, convertRGBA8, decodeImage, generateImage,
-                                       imageHeight, imageWidth, pixelAt,
-                                       saveJpgImage, savePngImage)
+import           Codec.Picture        (DynamicImage (..),
+                                       PixelRGBA8 (PixelRGBA8), convertRGBA8,
+                                       decodeImage, generateImage, imageHeight,
+                                       imageWidth, pixelAt, saveJpgImage,
+                                       savePngImage)
 import qualified Codec.Picture        as J
 import           Control.Arrow        ((&&&), (***))
 import           Control.Monad        (join)
@@ -22,6 +22,7 @@ import qualified Data.Text            as Text
 import qualified Data.Time.Clock      as TC
 import           Data.Time.Format     (defaultTimeLocale, formatTime)
 import qualified Database.MongoDB     as Mongo
+import           GHC.Word             (Word32)
 import           System.Directory     (createDirectoryIfMissing)
 
 data Image = Image
@@ -30,8 +31,9 @@ data Image = Image
   , createdAt :: TC.UTCTime
   } deriving (Show)
 
-data Extension =
-  PNG | JPG
+data Extension
+  = PNG
+  | JPG
   deriving (Eq)
 
 toText :: Extension -> Text
@@ -60,10 +62,14 @@ imgUrl (Image (Just id') origFile' created') =
     ]
 imgUrl _ = "Unreachable"
 
-find :: Mongo.Action IO [Image]
+find :: Word32 -> Mongo.Action IO [Image]
 -- ^ Find images
-find = do
-  res <- Mongo.find (Mongo.select [] "images") >>= Mongo.rest
+find limit = do
+  res <-
+    Mongo.find
+      (Mongo.select [] "images")
+      {Mongo.sort = ["_id" =: (1 :: Int)], Mongo.limit = limit} >>=
+    Mongo.rest
   return $ map fromDocument res
   where
     fromDocument doc =
@@ -87,9 +93,10 @@ save (MkFile (Just fname) _ d) = do
     Right i -> do
       let img = convertRGBA8 i
       let fact = 900 % imageWidth img
-      let img' = if fact > 1
-          then ImageRGBA8 img
-          else ImageRGBA8 $ resize4 fact img
+      let img' =
+            if fact > 1
+              then ImageRGBA8 img
+              else ImageRGBA8 $ resize4 fact img
       liftIO $
         if getExtension fname == PNG
           then savePngImage (imgDir ++ "/900" ++ Text.unpack ext) img'
@@ -123,7 +130,8 @@ pixelAt4' (dw, dh) s i (x, y) = foldl pp (0, 0, 0, 0) pix `pd` length pix
   where
     inds n d = [a | a <- (+ n) <$> [0 .. s], and ([(>= 0), (< d)] <*> [a])]
     pix = uncurry (pixelAt i) <$> [(x', y') | x' <- inds x dw, y' <- inds y dh]
-    pp (r, g, b, a) (PixelRGBA8 r' g' b' a') = (pf r r', pf g g', pf b b', pf a a')
+    pp (r, g, b, a) (PixelRGBA8 r' g' b' a') =
+      (pf r r', pf g g', pf b b', pf a a')
     pf a = (+ a) . fromIntegral
     pd (r, g, b, a) d = PixelRGBA8 (pr r d) (pr g d) (pr b d) (pr a d)
     pr a b = round (a % b)

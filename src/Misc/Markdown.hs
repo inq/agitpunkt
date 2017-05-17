@@ -7,6 +7,7 @@ import           Data.Attoparsec.Text.Lazy (Result (Done))
 import qualified Data.Text                 as Text
 import qualified Data.Text.Lazy            as L
 import qualified Misc.Parser               as P
+import           Misc.TextUtil             (stripHtml)
 
 -- * Data types
 newtype Markdown =
@@ -50,7 +51,7 @@ parseItem =
       open <-
         L.fromStrict <$>
         P.try (P.string "```" *> P.noneOf1 "\r\n" <* P.string "\r\n")
-      res <- parseLine
+      res <- (map stripHtml) <$> parseLine
       return $ Snippet open res
     parseImage = do
       alt <-

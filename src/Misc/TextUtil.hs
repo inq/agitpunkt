@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 module Misc.TextUtil where
@@ -63,3 +64,13 @@ splitAndDecodeB :: Char -> ByteString -> QueryString
 splitAndDecodeB mark bs = case BSParser.parseOnly (parseB mark) bs of
   Right val -> M.fromList val
   Left _    -> M.empty
+
+stripHtml :: L.Text -> L.Text
+stripHtml = L.concatMap char
+  where
+    char '<' = "&lt;"
+    char '>' = "&gt;"
+    char '&' = "&amp;"
+    char '"' = "&quot;"
+    char '\'' = "&#39;"
+    char x = L.singleton x
