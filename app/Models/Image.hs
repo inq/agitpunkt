@@ -29,17 +29,32 @@ data Image = Image
   , createdAt :: TC.UTCTime
   } deriving (Show)
 
+data Extension =
+  PNG | JPG
+
+toText :: Extension -> Text
+toText PNG = ".png"
+toText JPG = ".jpg"
+
+getExtension :: Text -> Extension
+-- ^ TODO: Support gif
+getExtension fname =
+  case (Text.toLower $ Text.takeEnd 4 fname) of
+    ".png" -> PNG
+    _      -> JPG
+
 getDirectory :: TC.UTCTime -> String
 getDirectory = formatTime defaultTimeLocale "%y%m%d"
 
 imgUrl :: Image -> Text
-imgUrl (Image (Just id') _ created') =
+imgUrl (Image (Just id') origFile' created') =
   Text.concat
     [ "/static/data/"
     , pack $ getDirectory created'
     , "/"
     , pack $ show id'
-    , "/1024.jpg"
+    , "/1024"
+    , (toText . getExtension) origFile'
     ]
 imgUrl _ = "Unreachable"
 
@@ -57,8 +72,9 @@ find = do
       }
 
 save :: Context -> Mongo.Action IO ()
--- ^ TODO: Use Bytestring
+-- ^ Save the image file
 save (MkFile (Just fname) _ d) = do
+  let ext = (toText . getExtension) fname
   current <- liftIO TC.getCurrentTime
   objId <- liftIO genObjectId
   let parentDir = "data/" ++ getDirectory current
@@ -70,12 +86,12 @@ save (MkFile (Just fname) _ d) = do
       let img = convertRGB8 i
       let fact = 1024 % imageWidth img
       liftIO $
-        saveJpgImage 100 (imgDir ++ "/1024.jpg") $
+        saveJpgImage 100 (imgDir ++ "/1024" ++ Text.unpack ext) $
         if fact > 1
           then ImageRGB8 img
           else ImageRGB8 $ resize fact img
     _ -> return ()
-  liftIO $ BS.writeFile (imgDir ++ "/orig.jpg") d
+  liftIO $ BS.writeFile (imgDir ++ "/orig" ++ Text.unpack ext) d
   _ <-
     Mongo.insert
       "images"
