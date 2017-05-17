@@ -4,9 +4,10 @@
 module Models.Image where
 
 import           Codec.Picture        (DynamicImage (..), PixelRGB8 (PixelRGB8),
-                                       convertRGB8, decodeImage, generateImage,
+                                       PixelRGBA8 (PixelRGBA8),
+                                       convertRGB8, convertRGBA8, decodeImage, generateImage,
                                        imageHeight, imageWidth, pixelAt,
-                                       saveJpgImage)
+                                       saveJpgImage, savePngImage)
 import qualified Codec.Picture        as J
 import           Control.Arrow        ((&&&), (***))
 import           Control.Monad        (join)
@@ -29,17 +30,33 @@ data Image = Image
   , createdAt :: TC.UTCTime
   } deriving (Show)
 
+data Extension =
+  PNG | JPG
+  deriving (Eq)
+
+toText :: Extension -> Text
+toText PNG = ".png"
+toText JPG = ".jpg"
+
+getExtension :: Text -> Extension
+-- ^ TODO: Support gif
+getExtension fname =
+  case (Text.toLower $ Text.takeEnd 4 fname) of
+    ".png" -> PNG
+    _      -> JPG
+
 getDirectory :: TC.UTCTime -> String
 getDirectory = formatTime defaultTimeLocale "%y%m%d"
 
 imgUrl :: Image -> Text
-imgUrl (Image (Just id') _ created') =
+imgUrl (Image (Just id') origFile' created') =
   Text.concat
     [ "/static/data/"
     , pack $ getDirectory created'
     , "/"
     , pack $ show id'
-    , "/1024.jpg"
+    , "/900"
+    , (toText . getExtension) origFile'
     ]
 imgUrl _ = "Unreachable"
 
@@ -57,8 +74,9 @@ find = do
       }
 
 save :: Context -> Mongo.Action IO ()
--- ^ TODO: Use Bytestring
+-- ^ Save the image file
 save (MkFile (Just fname) _ d) = do
+  let ext = (toText . getExtension) fname
   current <- liftIO TC.getCurrentTime
   objId <- liftIO genObjectId
   let parentDir = "data/" ++ getDirectory current
@@ -67,15 +85,17 @@ save (MkFile (Just fname) _ d) = do
   liftIO $ createDirectoryIfMissing False imgDir
   case decodeImage d of
     Right i -> do
-      let img = convertRGB8 i
-      let fact = 1024 % imageWidth img
+      let img = convertRGBA8 i
+      let fact = 900 % imageWidth img
+      let img' = if fact > 1
+          then ImageRGBA8 img
+          else ImageRGBA8 $ resize4 fact img
       liftIO $
-        saveJpgImage 100 (imgDir ++ "/1024.jpg") $
-        if fact > 1
-          then ImageRGB8 img
-          else ImageRGB8 $ resize fact img
+        if getExtension fname == PNG
+          then savePngImage (imgDir ++ "/900" ++ Text.unpack ext) img'
+          else saveJpgImage 100 (imgDir ++ "/900" ++ Text.unpack ext) img'
     _ -> return ()
-  liftIO $ BS.writeFile (imgDir ++ "/orig.jpg") d
+  liftIO $ BS.writeFile (imgDir ++ "/orig" ++ Text.unpack ext) d
   _ <-
     Mongo.insert
       "images"
@@ -84,27 +104,26 @@ save (MkFile (Just fname) _ d) = do
 save _ = return ()
 
 -- * Quoted from https://gist.github.com/eflister/5456125
-resize
+resize4
   :: (RealFrac a)
-  => a -> J.Image PixelRGB8 -> J.Image PixelRGB8
-resize fact i = uncurry (generateImage f) new
+  => a -> J.Image PixelRGBA8 -> J.Image PixelRGBA8
+resize4 fact i = uncurry (generateImage f) new
   where
     f =
       curry $
-      pixelAt' old (round $ 1 / fact) i .
+      pixelAt4' old (round $ 1 / fact) i .
       uncurry (***) (join (***) tmp (fst, snd))
     old = (imageWidth &&& imageHeight) i
     new = (join (***) $ scale fact) old
     scale r = round . (* toRational r) . toRational
     tmp s = scale (s old) . (% s new)
 
-pixelAt' :: (Int, Int) -> Int -> J.Image PixelRGB8 -> (Int, Int) -> PixelRGB8
-pixelAt' (dw, dh) s i (x, y) = avg pix
+pixelAt4' :: (Int, Int) -> Int -> J.Image PixelRGBA8 -> (Int, Int) -> PixelRGBA8
+pixelAt4' (dw, dh) s i (x, y) = foldl pp (0, 0, 0, 0) pix `pd` length pix
   where
     inds n d = [a | a <- (+ n) <$> [0 .. s], and ([(>= 0), (< d)] <*> [a])]
     pix = uncurry (pixelAt i) <$> [(x', y') | x' <- inds x dw, y' <- inds y dh]
-    avg p = foldl pp (0, 0, 0) p `pd` length p
-    pp (r, g, b) (PixelRGB8 r' g' b') = (pf r r', pf g g', pf b b')
+    pp (r, g, b, a) (PixelRGBA8 r' g' b' a') = (pf r r', pf g g', pf b b', pf a a')
     pf a = (+ a) . fromIntegral
-    pd (r, g, b) d = PixelRGB8 (pr r d) (pr g d) (pr b d)
+    pd (r, g, b, a) d = PixelRGBA8 (pr r d) (pr g d) (pr b d) (pr a d)
     pr a b = round (a % b)

@@ -65,7 +65,6 @@ acceptBody
   -> UserStore
   -> IO ()
 -- ^ Process the connection
---   TODO: Use ByteString
 acceptBody rt response404 fd db ss us = do
   buffer <- LazySocket.getContents fd
   let request = Request.parse buffer fd
