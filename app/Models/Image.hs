@@ -57,7 +57,7 @@ imgUrl (Image (Just id') origFile' created') =
     , pack $ getDirectory created'
     , "/"
     , pack $ show id'
-    , "/900"
+    , "/800"
     , (toText . getExtension) origFile'
     ]
 imgUrl _ = "Unreachable"
@@ -92,15 +92,15 @@ save (MkFile (Just fname) _ d) = do
   case decodeImage d of
     Right i -> do
       let img = convertRGBA8 i
-      let fact = 900 % imageWidth img
+      let fact = 800 % imageWidth img
       let img' =
             if fact > 1
               then ImageRGBA8 img
               else ImageRGBA8 $ resize4 fact img
       liftIO $
         if getExtension fname == PNG
-          then savePngImage (imgDir ++ "/900" ++ Text.unpack ext) img'
-          else saveJpgImage 100 (imgDir ++ "/900" ++ Text.unpack ext) img'
+          then savePngImage (imgDir ++ "/800" ++ Text.unpack ext) img'
+          else saveJpgImage 100 (imgDir ++ "/800" ++ Text.unpack ext) img'
     _ -> return ()
   liftIO $ BS.writeFile (imgDir ++ "/orig" ++ Text.unpack ext) d
   _ <-
