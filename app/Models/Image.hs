@@ -68,7 +68,7 @@ find limit = do
   res <-
     Mongo.find
       (Mongo.select [] "images")
-      {Mongo.sort = ["_id" =: (1 :: Int)], Mongo.limit = limit} >>=
+      {Mongo.sort = ["_id" =: (-1 :: Int)], Mongo.limit = limit} >>=
     Mongo.rest
   return $ map fromDocument res
   where
