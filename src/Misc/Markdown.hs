@@ -54,7 +54,7 @@ parseItem =
       where
       parseLine =
         parseEnd <|>
-        ((:) <$> parseImg <*> parseLine)
+        ((:) <$> (parseImg <* P.many1 (P.string "\r\n")) <*> parseLine)
       parseEnd = do
         _ <- P.try (P.string "}}}")
         return []
@@ -77,7 +77,7 @@ parseItem =
         L.fromStrict <$>
         P.try
           (P.char '!' *> P.spaces *> P.noneOf1 ";" <* P.char ';' <* P.spaces)
-      uri <- L.fromStrict <$> P.noneOf1 "\r" <* P.many1 (P.string "\r\n")
+      uri <- L.fromStrict <$> P.noneOf1 "\r\n"
       return $ Img alt uri
     parseImage = do
       img <- parseImg
@@ -105,7 +105,6 @@ parseMarkdown :: P.Parser Markdown
 -- ^ The actual parser
 parseMarkdown = do
   items <- P.sepBy parseItem (P.many1 (P.string "\r\n"))
-
   return $ Markdown items
 
 toHtml :: Markdown -> L.Text
