@@ -47,7 +47,7 @@ parseItem =
   where
     parseContainer = do
     -- ^ Contain the img tags.
-      open <-
+      _open <-
         L.fromStrict <$>
         P.try (P.string "{{{" <* P.string "\r\n")
       inner <- parseLine
@@ -63,7 +63,7 @@ parseItem =
       open <-
         L.fromStrict <$>
         P.try (P.string "```" *> P.noneOf1 "\r\n" <* P.string "\r\n")
-      res <- (map stripHtml) <$> parseLine
+      res <- map stripHtml <$> parseLine
       return $ Snippet open res
       where
       parseLine =
@@ -121,7 +121,7 @@ toStr (H3 str) = L.concat ["<h3>", str, "</h3>"]
 toStr (H2 str) = L.concat ["<h2>", str, "</h2>"]
 toStr (H1 str) = L.concat ["<h1>", str, "</h1>"]
 toStr (Container imgs) =
-  L.concat (["<div class='paragraph", (L.pack $ show $ length imgs), "'>"]
+  L.concat (["<div class='paragraph", L.pack $ show $ length imgs, "'>"]
   ++ renderImgs imgs ++ ["</div>"])
   where
   renderImgs (Img alt uri : t) =

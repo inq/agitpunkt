@@ -8,8 +8,8 @@ import           SpecHelper
 
 spec :: Spec
 spec =
-  describe "Core.Request.ContentSpec" $ do
-    context "Simple parsing" $ do
+  describe "Core.Request.ContentSpec" $ 
+    context "Simple parsing" $
       it "parses Content-Disposition" $ do
         let contDisp = "form-data; name=\"data\"; filename=\"theFile.png\""
         P.parseOnly parse contDisp `shouldBe`

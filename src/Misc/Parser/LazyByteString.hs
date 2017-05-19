@@ -6,7 +6,6 @@ module Misc.Parser.LazyByteString
   , isToken
   ) where
 
-import           Data.Attoparsec.ByteString.Lazy      (Parser)
 import           GHC.Word (Word8)
 import Data.Attoparsec.ByteString.Lazy 
 import qualified Data.Attoparsec.ByteString.Char8 as BSParser

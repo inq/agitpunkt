@@ -43,7 +43,7 @@ toText JPG = ".jpg"
 getExtension :: Text -> Extension
 -- ^ TODO: Support gif
 getExtension fname =
-  case (Text.toLower $ Text.takeEnd 4 fname) of
+  case Text.toLower $ Text.takeEnd 4 fname of
     ".png" -> PNG
     _      -> JPG
 

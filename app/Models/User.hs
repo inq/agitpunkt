@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Models.User where
@@ -44,7 +43,7 @@ putUserStore :: UserStore -> IO ()
 -- ^ Try to signin
 putUserStore store' = do
   map' <- atomically $ readTVar store'
-  putStrLn $ show map'
+  print map'
 
 catchError :: IOError -> IO (Maybe a)
 -- ^ TODO: Wrap this
@@ -63,7 +62,7 @@ signIn store' email' password' = do
   return $
     case M.lookup email' map' of
       Just user ->
-        if (password user) == password'
+        if password user == password'
           then Just user
           else Nothing
       _ -> Nothing

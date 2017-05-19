@@ -18,8 +18,8 @@ spec =
       it "parses simple enippet" $
         parse "Hello\r\n```rust\r\nHELLO\r\nWorld\r\n```\r\n" `shouldBe`
         Just (Markdown [Paragraph "Hello", Snippet "rust" ["HELLO", "World"]])
-    context "Multiple Images" $ do
-      it "renders multiple images" $ do
+    context "Multiple Images" $ 
+      it "renders multiple images" $
         parse
           "{{{\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n}}}\r\n" `shouldBe`
           Just

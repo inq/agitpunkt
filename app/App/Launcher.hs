@@ -39,7 +39,7 @@ run rt response404 databaseName socketFile =
         listen socketFd 10
         setStdFileMode socketFile
         acceptSocket rt response404 socketFd db ss user_store
-      Nothing -> do
+      Nothing ->
         putStrLn "FATAL: Cannot load user store."
 
 acceptSocket

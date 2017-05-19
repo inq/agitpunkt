@@ -9,9 +9,8 @@ module Misc.Parser.ByteString
   ) where
 
 import qualified Data.Attoparsec.ByteString.Char8      as BSParser
-import           Data.ByteString           (ByteString)
-import qualified Data.ByteString.Char8          as BS
-import           Data.Attoparsec.ByteString.Char8      (Parser)
+import           Data.ByteString                       (ByteString)
+import qualified Data.ByteString.Char8                 as BS
 import           GHC.Word (Word8)
 import Data.Attoparsec.ByteString.Char8
 import Data.Char (chr)
@@ -35,6 +34,6 @@ noneOf1 = BSParser.takeWhile1 . BSParser.notInClass
 
 isToken :: Word8 -> Bool
 isToken w =
-  w <= 127 && notInClass "\0-\31()<>@,;:\\\"/[]?={} \t" (chr $ iw)
+  w <= 127 && notInClass "\0-\31()<>@,;:\\\"/[]?={} \t" (chr iw)
   where
   iw = fromIntegral w :: Int
