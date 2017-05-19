@@ -48,8 +48,7 @@ parseItem =
     parseContainer = do
     -- ^ Contain the img tags.
       _open <-
-        L.fromStrict <$>
-        P.try (P.string "{{{" <* P.string "\r\n")
+        P.try (P.string "{{{") <* P.many1 (P.string "\r\n")
       inner <- parseLine
       return $ Container inner
       where
@@ -78,7 +77,7 @@ parseItem =
         L.fromStrict <$>
         P.try
           (P.char '!' *> P.spaces *> P.noneOf1 ";" <* P.char ';' <* P.spaces)
-      uri <- L.fromStrict <$> P.noneOf1 "\r" <* P.string "\r\n"
+      uri <- L.fromStrict <$> P.noneOf1 "\r" <* P.many1 (P.string "\r\n")
       return $ Img alt uri
     parseImage = do
       img <- parseImg

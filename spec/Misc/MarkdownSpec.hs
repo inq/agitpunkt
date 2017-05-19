@@ -21,7 +21,7 @@ spec =
     context "Multiple Images" $ 
       it "renders multiple images" $
         parse
-          "{{{\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n}}}\r\n" `shouldBe`
+          "{{{\r\n! hi-hihi; /img/img.png\r\n\r\n\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n}}}\r\n" `shouldBe`
           Just
             (Markdown
                [ Container
