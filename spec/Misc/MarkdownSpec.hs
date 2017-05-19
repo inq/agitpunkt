@@ -17,11 +17,19 @@ spec =
           Just (Markdown [Paragraph "Hello", Paragraph "Hihi"])
       it "parses simple enippet" $
         parse "Hello\r\n```rust\r\nHELLO\r\nWorld\r\n```\r\n" `shouldBe`
-          Just (Markdown [Paragraph "Hello", Snippet "rust" ["HELLO", "World"]])
+        Just (Markdown [Paragraph "Hello", Snippet "rust" ["HELLO", "World"]])
     context "Multiple Images" $ do
       it "renders multiple images" $ do
-        parse "{{{\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n}}}\r\n" `shouldBe`
-          Just (Markdown [Container [Img "hi-hihi" "/img/img.png", Img "hi-hihi" "/img/img.png", Img "hi-hihi" "/img/img.png"]])
+        parse
+          "{{{\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n! hi-hihi; /img/img.png\r\n}}}\r\n" `shouldBe`
+          Just
+            (Markdown
+               [ Container
+                   [ Img "hi-hihi" "/img/img.png"
+                   , Img "hi-hihi" "/img/img.png"
+                   , Img "hi-hihi" "/img/img.png"
+                   ]
+               ])
     context "To Html" $ do
       it "generate h4 string" $
         toHtml (Markdown [Paragraph "HI"]) `shouldBe` "<p>HI</p>"
