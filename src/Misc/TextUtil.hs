@@ -54,10 +54,10 @@ parseB splitter = BSParser.sepBy parsePair (BSParser.char splitter)
   where
     parsePair :: BSParser.Parser (Text, Text)
     parsePair = do
-      key <- (BSParser.skipSpace *> BSParser.noneOf1 " =" <* BSParser.skipSpace <* BSParser.char '=')
-      value <- (BSParser.skipSpace *> BSParser.noneOf1 (splitter : " ") <* BSParser.skipSpace)
+      key <- BSParser.skipSpace *> BSParser.noneOf1 " =" <* BSParser.skipSpace <* BSParser.char '='
+      value <- BSParser.skipSpace *> BSParser.noneOf1 (splitter : " ") <* BSParser.skipSpace
       return (decode key, decode value)
-    decode = decodeUtf8 . (urlDecode True)
+    decode = decodeUtf8 . urlDecode True
 
 splitAndDecodeB :: Char -> ByteString -> QueryString
 -- ^ TODO: Merge with Text

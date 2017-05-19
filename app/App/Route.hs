@@ -18,8 +18,8 @@ import           Language.Haskell.TH.Syntax (Exp (VarE), Lift (lift), Q, mkName,
 import qualified Misc.Parser                as P
 
 -- * Data types
-data Routes =
-  Routes ![Route]
+newtype Routes =
+  Routes [Route]
 
 data Route =
   Route !String

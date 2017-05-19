@@ -13,6 +13,32 @@ img.content-img {
     margin: 5px auto;
 }
 
+.paragraph3 {
+    max-width: 730px;
+    display: block;
+    margin: 5px auto;
+    text-align: center;
+}
+
+.paragraph3 img.content-img {
+    max-width: 239px;
+    display: inline-block;
+    margin: 2px;
+}
+
+.paragraph2 {
+    max-width: 730px;
+    display: block;
+    margin: 5px auto;
+    text-align: center;
+}
+
+.paragraph2 img.content-img {
+    max-width: 360px;
+    display: inline-block;
+    margin: 2px;
+}
+
 div.pager {
     padding-top: 1em;
 }

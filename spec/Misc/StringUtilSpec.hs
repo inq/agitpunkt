@@ -8,7 +8,7 @@ import           SpecHelper
 spec :: Spec
 spec =
   describe "Misc.StringUtilSpec" $
-  context "Simple string" $ do
+  context "Simple string" $
     it "convert to snake case" $ do
       toSnake "AAA" `shouldBe` "a_a_a"
       toSnake "AaA" `shouldBe` "aa_a"
