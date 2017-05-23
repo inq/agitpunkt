@@ -50,7 +50,6 @@ doPage p = do
               a { href $ showUri u }
                 = t
             div { class="content" }
-              = unwrap c
               - if isAdmin
                 p
                   a { href $ editUri i }
@@ -90,6 +89,8 @@ readArticle = do
             div { class="title" }
               = t
             div { class="content" }
+            div { class="content" }
+              = unwrap c
               - if isAdmin
                 p
                   a { href $ articleUri i }
