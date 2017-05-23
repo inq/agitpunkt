@@ -8,4 +8,4 @@ adminUser :: Text
 adminUser = "gofiri@gmail.com"
 
 articlePerPage :: Int
-articlePerPage = 5
+articlePerPage = 10

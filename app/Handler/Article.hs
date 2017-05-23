@@ -90,7 +90,6 @@ readArticle = do
             div { class="title" }
               = t
             div { class="content" }
-              = unwrap c
               - if isAdmin
                 p
                   a { href $ articleUri i }
