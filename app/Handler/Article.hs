@@ -4,9 +4,10 @@
 module Handler.Article
   ( indexH
   , page
-  , view
+  , readArticle
   , edit
   , new
+  , view
   , create
   , update
   ) where
@@ -46,6 +47,47 @@ doPage p = do
               span { class="time" }
                 $ formatTime defaultTimeLocale "%H:%M:%S" d
             div { class="title" }
+              a { href $ showUri u }
+                = t
+            div { class="content" }
+              = unwrap c
+              - if isAdmin
+                p
+                  a { href $ editUri i }
+                    | Edit
+      ^ pager p total
+     |]
+  return $ Res.success res []
+  where
+    editUri (Just id') = "/article/edit/" ++ show id'
+    editUri _          = "Unreachable"
+    showUri u' = "/read/" ++ Text.unpack u'
+    unwrap c =
+      case Markdown.convert $ fromChunks [c] of
+        Just s  -> toStrict s
+        Nothing -> ""
+
+readArticle :: Handler
+-- ^ The actual main page renderer
+readArticle = do
+  [u'] <- getParams
+  isAdmin <- isUser Config.adminUser
+  articles <- runDB $ Article.fromUri u'
+  res <- layout [parse|div
+      - map articles -> Article.Article i _u t c d
+        div { class="article" }
+          div { class="wrapper" }
+            div { class="label" }
+              span { class="date" }
+                $ formatTime defaultTimeLocale "%d" d
+              span { class="month-year" }
+                span { class="month" }
+                  $ formatTime defaultTimeLocale "%b" d
+                span { class="year" }
+                  $ formatTime defaultTimeLocale "%Y" d
+              span { class="time" }
+                $ formatTime defaultTimeLocale "%H:%M:%S" d
+            div { class="title" }
               = t
             div { class="content" }
               = unwrap c
@@ -53,7 +95,6 @@ doPage p = do
                 p
                   a { href $ articleUri i }
                     | Edit
-      ^ pager p total
      |]
   return $ Res.success res []
   where

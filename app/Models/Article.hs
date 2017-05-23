@@ -9,6 +9,7 @@ module Models.Article
   , list
   , update
   , find
+  , fromUri
   ) where
 
 import           Core.Model             (Model, toDocument)
@@ -81,6 +82,21 @@ find :: Bson.ObjectId -> Mongo.Action IO (Maybe Article)
 -- ^ Find articles
 find oid = do
   res <- Mongo.findOne (Mongo.select ["_id" =: oid] "articles")
+  return $ fromDocument <$> res
+  where
+    fromDocument doc =
+      Article
+      { _id = doc !? "_id"
+      , uri = Bson.at "uri" doc
+      , title = Bson.at "title" doc
+      , content = Bson.at "content" doc
+      , createdAt = Bson.at "created_at" doc
+      }
+
+fromUri :: Text -> Mongo.Action IO (Maybe Article)
+-- ^ Find articles
+fromUri u' = do
+  res <- Mongo.findOne (Mongo.select ["uri" =: u'] "articles")
   return $ fromDocument <$> res
   where
     fromDocument doc =
