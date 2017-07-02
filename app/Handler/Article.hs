@@ -4,9 +4,10 @@
 module Handler.Article
   ( indexH
   , page
-  , view
+  , readArticle
   , edit
   , new
+  , view
   , create
   , update
   ) where
@@ -31,10 +32,48 @@ doPage p = do
   isAdmin <- isUser Config.adminUser
   total <- runDB Article.count
   articles <- runDB $ Article.list Config.articlePerPage p
-  res <-
-    layout
-      [parse|div
-      - map articles -> Article.Article i t c d
+  res <- layout [parse|div
+      - map articles -> Article.Article i u t c d
+        div { class="article" }
+          div { class="wrapper" }
+            div { class="label" }
+              span { class="date" }
+                $ formatTime defaultTimeLocale "%d" d
+              span { class="month-year" }
+                span { class="month" }
+                  $ formatTime defaultTimeLocale "%b" d
+                span { class="year" }
+                  $ formatTime defaultTimeLocale "%Y" d
+              span { class="time" }
+                $ formatTime defaultTimeLocale "%H:%M:%S" d
+            div { class="title" }
+              a { href $ showUri u }
+                = t
+            div { class="content" }
+              - if isAdmin
+                p
+                  a { href $ editUri i }
+                    | Edit
+      ^ pager p total
+     |]
+  return $ Res.success res []
+  where
+    editUri (Just id') = "/article/edit/" ++ show id'
+    editUri _          = "Unreachable"
+    showUri u' = "/read/" ++ Text.unpack u'
+    unwrap c =
+      case Markdown.convert $ fromChunks [c] of
+        Just s  -> toStrict s
+        Nothing -> ""
+
+readArticle :: Handler
+-- ^ The actual main page renderer
+readArticle = do
+  [u'] <- getParams
+  isAdmin <- isUser Config.adminUser
+  articles <- runDB $ Article.fromUri u'
+  res <- layout [parse|div
+      - map articles -> Article.Article i _u t c d
         div { class="article" }
           div { class="wrapper" }
             div { class="label" }
@@ -50,12 +89,12 @@ doPage p = do
             div { class="title" }
               = t
             div { class="content" }
+            div { class="content" }
               = unwrap c
               - if isAdmin
                 p
                   a { href $ articleUri i }
                     | Edit
-      ^ pager p total
      |]
   return $ Res.success res []
   where
@@ -65,6 +104,7 @@ doPage p = do
       case Markdown.convert $ fromChunks [c] of
         Just s  -> toStrict s
         Nothing -> ""
+
 
 indexH :: Handler
 -- ^ The main page
@@ -107,6 +147,7 @@ edit = do
       [parse|div { class="article" }
       div { class="wrapper" }
         form { action=uri, method="post" }
+          input { class="editbox", type="text", name="uri", value=Article.uri article }
           input { class="editbox", type="text", name="title", value=Article.title article }
           input { class="editbox", type="text", name="created_at", value$createdAt }
           textarea { class="content", name="content", id="content-box" }
@@ -120,11 +161,12 @@ update :: Handler
 update = do
   [bsid] <- getParams
   let id' = read $ Text.unpack bsid
+  uri <- postData' "uri"
   title <- postData' "title"
   content <- postData' "content"
   createdAt <- postData' "created_at"
   let article =
-        Article.Article (Just id') title content (read $ Text.unpack createdAt)
+        Article.Article (Just id') uri title content (read $ Text.unpack createdAt)
   runDB $ Article.update article
   return $ Res.redirect "/" []
 
@@ -137,6 +179,7 @@ new = do
       [parse|div { class="content" }
       div { class="wrapper" }
         form { action="/article/new", method="post" }
+          input { class="editbox", type="text", name="uri" }
           input { class="editbox", type="text", name="title" }
           input { class="editbox", type="text", name="created_at", value$createdAt }
           textarea { class="content", name="content", id="content-box" }
@@ -147,10 +190,11 @@ new = do
 create :: Handler
 -- ^ Create a new article from the given POST data
 create = do
+  uri <- postData' "uri"
   title <- postData' "title"
   content <- postData' "content"
   createdAt <- postData' "created_at"
   runDB $
     Article.save $
-    Article.Article Nothing title content (read $ Text.unpack createdAt)
+    Article.Article Nothing uri title content (read $ Text.unpack createdAt)
   return $ Res.redirect "/" []

@@ -9,6 +9,7 @@ module Models.Article
   , list
   , update
   , find
+  , fromUri
   ) where
 
 import           Core.Model             (Model, toDocument)
@@ -24,6 +25,7 @@ import           GHC.Generics           (Generic)
 
 data Article = Article
   { _id       :: Maybe Bson.ObjectId
+  , uri       :: Text
   , title     :: Text
   , content   :: Text
   , createdAt :: TC.UTCTime
@@ -37,11 +39,12 @@ count = Mongo.count (Mongo.select [] "articles")
 
 save :: Article -> Mongo.Action IO ()
 -- ^ Save the data into the DB
-save (Article _id' title' content' createdAt') = do
+save (Article _id' uri' title' content' createdAt') = do
   _ <-
     Mongo.insert
       "articles"
-      [ "title" =: Bson.String title'
+      [ "uri" =: Bson.String uri'
+      , "title" =: Bson.String title'
       , "content" =: Bson.String content'
       , "created_at" =: createdAt'
       ]
@@ -63,6 +66,7 @@ list pagesize page = do
     fromDocument doc =
       Article
       { _id = doc !? "_id"
+      , uri = Bson.at "uri" doc
       , title = Bson.at "title" doc
       , content = Bson.at "content" doc
       , createdAt = Bson.at "created_at" doc
@@ -83,6 +87,22 @@ find oid = do
     fromDocument doc =
       Article
       { _id = doc !? "_id"
+      , uri = Bson.at "uri" doc
+      , title = Bson.at "title" doc
+      , content = Bson.at "content" doc
+      , createdAt = Bson.at "created_at" doc
+      }
+
+fromUri :: Text -> Mongo.Action IO (Maybe Article)
+-- ^ Find articles
+fromUri u' = do
+  res <- Mongo.findOne (Mongo.select ["uri" =: u'] "articles")
+  return $ fromDocument <$> res
+  where
+    fromDocument doc =
+      Article
+      { _id = doc !? "_id"
+      , uri = Bson.at "uri" doc
       , title = Bson.at "title" doc
       , content = Bson.at "content" doc
       , createdAt = Bson.at "created_at" doc
