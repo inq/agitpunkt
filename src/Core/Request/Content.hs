@@ -2,19 +2,19 @@
 
 module Core.Request.Content where
 
-import           Control.Applicative              (many)
-import qualified Core.Request.ContentDisposition  as Cont
-import qualified Data.Attoparsec.ByteString.Lazy  as LazyBSParser
-import           Data.ByteString.Char8            (ByteString)
-import qualified Data.ByteString.Char8            as BS
-import qualified Data.Map                         as M
-import qualified Data.Text                        as Text
-import           Data.Text                        (Text)
-import qualified Data.ByteString.Lazy             as LazyBS
-import qualified Misc.Parser                      as P
-import qualified Misc.Parser.ByteString           as BSParser
-import           Misc.TextUtil                    (splitAndDecodeB)
-import           Data.Text.Encoding               (encodeUtf8, decodeUtf8)
+import           Control.Applicative             (many)
+import qualified Core.Request.ContentDisposition as Cont
+import qualified Data.Attoparsec.ByteString.Lazy as LazyBSParser
+import           Data.ByteString.Char8           (ByteString)
+import qualified Data.ByteString.Char8           as BS
+import qualified Data.ByteString.Lazy            as LazyBS
+import qualified Data.Map                        as M
+import           Data.Text                       (Text)
+import qualified Data.Text                       as Text
+import           Data.Text.Encoding              (decodeUtf8, encodeUtf8)
+import qualified Misc.Parser                     as P
+import qualified Misc.Parser.ByteString          as BSParser
+import           Misc.TextUtil                   (splitAndDecodeB)
 
 -- * Data types
 type Content = M.Map Text Context

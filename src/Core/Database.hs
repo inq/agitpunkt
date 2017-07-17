@@ -1,16 +1,17 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ExtendedDefaultRules #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ExtendedDefaultRules  #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 module Core.Database
     ( module Core.Database
     , (=:)
     ) where
 
-import qualified Database.MongoDB as M
-import Data.Text (Text)
-import Database.MongoDB ((=:))
-import Control.Monad.Trans (MonadIO)
-import Control.Monad.Trans.Control (MonadBaseControl)
+import           Control.Monad.Trans         (MonadIO)
+import           Control.Monad.Trans.Control (MonadBaseControl)
+import           Data.Text                   (Text)
+import           Database.MongoDB            ((=:))
+import qualified Database.MongoDB            as M
 
 data Connection = Connection
   {-# UNPACK #-} !M.Pipe

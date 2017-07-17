@@ -1,5 +1,6 @@
-{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Misc.Html.Meta
   ( MetaNode(..)
@@ -7,10 +8,11 @@ module Misc.Html.Meta
   , convert
   ) where
 
-import qualified Data.Text as Text
-import Language.Haskell.TH.Syntax
-  ( Lift, Lit(StringL), Exp(LitE, AppE, VarE), Pat(VarP, ConP), lift, mkName)
-import Misc.Html.Node
+import qualified Data.Text                  as Text
+import           Language.Haskell.TH.Syntax (Exp (AppE, LitE, VarE), Lift,
+                                             Lit (StringL), Pat (ConP, VarP),
+                                             lift, mkName)
+import           Misc.Html.Node
 
 
 -- * Data types
@@ -46,14 +48,14 @@ instance Lift MetaNode where
    where
     mkP (p : []) = VarP $ mkName p
     mkP (p : ps) = ConP (mkName p) $ map (VarP . mkName) ps
-    mkP [] = error "empty pattern"
+    mkP []       = error "empty pattern"
   lift (MIf attrs nodes) =
     [| case $(return $
               (foldl AppE
                 ((VarE . mkName . head) attrs)
                 (map (VarE . mkName) (tail attrs)))) of
            True -> Text.concat <$> sequence $(lift nodes)
-           _ -> return ""
+           _    -> return ""
      |]
 
 -- * Optimizer

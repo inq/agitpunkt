@@ -6,9 +6,9 @@ module Misc.Parser.LazyByteString
   , isToken
   ) where
 
-import           GHC.Word (Word8)
-import Data.Attoparsec.ByteString.Lazy 
 import qualified Data.Attoparsec.ByteString.Char8 as BSParser
+import           Data.Attoparsec.ByteString.Lazy
+import           GHC.Word                         (Word8)
 
 token :: Char -> Parser Char
 token c = BSParser.skipSpace *> BSParser.char c <* BSParser.skipSpace

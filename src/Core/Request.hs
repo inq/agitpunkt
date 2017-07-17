@@ -7,10 +7,9 @@ module Core.Request where
 import           Control.Applicative        (many)
 import qualified Core.Http                  as Http
 import           Core.Request.Content       (Content, mkContent)
-import qualified Misc.Parser.LazyByteString as LazyBSParser
-import qualified Data.ByteString.Lazy       as LazyBS
-import qualified Data.ByteString.Char8      as BS
 import           Data.ByteString            (ByteString)
+import qualified Data.ByteString.Char8      as BS
+import qualified Data.ByteString.Lazy       as LazyBS
 import qualified Data.Char                  as C
 import qualified Data.Map                   as M
 import           Data.Text                  (Text)
@@ -19,7 +18,9 @@ import           Data.Text.Encoding         (decodeUtf8)
 import qualified Data.Text.Read             as TextRead
 import           Language.Haskell.TH.Syntax (Lift, lift)
 import qualified Misc.Parser.ByteString     as BSParser
-import           Misc.TextUtil              (QueryString, splitAndDecode, splitAndDecodeB)
+import qualified Misc.Parser.LazyByteString as LazyBSParser
+import           Misc.TextUtil              (QueryString, splitAndDecode,
+                                             splitAndDecodeB)
 import           Network.Socket             (Socket)
 
 -- * Data types

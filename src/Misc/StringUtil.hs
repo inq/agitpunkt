@@ -4,7 +4,7 @@ module Misc.StringUtil (
   toSnake
   ) where
 
-import Data.Char (isUpper, toLower)
+import           Data.Char (isUpper, toLower)
 
 toSnake :: String -> String
 toSnake (h:t) = toLower h : internal t

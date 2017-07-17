@@ -1,10 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Misc.TextUtil where
 
-import qualified Data.Map               as M
 import           Data.ByteString        (ByteString)
+import qualified Data.Map               as M
 import           Data.Text              (Text)
 import qualified Data.Text              as Text
 import           Data.Text.Encoding     (decodeUtf8, encodeUtf8)
@@ -68,9 +68,9 @@ splitAndDecodeB mark bs = case BSParser.parseOnly (parseB mark) bs of
 stripHtml :: L.Text -> L.Text
 stripHtml = L.concatMap char
   where
-    char '<' = "&lt;"
-    char '>' = "&gt;"
-    char '&' = "&amp;"
-    char '"' = "&quot;"
+    char '<'  = "&lt;"
+    char '>'  = "&gt;"
+    char '&'  = "&amp;"
+    char '"'  = "&quot;"
     char '\'' = "&#39;"
-    char x = L.singleton x
+    char x    = L.singleton x

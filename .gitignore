@@ -17,5 +17,4 @@ cabal.config
 *.tsv
 .stack-work
 tmp/
-bin/
 data

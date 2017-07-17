@@ -8,12 +8,12 @@ module Misc.Parser.ByteString
   , isToken
   ) where
 
-import qualified Data.Attoparsec.ByteString.Char8      as BSParser
-import           Data.ByteString                       (ByteString)
-import qualified Data.ByteString.Char8                 as BS
-import           GHC.Word (Word8)
-import Data.Attoparsec.ByteString.Char8
-import Data.Char (chr)
+import           Data.Attoparsec.ByteString.Char8
+import qualified Data.Attoparsec.ByteString.Char8 as BSParser
+import           Data.ByteString                  (ByteString)
+import qualified Data.ByteString.Char8            as BS
+import           Data.Char                        (chr)
+import           GHC.Word                         (Word8)
 
 quoted :: Parser ByteString
 quoted = BSParser.char '"' *> (BS.concat <$> cont) <* BSParser.char '"'
