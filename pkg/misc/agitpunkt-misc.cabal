@@ -1,4 +1,4 @@
-name:                agitpunkt
+name:                agitpunkt-misc
 version:             0.1.0.0
 synopsis: 
 license:             AGPL-3
@@ -9,47 +9,12 @@ category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
 
-executable agitpunkt
-  ghc-options:     -Wall -fllvm -dynamic
-  main-is:           main.hs
-  other-modules:     Handler.Article
-                   , App.Handler
-                   , App.Component
-                   , App.Route
-                   , App.Launcher
-                   , App.Session
-                   , Models.Article
-                   , Models.User
-                   , Models.Image
-                   , Models.Category
-                   , Handler.Base
-                   , Handler.Auth
-                   , Handler.Icons
-                   , Handler.Image
-                   , Handler.Application
-                   , Config
-  build-depends:     agitpunkt
-                   , base
-                   , containers
-                   , bytestring
-                   , template-haskell
-                   , time
-                   , bson
-                   , mtl
-                   , text
-                   , directory
-                   , JuicyPixels
-                   , network
-                   , mongoDB                   
-  hs-source-dirs:    app
-  default-language:  Haskell2010
-
 test-suite spec
   ghc-options:       -fllvm -ddump-deriv
   hs-source-dirs:    spec
   main-is:           Spec.hs
   type:              exitcode-stdio-1.0
-  build-depends:     agitpunkt
+  build-depends:     agitpunkt-misc
                    , hspec
                    , base
                    , containers
@@ -62,22 +27,12 @@ test-suite spec
                    , Misc.MarkdownSpec
                    , Misc.HtmlSpec
                    , Misc.StringUtilSpec
-                   , Core.ModelSpec
-                   , Core.Request.ContentSpec
-                   , Core.Request.ContentDispositionSpec
                    , SpecHelper
   default-language:  Haskell2010
 
 library
   ghc-options:     -Wall -fllvm -auto-all
-  exposed-modules:   Core.Request
-                   , Core.Request.Content
-                   , Core.Request.ContentDisposition
-                   , Core.Response
-                   , Core.Http
-                   , Core.Database
-                   , Core.Model
-                   , Misc.Daemon
+  exposed-modules:   Misc.Daemon
                    , Misc.StringUtil
                    , Misc.File
                    , Misc.TextUtil
@@ -109,6 +64,5 @@ library
                    , monad-control
                    , wreq
                    , lens
-  hs-source-dirs:    src
   default-language:  Haskell2010
 

@@ -1,4 +1,8 @@
 resolver: lts-8.14
+packages:
+  - ./pkg/core
+  - ./pkg/misc
+  - ./pkg/app
 extra-deps: []
 flags: {}
 extra-package-dbs: []

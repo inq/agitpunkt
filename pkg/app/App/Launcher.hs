@@ -31,7 +31,7 @@ run rt response404 databaseName socketFile =
     removeSockIfExists socketFile
     db <- DB.connect databaseName
     ss <- initStore
-    loadUserStore "config/users.tsv" >>= \case
+    loadUserStore "pkg/app/config/users.tsv" >>= \case
       Just user_store -> do
         putUserStore user_store
         socketFd <- socket AF_UNIX Stream 0
