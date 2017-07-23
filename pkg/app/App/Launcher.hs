@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module App.Launcher where
 
@@ -7,6 +8,9 @@ import           App.Component                  (ResState (..), runHandler)
 import           App.Route                      (RouteTree, match)
 import           App.Session                    (SessionStore, initStore)
 import           Control.Concurrent             (forkIO)
+import           Control.Monad.Logger           (LoggingT, logError, logInfo,
+                                                 runStderrLoggingT)
+import           Control.Monad.Trans            (liftIO)
 import qualified Core.Database                  as DB
 import qualified Core.Request                   as Request
 import qualified Core.Response                  as Res
@@ -27,20 +31,21 @@ import qualified Network.Socket.ByteString.Lazy as LazySocket
 run :: RouteTree -> Text -> Text -> String -> IO ()
 -- ^ Run the given RouteTree
 run rt response404 databaseName socketFile =
-  withSocketsDo $ do
-    removeSockIfExists socketFile
-    db <- DB.connect databaseName
-    ss <- initStore
+  withSocketsDo $ runStderrLoggingT $ do
+    liftIO $ removeSockIfExists socketFile
+    db <- liftIO $ DB.connect databaseName
+    ss <- liftIO initStore
     loadUserStore "pkg/app/config/users.tsv" >>= \case
       Just user_store -> do
-        putUserStore user_store
-        socketFd <- socket AF_UNIX Stream 0
-        bind socketFd $ SockAddrUnix socketFile
-        listen socketFd 10
-        setStdFileMode socketFile
+        $(logInfo) "Finished to load user store."
+        liftIO $ putUserStore user_store
+        socketFd <- liftIO $ socket AF_UNIX Stream 0
+        liftIO $ bind socketFd $ SockAddrUnix socketFile
+        liftIO $ listen socketFd 10
+        liftIO $ setStdFileMode socketFile
         acceptSocket rt response404 socketFd db ss user_store
       Nothing ->
-        putStrLn "FATAL: Cannot load user store."
+        $(logError) "FATAL: Cannot load user store."
 
 acceptSocket
   :: RouteTree
@@ -49,11 +54,11 @@ acceptSocket
   -> DB.Connection
   -> SessionStore
   -> UserStore
-  -> IO ()
+  -> LoggingT IO ()
 -- ^ Accept a new socket with a new process
 acceptSocket rt response404 socketFd db ss us = do
-  (fd, _) <- NS.accept socketFd
-  _thread_id <- forkIO $ acceptBody rt response404 fd db ss us
+  (fd, _) <- liftIO $ NS.accept socketFd
+  _thread_id <- liftIO $ forkIO $ acceptBody rt response404 fd db ss us
   acceptSocket rt response404 socketFd db ss us
 
 acceptBody

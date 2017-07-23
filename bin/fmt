@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-find src app -name "*.hs" | while read HSFILE; do
+find pkg -name "*.hs" | while read HSFILE; do
   stylish-haskell $HSFILE -i
 done

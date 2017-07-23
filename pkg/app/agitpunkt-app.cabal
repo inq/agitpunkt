@@ -41,5 +41,6 @@ executable agitpunkt
                    , directory
                    , JuicyPixels
                    , network
-                   , mongoDB                   
+                   , mongoDB
+                   , monad-logger     
   default-language:  Haskell2010
