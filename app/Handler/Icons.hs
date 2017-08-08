@@ -4,8 +4,7 @@
 CAUTION: You cannot use this icons unless you have a paid license with Flaticon
 -}
 module Handler.Icons where
-import           Core.Component       (Component)
-import qualified Data.ByteString.UTF8 as UTF8
+import           App.Component       (Component)
 import           Misc.Html            (parse)
 
 airplane :: Component

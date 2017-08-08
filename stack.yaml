@@ -1,4 +1,5 @@
-resolver: lts-8.14
-extra-deps: []
+resolver: nightly-2017-08-08
+extra-deps:
+  - wreq-0.5.1.0
 flags: {}
 extra-package-dbs: []
