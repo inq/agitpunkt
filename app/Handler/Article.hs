@@ -49,11 +49,10 @@ doPage p = do
             div { class="title" }
               a { href $ showUri u }
                 = t
-            div { class="content" }
-              - if isAdmin
-                p
-                  a { href $ editUri i }
-                    | Edit
+            - if isAdmin
+              p
+                a { href $ editUri i }
+                  | Edit
       ^ pager p total
      |]
   return $ Res.success res []

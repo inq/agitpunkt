@@ -3,12 +3,22 @@
     src: url("/static/jura.woff") format('woff');
 }
 
+@font-face {
+    font-family: "shserif";
+    src: url("/static/source_han_serif.woff") format('woff');
+}
+
+.article {
+    font-family: shserif;
+}
+
 h1, h2, h3, h4, h5 {
     padding: 0 35px;
 }
 
-a:link, a:visited {
+a:link, a:visited, a:hover {
     text-decoration: none;
+    color: inherit;
 }
 
 img.content-img {
@@ -83,6 +93,8 @@ textarea.content {
 
 #menu {
     width: 100%;
+    margin: 0 0 2em 0;
+
 }
 
 #menu ul {
@@ -91,7 +103,7 @@ textarea.content {
     linear-gradient(315deg, white 50%, #333 0, #333 50%),transparent;
     background-size: 2.2em 2.2em;
     background-repeat: no-repeat;
-    background-position: 5.5em 0;
+    background-position: 7.5em 0;
     display: block;
     padding: 0;
     width: 800px;
@@ -174,11 +186,6 @@ div#signin-box {
     padding-right: 1em;
 }
 
-div.wrapper {
-    margin: 0 auto 0 auto;
-    max-width: 800px;
-}
-
 div#header {
     background-color: #333333;
     width: 100%;
@@ -186,8 +193,13 @@ div#header {
     font-family: jura;
 }
 
+div.wrapper {
+    margin: 0 0 0 0;
+    max-width: 800px;
+}
+
 div#header p {
-    width: 200px;
+    width: 130px;
     text-align: center;
     font-size: 2em;
     line-height: 2em;
@@ -204,8 +216,8 @@ div#footer {
     text-align: right;
     background-color: white;
     max-width: 800px;
-    padding: 0 calc(50% - 512px);
-    margin: 20px 0;
+    margin: 20px auto;
+    padding: 0 10px 0 0;
     font-family: Consolas, Menlo, Courier, monospace;
 }
 
@@ -276,12 +288,12 @@ div#sidebar > span {
 div.label {
     font-family: "jura";
     display: inline-block;
-    border: 1px solid #dddddd;
+    border-bottom: 3px solid #dddddd;
     background-color: white;
     width: 6em;
     vertical-align: top;
-    margin-left: 35px;
-    margin-right: 35px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .label > .date {
@@ -322,7 +334,6 @@ div.label {
 
 .wrapper > .content {
     display: inline-block;
-    min-height: 100px;
     width: 100%;
     padding-bottom: 2px;
     padding-right: 2px;
@@ -334,20 +345,17 @@ div.label {
 }
 
 div.article {
-    background-image:
-        linear-gradient(0deg, #cccccc 1px, transparent 0px);
     overflow: hidden;
 }
 
 .article .wrapper {
     overflow: hidden;
     box-sizing: border-box;
-    margin-top: 2em;
-    margin-bottom: 3em;
 }
 
 .article p {
     margin-left: 35px;
+    margin-right: 10px;
 }
 
 .article .title {
