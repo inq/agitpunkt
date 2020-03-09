@@ -33,7 +33,7 @@ doPage p = do
   total <- runDB Article.count
   articles <- runDB $ Article.list Config.articlePerPage p
   res <- layout [parse|div
-      - map articles -> Article.Article i u t c d
+      - map articles -> Article.Article i u t _c d
         div { class="article" }
           div { class="wrapper" }
             div { class="label" }
@@ -60,10 +60,7 @@ doPage p = do
     editUri (Just id') = "/article/edit/" ++ show id'
     editUri _          = "Unreachable"
     showUri u' = "/read/" ++ Text.unpack u'
-    unwrap c =
-      case Markdown.convert $ fromChunks [c] of
-        Just s  -> toStrict s
-        Nothing -> ""
+    _unwrap c = maybe "" toStrict (Markdown.convert $ fromChunks [c])
 
 readArticle :: Handler
 -- ^ The actual main page renderer
@@ -100,10 +97,7 @@ readArticle = do
     articleUri (Just id') = "/article/edit/" ++ show id'
     articleUri _          = "Unreachable"
     unwrap c =
-      case Markdown.convert $ fromChunks [c] of
-        Just s  -> toStrict s
-        Nothing -> ""
-
+      maybe "" toStrict (Markdown.convert $ fromChunks [c])
 
 indexH :: Handler
 -- ^ The main page

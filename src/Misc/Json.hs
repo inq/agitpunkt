@@ -1,4 +1,3 @@
-{-# LANGUAGE EmptyCase         #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -64,7 +63,7 @@ parseJson =
   parseObject <|> parseArray <|> parseString <|> parseBoolean <|> parseInt
   where
     parseString =
-      (JSString . Text.pack) <$> (op '"' *> P.manyTill anyChar (P.char '"'))
+      JSString . Text.pack <$> (op '"' *> P.manyTill anyChar (P.char '"'))
       where
         escapeMap =
           M.fromList
@@ -97,7 +96,7 @@ parseJson =
       JSArray <$>
       (op '[' *> P.sepBy (spaces *> parseJson <* spaces) (P.char ',') <* cl ']')
     parseObject =
-      (JSObject . M.fromList) <$>
+      JSObject . M.fromList <$>
       (op '{' *> P.sepBy pair (P.char ',') <* cl '}')
       where
         pair = do
@@ -111,6 +110,6 @@ parseJson =
         parseTrue = P.try (spaces *> P.string "true" *> spaces) >> return True
         parseFalse =
           P.try (spaces *> P.string "false" *> spaces) >> return False
-    parseInt = (JSInt . read) <$> P.try (P.many1 P.digit)
+    parseInt = JSInt . read <$> P.try (P.many1 P.digit)
     op c = P.try (spaces *> P.char c)
     cl c = P.char c <* spaces

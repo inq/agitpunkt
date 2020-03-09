@@ -90,7 +90,7 @@ parseCommand = do
   where
     ifNode =
       P.string "if" *> P.skipSpace *>
-      ((NIf . map Text.unpack) <$>
+      (NIf . map Text.unpack <$>
        P.sepBy (P.spaces *> P.noneOf " \n") (P.char ' ') <*>
        return [])
     mapNode =

@@ -49,8 +49,7 @@ parseItem =
     -- ^ Contain the img tags.
       _open <-
         P.try (P.string "{{{") <* P.many1 (P.string "\r\n")
-      inner <- parseLine
-      return $ Container inner
+      Container <$> parseLine
       where
       parseLine =
         parseEnd <|>
@@ -67,7 +66,7 @@ parseItem =
       where
       parseLine =
         parseEnd <|>
-        (((:) . L.fromStrict) <$> (P.noneOf "\r\n" <* P.string "\r\n") <*> parseLine)
+        ((:) . L.fromStrict <$> (P.noneOf "\r\n" <* P.string "\r\n") <*> parseLine)
       parseEnd = do
         _ <- P.try (P.string "```")
         return []

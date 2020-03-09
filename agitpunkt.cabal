@@ -69,7 +69,7 @@ test-suite spec
   default-language:  Haskell2010
 
 library
-  ghc-options:     -Wall -fllvm -auto-all
+  ghc-options:     -Wall -fllvm -fprof-auto
   exposed-modules:   Core.Request
                    , Core.Request.Content
                    , Core.Request.ContentDisposition

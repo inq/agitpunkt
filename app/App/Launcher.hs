@@ -15,11 +15,10 @@ import           Misc.File                      (removeSockIfExists,
                                                  setStdFileMode)
 import           Models.User                    (UserStore, loadUserStore,
                                                  putUserStore)
-import           Network                        (withSocketsDo)
 import           Network.Socket                 (Family (AF_UNIX),
                                                  SockAddr (SockAddrUnix),
                                                  Socket, SocketType (Stream),
-                                                 bind, listen, socket)
+                                                 bind, listen, socket, withSocketsDo)
 import qualified Network.Socket                 as NS
 import           Network.Socket.ByteString      (sendAll)
 import qualified Network.Socket.ByteString.Lazy as LazySocket

@@ -1,7 +1,5 @@
-{-# LANGUAGE ExplicitNamespaces   #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE ScopedTypeVariables  #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -56,6 +54,8 @@ instance (GN.Selector c, T.Typeable t, Mongo.Val t, Json.ToJson t) =>
     case gToJson $ GN.unM1 s of
       Json.JSNil -> M.empty
       val        -> M.fromList [(Text.pack (toSnake $ GN.selName s), val)]
+
+
   gToDocument s =
     case Mongo.val (GN.unK1 $ GN.unM1 s) of
       Mongo.Null -> []

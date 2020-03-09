@@ -6,7 +6,7 @@ import           Control.Exception (catch)
 import qualified Data.Map          as M
 import           Data.Text         (Text)
 import qualified Data.Text.IO      as TextIO
-import           GHC.Conc.Sync     (TVar, atomically, newTVar, readTVar)
+import           GHC.Conc.Sync     (TVar, atomically, newTVar, readTVarIO)
 import qualified Misc.Parser       as P
 
 -- * Data types
@@ -42,7 +42,7 @@ parseUserList = do
 putUserStore :: UserStore -> IO ()
 -- ^ Try to signin
 putUserStore store' = do
-  map' <- atomically $ readTVar store'
+  map' <- readTVarIO store'
   print map'
 
 catchError :: IOError -> IO (Maybe a)
@@ -58,7 +58,7 @@ loadUserStore fileName = do
 signIn :: UserStore -> Text -> Text -> IO (Maybe User)
 -- ^ Try to signin
 signIn store' email' password' = do
-  map' <- atomically $ readTVar store'
+  map' <- readTVarIO store'
   return $
     case M.lookup email' map' of
       Just user ->

@@ -3,7 +3,6 @@
 {-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE QuasiQuotes          #-}
 {-# LANGUAGE TemplateHaskell      #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 
 module App.Route where
 
@@ -103,7 +102,7 @@ routeNode :: P.Parser Route
 -- ^ The subparser
 routeNode = do
   uri <- Text.unpack <$> (P.many (P.char '\n') *> P.noneOf1 " ")
-  method <- (read . Text.unpack) <$> (P.many1 (P.char ' ') *> P.noneOf1 " ")
+  method <- read . Text.unpack <$> (P.many1 (P.char ' ') *> P.noneOf1 " ")
   action <-
     Text.unpack <$>
     (P.many (P.char ' ') *> P.noneOf1 "\n" <* P.many (P.char '\n'))

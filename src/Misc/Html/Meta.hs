@@ -30,32 +30,33 @@ data MetaNode
 instance Lift MetaNode where
   lift (MStr es) =
     [| return $ Text.pack $(return $
-         (foldl AppE (conv $ head es)) (map conv $ tail es))
+         foldl AppE (conv $ head es) (map conv $ tail es))
      |]
   lift (MBts es) =
     [| return $(return $
-         (foldl AppE (conv $ head es)) (map conv $ tail es))
+         foldl AppE (conv $ head es) (map conv $ tail es))
      |]
   lift (MMon as) =
     [| $(return $
-         (foldl AppE (conv $ head as) (map conv $ tail as)))
+         foldl AppE (conv $ head as) (map conv $ tail as))
      |]
   lift (MMap vs v nodes) =
-    [| Text.concat <$> (sequence $ concatMap
-        (\($(return $ mkP v)) -> $(lift nodes))
-         $(return $ VarE $ mkName vs))
+    [| Text.concat <$> sequence (concatMap
+                                  (\($(return $ mkP v)) -> $(lift nodes))
+                                  $(return $ VarE $ mkName vs))
      |]
    where
-    mkP (p : []) = VarP $ mkName p
+    mkP [p] = VarP $ mkName p
     mkP (p : ps) = ConP (mkName p) $ map (VarP . mkName) ps
     mkP []       = error "empty pattern"
   lift (MIf attrs nodes) =
-    [| case $(return $
-              (foldl AppE
-                ((VarE . mkName . head) attrs)
-                (map (VarE . mkName) (tail attrs)))) of
-           True -> Text.concat <$> sequence $(lift nodes)
-           _    -> return ""
+    [| if $(return $
+         foldl AppE
+             ((VarE . mkName . head) attrs)
+             (map (VarE . mkName) (tail attrs))) then
+         Text.concat <$> sequence $(lift nodes)
+       else
+         return ""
      |]
 
 -- * Optimizer
@@ -64,9 +65,9 @@ optimize :: [MetaNode] -> [MetaNode]
 optimize (MStr [TStr a] : MStr [TStr b] : res) = optimize $ MStr [TStr (a ++ b)] : res
 optimize (MStr s@[TStr _] : res) = MStr s : optimize res
 optimize (MMap vs v nodes : res) =
-    (MMap vs v $ optimize nodes) : optimize res
+    MMap vs v (optimize nodes) : optimize res
 optimize (MIf attrs nodes : res) =
-    (MIf attrs $ optimize nodes) : optimize res
+    MIf attrs (optimize nodes) : optimize res
 optimize (a : res) = a : optimize res
 optimize [] = []
 

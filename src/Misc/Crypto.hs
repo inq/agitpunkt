@@ -12,9 +12,7 @@ import           Data.Time.Clock.POSIX   (getPOSIXTime)
 
 generateKey :: IO Text
 -- ^ Generate a session key
-generateKey = do
-  t <- getPOSIXTime
-  return $ hashPassword $ Text.pack $ show t
+generateKey = hashPassword . Text.pack . show <$> getPOSIXTime
 
 hashPassword :: Text -> Text
 -- ^ Hash the given password
